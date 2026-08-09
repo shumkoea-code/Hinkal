@@ -1,0 +1,8 @@
+# Шаблон по RFC 9116 (https://www.rfc-editor.org/rfc/rfc9116)
+# Разместить как /.well-known/security.txt на боевом сайте.
+# Замените контакты и дату Expires на свои реальные значения.
+
+Contact: mailto:security@hinkalnayaureki.ru
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: ru, en
+Canonical: https://hinkalnayaureki.ru/.well-known/security.txt
