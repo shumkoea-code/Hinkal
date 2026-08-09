@@ -30,3 +30,8 @@
 
 - Иконки в топбаре, фиксированные игровые области.
 - Doc: [games-static-layout.md](../games-static-layout.md)
+
+## 2026-08-09 — Games UX (fifteen collapse)
+
+- Фикс схлопывания пятнашек; mobile/PC UX.
+- Doc: [games-ux-fix.md](../games-ux-fix.md)

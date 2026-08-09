@@ -463,13 +463,14 @@ body:has(.games-root) .animated-bg {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   grid-template-rows: repeat(4, minmax(0, 1fr));
   gap: clamp(0.3rem, 1vw, 0.55rem);
-  width: min(100%, 100%);
+  width: min(100%, 74vmin, 480px);
   margin: 0 auto;
-  align-self: stretch;
-  flex: 1 1 auto;
+  align-self: center;
+  flex: 0 0 auto;
   min-height: 0;
-  max-height: 100%;
-  height: 100%;
+  max-height: min(100%, 74vmin, 480px);
+  height: auto;
+  aspect-ratio: 1;
   perspective: 900px;
 }
 
@@ -962,9 +963,10 @@ body:has(.games-root) .animated-bg {
   gap: 0;
   overflow: hidden;
   position: relative;
-  /* Lock stage footprint idle ↔ play */
-  contain: layout size;
+  /* Avoid size containment — it zeroed cqh and collapsed square boards */
 }
+
+
 
 .game-stage__board {
   flex: 1 1 0;
@@ -978,7 +980,6 @@ body:has(.games-root) .animated-bg {
   justify-content: center;
   position: relative;
   overflow: hidden;
-  container-type: size;
 }
 
 .game-over-msg {
@@ -1096,16 +1097,41 @@ body:has(.games-root) .animated-bg {
   object-fit: contain;
 }
 
-/* Square boards (checkers / fifteen / memory) — fixed stage box */
+/* Square boards — size from viewport, never cqh (container queries collapsed width) */
 .game-stage__board > .checkers-board-frame,
 .game-stage__board > .fifteen-board,
 .game-stage__board > .memory-board {
-  width: min(100%, 100cqh, 720px);
+  width: min(100%, 72vmin, 440px);
   height: auto;
   max-width: 100%;
-  max-height: 100%;
+  max-height: min(100%, 72vmin, 440px);
   aspect-ratio: 1 / 1;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
+  margin-inline: auto;
+}
+
+.game-stage__board > .fifteen-board {
+  width: min(100%, 70vmin, 420px);
+  max-height: min(100%, 70vmin, 420px);
+  margin-top: 0;
+}
+
+.game-stage__board > .memory-board {
+  width: min(100%, 74vmin, 480px);
+  max-height: min(100%, 74vmin, 480px);
+  height: auto;
+}
+
+.game-stage__board > .checkers-board-frame {
+  width: min(100%, 74vmin, 520px);
+  max-height: min(100%, 74vmin, 520px);
+}
+
+.game-stage__board > .checkers-board-frame .checkers-board {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
 }
 
 .game-shell.is-playing .game-canvas-hint,
@@ -1851,8 +1877,6 @@ body:has(.games-root) .animated-bg {
 .game-shell.is-checkers .game-stage {
   justify-content: center;
   align-items: center;
-  container-type: size;
-  container-name: checkers-stage;
 }
 
 .game-shell.is-checkers .game-panel {
@@ -1860,20 +1884,20 @@ body:has(.games-root) .animated-bg {
 }
 
 .checkers-board-frame {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
   min-height: 0;
-  width: 100%;
-  height: 100%;
+  width: min(100%, 74vmin, 520px);
+  max-width: 100%;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .checkers-board {
-  /* Fit the smaller stage axis so 8×8 never overflows / clips */
-  width: min(100%, 100cqw, 100cqh, 720px);
-  height: min(100%, 100cqw, 100cqh, 720px);
+  width: 100%;
+  height: 100%;
   max-width: 100%;
   max-height: 100%;
   aspect-ratio: 1;
@@ -1885,13 +1909,6 @@ body:has(.games-root) .animated-bg {
   overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.22);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
-}
-
-@supports not (width: 1cqw) {
-  .checkers-board {
-    width: min(100%, 72vmin, 720px);
-    height: min(100%, 72vmin, 720px);
-  }
 }
 
 .checkers-cell {
@@ -2125,12 +2142,15 @@ body:has(.games-root) .animated-bg {
   color: #f8fafc;
 }
 
-.game-diff-picker {
+.game-diff-picker,
+.game-diff-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   justify-content: center;
-  margin: 0.25rem 0 0.15rem;
+  align-items: center;
+  margin: 0;
+  width: 100%;
 }
 .game-diff-btn {
   appearance: none;
@@ -2182,11 +2202,12 @@ body:has(.games-root) .animated-bg {
   --fifteen-gap: 0.45rem;
   display: grid;
   grid-template-columns: repeat(var(--fifteen-n, 4), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--fifteen-n, 4), minmax(0, 1fr));
   gap: var(--fifteen-gap);
-  width: min(100%, 420px);
-  margin: 0.5rem auto 0;
+  width: min(100%, 70vmin, 420px);
+  margin: 0 auto;
   aspect-ratio: 1;
-  padding: 0.55rem;
+  padding: 0.45rem;
   border-radius: 1.1rem;
   background:
     radial-gradient(120% 80% at 10% 0%, rgba(6, 182, 212, 0.22), transparent 55%),
@@ -2511,4 +2532,113 @@ body:has(.games-root) .animated-bg {
   margin: 0.25rem 0 0;
   font-size: 0.78rem;
   color: var(--muted, #64748b);
+}
+
+/* === games-ux-optimize-20260809 === */
+/* Mobile: board first, compact chrome; PC keeps side rail */
+@media (max-width: 899px) {
+  .game-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.4rem 0.45rem;
+    height: 100%;
+    min-height: 0;
+  }
+  .game-hud {
+    order: 1;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.3rem;
+  }
+  .game-hud-left {
+    max-width: 100%;
+  }
+  .game-hud-right {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+    max-width: 100%;
+  }
+  .game-hud-stats {
+    justify-content: flex-start;
+    flex: 1 1 auto;
+  }
+  .game-hud-actions {
+    margin-left: auto;
+  }
+  .game-hud-sub {
+    min-height: 1.15rem;
+  }
+  .game-hud-status,
+  .game-hud-hint {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.3;
+  }
+  .game-pc-hint {
+    display: none !important;
+  }
+  .game-extra {
+    order: 2;
+  }
+  .game-stage {
+    order: 3;
+    flex: 1 1 0;
+    min-height: 0;
+  }
+  .game-hof-slot {
+    order: 4;
+    min-height: 4.75rem;
+    max-height: 4.75rem;
+    height: 4.75rem;
+  }
+  .game-controls-dock {
+    order: 5;
+  }
+  .game-diff-btn {
+    flex: 1 1 auto;
+    min-width: 4.2rem;
+    text-align: center;
+    padding: 0.5rem 0.55rem;
+  }
+  .games-topbar {
+    padding-bottom: 0.1rem;
+  }
+  .games-topbar-game {
+    font-size: 0.65rem;
+  }
+  .game-primary-btn {
+    min-width: 4.8rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .game-stage__board > .fifteen-board {
+    width: min(100%, 420px);
+    max-height: min(100%, 520px);
+  }
+  .game-stage__board > .memory-board {
+    width: min(100%, 520px);
+    max-height: min(100%, 560px);
+  }
+  .game-stage__board > .checkers-board-frame {
+    width: min(100%, 560px);
+    max-height: min(100%, 640px);
+  }
+  .game-diff-picker,
+  .game-diff-row {
+    justify-content: flex-start;
+  }
+}
+
+/* Canvas wraps: stable aspect, no container queries */
+.game-canvas-wrap {
+  contain: layout style;
 }
