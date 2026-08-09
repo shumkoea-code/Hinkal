@@ -41,7 +41,7 @@ function ProgressRing({
   children: ReactNode;
 }) {
   const pct = clampPct(progress);
-  const stroke = Math.max(2.5, size * 0.09);
+  const stroke = Math.max(2.2, size * 0.1);
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const offset = c - (pct / 100) * c;
@@ -100,8 +100,8 @@ export default function RatingProgressIcons({
   onSelect,
   className = '',
 }: IconsProps) {
-  const ringSize = size === 'sm' ? 34 : size === 'lg' ? 46 : 40;
-  const iconPx = size === 'sm' ? 13 : size === 'lg' ? 17 : 15;
+  const ringSize = size === 'sm' ? 32 : size === 'lg' ? 46 : 40;
+  const iconPx = size === 'sm' ? 12 : size === 'lg' ? 17 : 15;
 
   return (
     <div
@@ -144,7 +144,7 @@ export default function RatingProgressIcons({
   );
 }
 
-/** Компактные кольца для сайдбара / меню — только иконка + короткое значение. */
+/** Компактные кольца в одну строку — меню / сайдбар / шапка профиля. */
 export function RatingProgressChips({
   items,
   onSelect,
@@ -174,8 +174,8 @@ export function RatingProgressChips({
             aria-label={`${item.label} ${item.value}, прогресс ${pct}%`}
             onClick={interactive ? () => onSelect?.(item.kind) : undefined}
           >
-            <ProgressRing progress={pct} color={color} size={28}>
-              <Icon size={11} strokeWidth={2.5} />
+            <ProgressRing progress={pct} color={color} size={26}>
+              <Icon size={10} strokeWidth={2.5} />
             </ProgressRing>
             <span className="rating-chip__text">
               <strong>{item.value}</strong>

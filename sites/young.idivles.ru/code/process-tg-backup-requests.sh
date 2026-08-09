@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+# Process pending Telegram Abracadabra backup requests.
+# Runs on the HOST (has docker + pg_dump + project tree).
+set -euo pipefail
+
+ROOT="/opt/sochi-portal"
+REQ_DIR="$ROOT/data/backup-requests"
+DONE_DIR="$REQ_DIR/done"
+FAIL_DIR="$REQ_DIR/failed"
+BACKUP_DIR="/var/backups/sochi-portal/tg"
+LOCK="/tmp/sochi-tg-backup.lock"
+LOG="/var/log/sochi-tg-backup.log"
+
+mkdir -p "$REQ_DIR" "$DONE_DIR" "$FAIL_DIR" "$BACKUP_DIR"
+
+exec 9>"$LOCK"
+if ! flock -n 9; then
+  echo "$(date -Is) already running" >>"$LOG"
+  exit 0
+fi
+
+cd "$ROOT"
+# shellcheck disable=SC1091
+set -a
+# shellcheck source=/dev/null
+source "$ROOT/.env" 2>/dev/null || true
+set +a
+
+TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+if [[ -z "$TOKEN" ]]; then
+  # Prefer live token from DB via docker
+  TOKEN="$(docker exec sochi-portal_web_1 node -e '
+    const {PrismaClient}=require("@prisma/client");
+    (async()=>{
+      try {
+        const {PrismaPg}=require("@prisma/adapter-pg");
+        const {Pool}=require("pg");
+        const pool=new Pool({connectionString:process.env.DATABASE_URL});
+        const adapter=new PrismaPg(pool);
+        const prisma=new PrismaClient({adapter});
+        const s=await prisma.siteSettings.findUnique({where:{id:"1"},select:{telegramBotToken:true}});
+        process.stdout.write(s?.telegramBotToken||"");
+        await prisma.$disconnect(); await pool.end();
+      } catch(e){ process.stdout.write(""); }
+    })();
+  ' 2>/dev/null || true)"
+fi
+
+if [[ -z "$TOKEN" ]]; then
+  echo "$(date -Is) no telegram token" >>"$LOG"
+  exit 0
+fi
+
+send_msg() {
+  local chat="$1" text="$2"
+  curl -fsS -X POST "https://api.telegram.org/bot${TOKEN}/sendMessage" \
+    -d "chat_id=${chat}" \
+    --data-urlencode "text=${text}" \
+    -d "parse_mode=HTML" >/dev/null || true
+}
+
+send_doc() {
+  local chat="$1" file="$2" caption="$3"
+  curl -fsS -X POST "https://api.telegram.org/bot${TOKEN}/sendDocument" \
+    -F "chat_id=${chat}" \
+    -F "document=@${file}" \
+    -F "caption=${caption}" >/dev/null
+}
+
+shopt -s nullglob
+requests=("$REQ_DIR"/*.json)
+if ((${#requests[@]} == 0)); then
+  exit 0
+fi
+
+for req in "${requests[@]}"; do
+  base="$(basename "$req")"
+  echo "$(date -Is) processing $base" >>"$LOG"
+  chatId="$(python3 - <<PY
+import json
+print(json.load(open("$req")).get("chatId",""))
+PY
+)"
+  if [[ -z "$chatId" ]]; then
+    mv "$req" "$FAIL_DIR/"
+    continue
+  fi
+
+  STAMP="$(date -u +%Y-%m-%d_%H%M%S)"
+  DB_OUT="$BACKUP_DIR/db-${STAMP}.dump"
+  FULL_OUT="$BACKUP_DIR/full-${STAMP}.tar.gz"
+  MANIFEST="$BACKUP_DIR/manifest-${STAMP}.txt"
+
+  send_msg "$chatId" "📦 Сборка бэкапа <code>${STAMP}</code>…"
+
+  set +e
+  docker exec sochi-portal_db_1 pg_dump -U "${POSTGRES_USER:-sochi}" -Fc "${POSTGRES_DB:-sochi_portal}" >"$DB_OUT"
+  db_rc=$?
+  tar -czf "$FULL_OUT" -C /opt \
+    --exclude='sochi-portal/node_modules' \
+    --exclude='sochi-portal/.next' \
+    --exclude='sochi-portal/data/postgres' \
+    --exclude='sochi-portal/data/backup-requests' \
+    --exclude='sochi-portal/.git' \
+    sochi-portal \
+    && cp -f "$ROOT/.env" "$BACKUP_DIR/env-${STAMP}.env" \
+    && tar -rzf "$FULL_OUT" -C "$BACKUP_DIR" "env-${STAMP}.env" \
+    && rm -f "$BACKUP_DIR/env-${STAMP}.env"
+  tar_rc=$?
+  set -e
+
+  {
+    echo "stamp=$STAMP"
+    echo "db_rc=$db_rc"
+    echo "tar_rc=$tar_rc"
+    echo "db=$(basename "$DB_OUT") size=$(stat -c%s "$DB_OUT" 2>/dev/null || echo 0)"
+    echo "full=$(basename "$FULL_OUT") size=$(stat -c%s "$FULL_OUT" 2>/dev/null || echo 0)"
+    echo "host=$(hostname)"
+    echo "created=$(date -Is)"
+  } >"$MANIFEST"
+
+  if [[ $db_rc -ne 0 || $tar_rc -ne 0 ]]; then
+    send_msg "$chatId" "❌ Ошибка сборки бэкапа (db=$db_rc tar=$tar_rc). Смотри лог на сервере."
+    mv "$req" "$FAIL_DIR/"
+    continue
+  fi
+
+  # Telegram bot limit ~50MB; send separately
+  set +e
+  send_doc "$chatId" "$DB_OUT" "🗄️ Дамп PostgreSQL ${STAMP}"
+  send_db=$?
+  send_doc "$chatId" "$FULL_OUT" "📁 Полный архив проекта ${STAMP}"
+  send_full=$?
+  send_doc "$chatId" "$MANIFEST" "📋 Манифест ${STAMP}"
+  set -e
+
+  if [[ $send_db -eq 0 && $send_full -eq 0 ]]; then
+    send_msg "$chatId" "✅ Бэкап отправлен. Храните файлы в безопасном месте."
+    mv "$req" "$DONE_DIR/"
+    rm -f "$REQ_DIR/.pending"
+  else
+    send_msg "$chatId" "⚠️ Часть файлов не отправилась (db=$send_db full=$send_full). Архивы: $BACKUP_DIR"
+    mv "$req" "$FAIL_DIR/"
+  fi
+
+  # keep last 5 tg backups
+  ls -1t "$BACKUP_DIR"/full-*.tar.gz 2>/dev/null | tail -n +6 | xargs -r rm -f
+  ls -1t "$BACKUP_DIR"/db-*.dump 2>/dev/null | tail -n +6 | xargs -r rm -f
+  ls -1t "$BACKUP_DIR"/manifest-*.txt 2>/dev/null | tail -n +6 | xargs -r rm -f
+done
+
+echo "$(date -Is) done" >>"$LOG"
