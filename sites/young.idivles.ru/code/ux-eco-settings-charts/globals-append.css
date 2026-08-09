@@ -1,0 +1,127 @@
+
+/* === UX compact / eco pool / charts / nav overflow (2026-08-09) === */
+.eco-pool-hint {
+  margin: 0.55rem 0 0.35rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(22, 163, 74, 0.08), rgba(14, 116, 144, 0.06));
+  border: 1px solid rgba(22, 163, 74, 0.14);
+  font-size: 0.78rem;
+  color: #334155;
+}
+.eco-pool-hint__head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  font-weight: 650;
+}
+.eco-pool-hint__head strong {
+  font-variant-numeric: tabular-nums;
+  color: #15803d;
+}
+.eco-pool-hint__muted { color: #64748b; font-weight: 500; }
+.eco-pool-hint__bar {
+  margin-top: 0.4rem;
+  height: 4px;
+  border-radius: 99px;
+  background: rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+.eco-pool-hint__bar > div {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #0e7490);
+  border-radius: inherit;
+}
+.eco-pool-hint__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.85rem;
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+.eco-pool-hint--footer {
+  margin: 0.35rem 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+
+.admin-charts-wrap,
+.admin-chart-card {
+  min-width: 0;
+  max-width: 100%;
+}
+.admin-charts-wrap .recharts-responsive-container {
+  min-width: 0 !important;
+}
+
+.desktop-nav [data-nav-overflow='1'] {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+  pointer-events: none !important;
+}
+
+.filter-bar__chips {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent;
+}
+.filter-bar__chips::-webkit-scrollbar { height: 4px; }
+.filter-bar__chips::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 99px;
+}
+
+.eco-panel {
+  max-width: 100%;
+  overflow: hidden;
+}
+.eco-panel__catalog {
+  max-width: 100%;
+}
+.eco-panel__item {
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.profile-hero,
+.dashboard-layout,
+.admin-page-shell,
+.container {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.rating-chip__text {
+  min-width: 0;
+}
+.rating-icons__item,
+.rating-chip {
+  max-width: 100%;
+}
+
+.settings-tab-group + .settings-tab-group {
+  margin-left: 0.35rem;
+  padding-left: 0.55rem;
+  border-left: 1px solid #e2e8f0;
+}
+@media (max-width: 900px) {
+  .settings-tab-group + .settings-tab-group {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+    width: 100%;
+  }
+}
