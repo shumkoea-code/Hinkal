@@ -28,22 +28,9 @@ set +a
 
 TOKEN="${TELEGRAM_BOT_TOKEN:-}"
 if [[ -z "$TOKEN" ]]; then
-  # Prefer live token from DB via docker
-  TOKEN="$(docker exec sochi-portal_web_1 node -e '
-    const {PrismaClient}=require("@prisma/client");
-    (async()=>{
-      try {
-        const {PrismaPg}=require("@prisma/adapter-pg");
-        const {Pool}=require("pg");
-        const pool=new Pool({connectionString:process.env.DATABASE_URL});
-        const adapter=new PrismaPg(pool);
-        const prisma=new PrismaClient({adapter});
-        const s=await prisma.siteSettings.findUnique({where:{id:"1"},select:{telegramBotToken:true}});
-        process.stdout.write(s?.telegramBotToken||"");
-        await prisma.$disconnect(); await pool.end();
-      } catch(e){ process.stdout.write(""); }
-    })();
-  ' 2>/dev/null || true)"
+  TOKEN="$(PGPASSWORD="${POSTGRES_PASSWORD}" docker exec -e PGPASSWORD="${POSTGRES_PASSWORD}" sochi-portal_db_1 \
+    psql -U "${POSTGRES_USER:-sochi}" -d "${POSTGRES_DB:-sochi_portal}" -Atqc \
+    "SELECT COALESCE(\"telegramBotToken\", '') FROM \"SiteSettings\" WHERE id='1';" 2>/dev/null || true)"
 fi
 
 if [[ -z "$TOKEN" ]]; then
