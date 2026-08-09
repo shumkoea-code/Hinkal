@@ -7,13 +7,17 @@ import { getTelegramConfig, tgSendMessage } from '@/lib/telegram';
 /** Exact magic phrase for full project+DB backup via Telegram. */
 export const TG_BACKUP_PHRASE = 'Абракадабра, Евгений Шумко!';
 
+/** Reveal password for the latest encrypted backup (authorized admin only). */
+export const TG_BACKUP_PASSWORD_PHRASE = 'Шумко Евгений, дай пароль!';
+
 const REQUEST_DIR = path.join(process.cwd(), 'data', 'backup-requests');
+const PASSWORD_DIR = path.join(REQUEST_DIR, 'password-requests');
 const COOLDOWN_MS = 30 * 60 * 1000; // 30 min
 
 function normalizePhrase(text: string) {
   return String(text || '')
     .replace(/\u00a0/g, ' ')
-    .replace(/[!！]+$/g, '!') // tolerate fullwidth bang
+    .replace(/[!！]+$/g, '!')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -22,10 +26,14 @@ export function isTelegramBackupPhrase(text: string) {
   return normalizePhrase(text) === TG_BACKUP_PHRASE;
 }
 
-async function ensureDir() {
-  await mkdir(REQUEST_DIR, { recursive: true });
+export function isTelegramBackupPasswordPhrase(text: string) {
+  return normalizePhrase(text) === TG_BACKUP_PASSWORD_PHRASE;
+}
+
+async function ensureDir(dir: string) {
+  await mkdir(dir, { recursive: true });
   try {
-    await chmod(REQUEST_DIR, 0o775);
+    await chmod(dir, 0o775);
   } catch {
     /* ignore */
   }
@@ -36,7 +44,6 @@ export async function isAuthorizedBackupChat(chatId: string | number): Promise<b
   const c = await getTelegramConfig();
   if (c.ids.map(String).includes(id)) return true;
 
-  // Daily-backup recipient is always allowed to request Abracadabra too
   try {
     const s = await prisma.siteSettings.findUnique({
       where: { id: '1' },
@@ -44,7 +51,7 @@ export async function isAuthorizedBackupChat(chatId: string | number): Promise<b
     });
     if (s?.dailyBackupChatId && String(s.dailyBackupChatId) === id) return true;
   } catch {
-    /* column may be missing mid-migrate */
+    /* ignore */
   }
 
   const admin = await prisma.user.findFirst({
@@ -99,7 +106,7 @@ export async function enqueueTelegramBackup(opts: {
       }
     }
 
-    await ensureDir();
+    await ensureDir(REQUEST_DIR);
     const id = randomUUID();
     const payload = {
       id,
@@ -116,7 +123,9 @@ export async function enqueueTelegramBackup(opts: {
 
     await tgSendMessage(
       chatId,
-      '🪄 <b>Абракадабра принята.</b>\nСобираю полный бэкап проекта и баз данных — пришлю файлы сюда в течение минуты.'
+      '🪄 <b>Абракадабра принята.</b>\n' +
+        'Собираю и <b>шифрую</b> полный бэкап (AES-256). Файлы пришлю сюда в течение минуты.\n' +
+        'Пароль отдельно — командой:\n<code>Шумко Евгений, дай пароль!</code>'
     );
 
     return { ok: true as const, id };
@@ -125,8 +134,48 @@ export async function enqueueTelegramBackup(opts: {
     try {
       await tgSendMessage(
         chatId,
-        '❌ Не удалось поставить бэкап в очередь (ошибка записи на сервере). Техслужба уведомлена в логах.'
+        '❌ Не удалось поставить бэкап в очередь (ошибка записи на сервере).'
       );
+    } catch {
+      /* ignore */
+    }
+    return { ok: false as const, reason: 'error' as const };
+  }
+}
+
+/** Queue a host-side reveal of the latest backup password (vault is root-only). */
+export async function enqueueBackupPasswordReveal(opts: {
+  chatId: string | number;
+  fromUserId?: string | number | null;
+  fromUsername?: string | null;
+}) {
+  const chatId = String(opts.chatId);
+  try {
+    if (!(await isAuthorizedBackupChat(chatId))) {
+      await tgSendMessage(chatId, '⛔ Пароль бэкапа доступен только авторизованному админу.');
+      return { ok: false as const, reason: 'forbidden' as const };
+    }
+
+    await ensureDir(PASSWORD_DIR);
+    const id = randomUUID();
+    const payload = {
+      id,
+      chatId,
+      kind: 'password-reveal',
+      fromUserId: opts.fromUserId != null ? String(opts.fromUserId) : null,
+      fromUsername: opts.fromUsername || null,
+      requestedAt: new Date().toISOString(),
+    };
+    await writeFile(path.join(PASSWORD_DIR, `${id}.json`), JSON.stringify(payload, null, 2), 'utf8');
+    await tgSendMessage(
+      chatId,
+      '🔐 Запрос пароля принят. Пришлю актуальный пароль от последнего бэкапа в течение минуты.'
+    );
+    return { ok: true as const, id };
+  } catch (e) {
+    console.error('[tg-backup] password enqueue failed', e);
+    try {
+      await tgSendMessage(chatId, '❌ Не удалось запросить пароль. Повторите чуть позже.');
     } catch {
       /* ignore */
     }

@@ -37,3 +37,5 @@
 | Копия архива в репо | `sites/young.idivles.ru/archives/` |
 
 Точный путь архива также в [`ARCHIVE_PATH.txt`](./ARCHIVE_PATH.txt).
+
+| [related/db-protection-encrypted-backups.md](./related/db-protection-encrypted-backups.md) | Защита БД + шифробэкапы TG |
