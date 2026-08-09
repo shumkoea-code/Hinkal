@@ -42,11 +42,18 @@ log(){ printf '%s %s\n' "$(date '+%F %T')" "$*" >> "$LOG"; }
 
 _send(){ # <text>
   local text="$1"
+  # ALERT_TG_CHAT может содержать несколько id через запятую
   if [ -n "$ALERT_TG_TOKEN" ] && [ -n "$ALERT_TG_CHAT" ]; then
-    curl -sS -m 15 -o /dev/null \
-      --data-urlencode "chat_id=${ALERT_TG_CHAT}" \
-      --data-urlencode "text=[${HOSTN}] ${text}" \
-      "https://api.telegram.org/bot${ALERT_TG_TOKEN}/sendMessage" 2>/dev/null
+    local oldifs="$IFS"; IFS=','
+    local chat
+    for chat in $ALERT_TG_CHAT; do
+      chat="$(printf '%s' "$chat" | tr -d '[:space:]')"; [ -n "$chat" ] || continue
+      curl -sS -m 15 -o /dev/null \
+        --data-urlencode "chat_id=${chat}" \
+        --data-urlencode "text=[${HOSTN}] ${text}" \
+        "https://api.telegram.org/bot${ALERT_TG_TOKEN}/sendMessage" 2>/dev/null
+    done
+    IFS="$oldifs"
   fi
   if [ -n "$ALERT_EMAIL" ] && command -v mail >/dev/null 2>&1; then
     printf '%s\n' "$text" | mail -s "[yp-watchdog:${HOSTN}] alert" "$ALERT_EMAIL" 2>/dev/null
