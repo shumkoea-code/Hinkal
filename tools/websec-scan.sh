@@ -381,16 +381,28 @@ fi
 
 # ------------------------------ 5. CORS --------------------------------------
 section "5. CORS"
-ACAO="$("${CURL[@]}" -D - -o /dev/null -H "Origin: https://evil.example" "$TARGET/" 2>/dev/null | grep -i '^access-control-allow-origin:' | head -1 | sed 's/\r//' | sed 's/^[^:]*:[[:space:]]*//')"
-if [ -z "$ACAO" ]; then
-  add_result info OK "CORS" "Access-Control-Allow-Origin не выставляется"
-elif [ "$ACAO" = "*" ]; then
-  add_result med WARN "CORS" "Access-Control-Allow-Origin: * (открыт для всех)"
-elif grep -iq "evil.example" <<<"$ACAO"; then
-  add_result high WARN "CORS" "отражает произвольный Origin ($ACAO) — небезопасно"
-else
-  add_result low OK "CORS" "ограничен: $ACAO"
-fi
+# cors_check <url> <label> [token] — учитывает Allow-Credentials при оценке
+cors_check() {
+  local url="$1" label="$2" tok="${3:-}"; local args=(-H "Origin: https://evil.example")
+  [ -n "$tok" ] && args+=(-H "Authorization: Bearer $tok")
+  local dump acao acac
+  dump="$("${CURL[@]}" "${args[@]}" -D - -o /dev/null "$url" 2>/dev/null)"
+  acao="$(grep -i '^access-control-allow-origin:'      <<<"$dump" | head -1 | sed 's/\r//' | sed 's/^[^:]*:[[:space:]]*//')"
+  acac="$(grep -i '^access-control-allow-credentials:' <<<"$dump" | head -1 | sed 's/\r//' | sed 's/^[^:]*:[[:space:]]*//')"
+  local creds=0; grep -iq true <<<"$acac" && creds=1
+  if [ -z "$acao" ]; then
+    add_result info OK "$label" "Access-Control-Allow-Origin не выставляется"
+  elif grep -iq "evil.example" <<<"$acao" || [ "$acao" = "*" ]; then
+    if [ "$creds" = 1 ]; then
+      add_result high FAIL "$label" "отражает Origin ($acao) И Allow-Credentials: true — любой сайт может читать данные пользователя"
+    else
+      add_result med WARN "$label" "отражает произвольный Origin ($acao) без Allow-Credentials — политика слишком широкая (риск при переходе на cookie-аутентификацию)"
+    fi
+  else
+    add_result low OK "$label" "ограничен: $acao"
+  fi
+}
+cors_check "$TARGET/" "CORS"
 
 # ------------------------------ 6. HTTP-методы -------------------------------
 section "6. HTTP-методы"
@@ -558,12 +570,8 @@ if [ -n "$OPT_TOKEN" ] || [ -n "$LOGIN_PHONE" ]; then
       fi
     done
 
-    # E) CORS на API
-    ACAO_API="$("${CURL[@]}" -H "Origin: https://evil.example" -H "Authorization: Bearer $AUTH_TOKEN" -D - -o /dev/null "$API_BASE/api/loyalty/balance" 2>/dev/null | grep -i '^access-control-allow-origin:' | head -1 | sed 's/\r//' | sed 's/^[^:]*:[[:space:]]*//')"
-    if [ -z "$ACAO_API" ]; then add_result low OK "CORS API" "Access-Control-Allow-Origin не выставляется"
-    elif grep -iq 'evil.example' <<<"$ACAO_API"; then add_result high WARN "CORS API" "отражает произвольный Origin ($ACAO_API)"
-    elif [ "$ACAO_API" = "*" ]; then add_result med WARN "CORS API" "Access-Control-Allow-Origin: *"
-    else add_result low OK "CORS API" "ограничен: $ACAO_API"; fi
+    # E) CORS на API (с учётом Allow-Credentials)
+    cors_check "$API_BASE/api/loyalty/balance" "CORS API" "$AUTH_TOKEN"
   else
     add_result info INFO "Авторизованные проверки" "пропущены — не удалось получить токен"
   fi
