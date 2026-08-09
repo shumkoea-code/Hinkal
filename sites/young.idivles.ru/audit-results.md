@@ -101,3 +101,5 @@ cp /root/backups/sochi-portal/nginx-2026-08-09_083607/nginx.conf.bak /etc/nginx/
 cp /root/backups/sochi-portal/nginx-2026-08-09_083607/sochi-portal.bak /etc/nginx/sites-available/sochi-portal
 nginx -t && systemctl reload nginx
 ```
+
+> **Update 2026-08-09:** `Permissions-Policy` for young.idivles.ru changed to `camera=(self)` so `/scanner` can use the device camera; mic/payment/usb remain blocked.
