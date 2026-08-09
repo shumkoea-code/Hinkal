@@ -25,3 +25,8 @@
 
 - Подключён `games.css`, обёртка `games-root` + topbar; карточки хаба.
 - Doc: [games-ui-fix.md](../games-ui-fix.md)
+
+## 2026-08-09 — Games static layout + icon topbar
+
+- Иконки в топбаре, фиксированные игровые области.
+- Doc: [games-static-layout.md](../games-static-layout.md)

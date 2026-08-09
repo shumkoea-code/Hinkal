@@ -4,20 +4,9 @@ import Link from "next/link";
 import { useVoiceCopy } from "@/components/VoiceProvider";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  BarChart3,
-  Brain,
-  CircleDot,
-  Crown,
-  Gamepad2,
-  Grid3x3,
-  Layers,
-  Puzzle,
-  RectangleHorizontal,
-  Trophy,
-  type LucideIcon,
-} from "lucide-react";
+import { BarChart3, Crown, Gamepad2, Trophy } from "lucide-react";
 import { GAMES, GAME_IDS, isGameId, type GameId } from "@/lib/games";
+import { GAME_ICONS } from "@/lib/game-icons";
 import {
   flushGameScoreQueue,
   getAllLocalPlayCounts,
@@ -28,49 +17,43 @@ import GameHallOfFame from "@/components/games/GameHallOfFame";
 
 const META: Record<
   GameId,
-  { desc: string; accent: string; badge: string; tips: string; Icon: LucideIcon }
+  { desc: string; accent: string; badge: string; tips: string }
 > = {
   snake: {
     desc: "Свайп, комбо, таблица почёта.",
     accent: "#22c55e",
     badge: "аркада",
     tips: "Тап — старт",
-    Icon: CircleDot,
   },
   tetris: {
     desc: "Свайпы и превью фигуры.",
     accent: "#3b82f6",
     badge: "пазл",
     tips: "Тап — поворот",
-    Icon: Layers,
   },
   checkers: {
     desc: "Три сложности, рекорд на время.",
     accent: "#f59e0b",
     badge: "дуэль",
     tips: "Выбери сложность",
-    Icon: Puzzle,
   },
   breakout: {
     desc: "Уровни и жизни. ПК: мышь.",
     accent: "#ef4444",
     badge: "аркада",
     tips: "Тап — старт",
-    Icon: RectangleHorizontal,
   },
   memory: {
     desc: "Пары, комбо, бонус за скорость.",
     accent: "#a855f7",
     badge: "логика",
     tips: "Тап по карточкам",
-    Icon: Brain,
   },
   fifteen: {
     desc: "3×3 / 4×4 / 5×5 — собери поле на время.",
     accent: "#06b6d4",
     badge: "пазл",
     tips: "Выбери сложность",
-    Icon: Grid3x3,
   },
 };
 
@@ -217,7 +200,7 @@ function GamesHubInner() {
         <div className="games-hub__grid">
           {LIST.map((g) => {
             const m = META[g.id];
-            const Icon = m.Icon;
+            const Icon = GAME_ICONS[g.id];
             return (
               <Link
                 key={g.id}
