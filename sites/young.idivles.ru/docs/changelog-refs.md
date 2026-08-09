@@ -1,3 +1,4 @@
+- 2026-08-09: полный аудит auth — keepAlive на смене пароля, hardening reset/login/register (`auth-full-audit.md`, tag `auth-hardening`)
 # Связанные материалы проекта
 
 Документы в `sites/young.idivles.ru/` (и копия в `/opt/sochi-portal/docs/related/` при упаковке):
