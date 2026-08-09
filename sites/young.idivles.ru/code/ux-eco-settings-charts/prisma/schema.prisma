@@ -1,0 +1,1511 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  PARTICIPANT
+  MODERATOR
+  ADMIN
+  SCANNER
+  TECH
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+/** Видимость публичного профиля и поиск друзей */
+enum ProfileVisibility {
+  PUBLIC
+  FRIENDS
+  PRIVATE
+}
+
+/** Пол (опционально в профиле) */
+enum Gender {
+  MALE
+  FEMALE
+}
+
+// NextAuth стандартные модели
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  phone         String?   @unique
+  phoneVerified DateTime?
+  password      String?
+  /** Требовать смену пароля при следующем входе (назначение ADMIN/MOD/SCANNER) */
+  mustChangePassword Boolean @default(false)
+  /** bcrypt(sha256(normalized 24-word RU phrase)) — offline password recovery */
+  recoveryPhraseHash      String?
+  recoveryPhraseCreatedAt DateTime?
+  image         String?
+  role          Role      @default(USER)
+  permissions   String?   // JSON or comma-separated string for moderator access
+  /** Авторитет (надёжность) 0–100: старт 100, − за пропуски/модерацию, + за присутствие */
+  reliabilityScore Int @default(100)
+  /** Социальный рейтинг 0–100: старт 50, + за друзей/галерею, − за нарушения в общении */
+  socialScore      Int @default(50)
+  /** Эко-баллы (внутренняя валюта «Забота о планете») */
+  ecoPoints        Int @default(0)
+  /** JSON unlocks / cosmetics for profile customization */
+  cosmeticsJson    String?
+  /** Active cosmetic loadout: { voice, frame, badge, theme, aura, banner, cursor, ticket } */
+  ecoLoadoutJson   String?
+  /** Steam-like collectible cards inventory JSON */
+  collectiblesJson String?
+  attendedCount    Int @default(0)
+  noShowCount      Int @default(0)
+
+  /** Согласие с политикой конфиденциальности (цифровая подпись) */
+  privacyAcceptedAt   DateTime?
+  /** Первое согласие с политикой (не перезаписывается при обновлении версии) */
+  privacyFirstAcceptedAt DateTime?
+  /** Отказ от новой версии политики — портал недоступен до принятия */
+  privacyRefusedAt    DateTime?
+  privacySignature    String?
+  privacyPolicyVersion String?
+  /** Согласие на cookie / уведомления */
+  cookiesAcceptedAt   DateTime?
+  cookiesSignature    String?
+  cookiesPolicyVersion String?
+  /** Согласие с правилами сайта */
+  rulesAcceptedAt     DateTime?
+  rulesSignature      String?
+  rulesPolicyVersion  String?
+
+  /** Расширенный профиль */
+  birthDate   DateTime?
+  gender      Gender?
+  bio         String?
+  city        String?
+  hobbies     String? // JSON string[]
+  interests   String? // JSON string[]
+  about       String?
+
+  /**
+   * Версия инструктажа профиля (см. INSTRUCTIONS_VERSION).
+   * Значок «инструктаж пройден» активен только при совпадении с текущей версией.
+   */
+  instructionsVersion     String?
+  instructionsCompletedAt DateTime?
+  /** Когда скрыли приветствие инструктажа «больше не показывать» */
+  instructionsPromptDismissedAt DateTime?
+  /** Собственный реферальный код (R-XXXX) */
+  referralCode String? @unique
+  /** Кто пригласил (денормализация) */
+  referredById String?
+
+  /** До 3 кодов достижений на аватарке (JSON string[]) — витрина профиля */
+  showcaseBadges String?
+
+  /** Личная галерея пользователя: JSON { url, caption? }[] */
+  personalGalleryJson String?
+
+  /** Короткий публичный ID (YM-A7K2M9), отличный от внутреннего cuid */
+  publicCode  String?   @unique
+  /** Публичный никнейм (опционально, уникален если задан) */
+  nickname    String?   @unique
+  /** Опциональные соцсети / Steam */
+  steamUrl      String?
+  vkUrl         String?
+  telegramUrl   String?
+  maxUrl        String?
+
+  /** Конфиденциальность профиля: PUBLIC / FRIENDS / PRIVATE (друзья только по ссылке) */
+  profileVisibility ProfileVisibility @default(PUBLIC)
+  /** Токен приглашения в друзья для закрытого профиля */
+  friendInviteToken String? @unique
+
+  /** Последняя активность (для статуса «в сети») */
+  lastActiveAt DateTime?
+  /** Кто видит онлайн: FRIENDS | PUBLIC | HIDDEN */
+  onlineVisibility String @default("FRIENDS")
+
+  /** Блокировка аккаунта (вход и API запрещены) */
+  blockedAt       DateTime?
+  blockedReason   String?
+  /** Инкремент инвалидирует все JWT кроме тех, что уже обновили tv */
+  tokenVersion    Int       @default(0)
+  /** One-time nonce to keep current session after «завершить другие» */
+  tokenKeepAlive  String?
+  /** Число предупреждений модерации */
+  warnCount       Int       @default(0)
+
+  /** Самостоятельное удаление: заявка → 30 дней на отмену → анонимизация + архив 5 лет */
+  deletionRequestedAt  DateTime?
+  deletionEffectiveAt  DateTime?
+  deletedAt            DateTime?
+
+  accounts     Account[]
+  sessions     Session[]
+  applications Application[]
+  bookings     Booking[]
+  participations BookingParticipant[]
+  waitlistEntries BookingWaitlist[]
+  ticketCheckIns TicketCheckIn[] @relation("TicketHolder")
+  scannedTickets TicketCheckIn[] @relation("ScannedBy")
+  achievements UserAchievement[]
+  loginEvents  LoginEvent[]
+  notifications UserNotification[]
+  pushSubscriptions PushSubscription[]
+  gameScores   GameScore[]
+  friendRequestsSent     Friendship[] @relation("FriendRequestsSent")
+  friendRequestsReceived Friendship[] @relation("FriendRequestsReceived")
+  sentMessages           DirectMessage[] @relation("MessageSender")
+  trustedDevices         TrustedDevice[]
+  aboutFeatured          AboutFeaturedUser?
+  portfolio              UserPortfolio?
+  contentFlags           ContentFlag[]
+  placeFavorites         PlaceFavorite[]
+  placeRatings           PlaceRating[]
+  placeReviews           PlaceReview[]
+  placeInvitesSent       PlaceInvite[] @relation("PlaceInvitesSent")
+  placeInvitesReceived   PlaceInvite[] @relation("PlaceInvitesReceived")
+  bookingInvitesSent     BookingInvite[] @relation("BookingInvitesSent")
+  bookingInvitesReceived BookingInvite[] @relation("BookingInvitesReceived")
+  reputationEvents       ReputationEvent[]
+  referralsSent          Referral[] @relation("ReferralsSent")
+  referralReceived       Referral?  @relation("ReferralReceived")
+  referralRewards        ReferralReward[] @relation("ReferralRewardsReferrer")
+  entityInvitesSent      EntityInvite[] @relation("EntityInvitesSent")
+  entityInvitesReceived  EntityInvite[] @relation("EntityInvitesReceived")
+  conversationStates    ConversationUserState[]
+  employersSubmitted     Employer[] @relation("EmployerSubmitted")
+  vacancyApplications    VacancyApplication[]
+  contestSubmissions     ContestSubmission[]
+  contestVotes           ContestVote[]
+  contestRaffleEntries   ContestRaffleEntry[]
+  contestWins            ContestWinner[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDemoData Boolean @default(false)
+  // --- Messenger linking (added by integration) ---
+  telegramChatId   String?
+  telegramLinkedAt DateTime?
+  maxUserId        String?
+  maxLinkedAt      DateTime?
+}
+
+/** Рекорды мини-игр (змейка, тетрис, шашки) */
+model GameScore {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** snake | tetris | checkers | breakout | memory */
+  game      String
+  score     Int
+  meta      String?  // JSON extra (wins, level…)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, game])
+  @@index([game, score])
+}
+
+/** История входов / пингов сессии (IP, UA, отпечаток устройства) */
+model LoginEvent {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip           String?
+  userAgent    String?
+  fingerprint  String?
+  deviceLabel  String?
+  success      Boolean  @default(true)
+  /** LOGIN | PING | REVOKE | BLOCKED_ATTEMPT */
+  kind         String   @default("LOGIN")
+  createdAt    DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@index([ip])
+  @@index([fingerprint])
+}
+
+/** Устройство: доверенное через 7 дней с первого появления (первое на аккаунте — сразу) */
+model TrustedDevice {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fingerprint String
+  deviceLabel String?
+  firstSeenAt DateTime  @default(now())
+  lastSeenAt  DateTime  @updatedAt
+  trustedAt   DateTime?
+  revokedAt   DateTime?
+
+  @@unique([userId, fingerprint])
+  @@index([userId, revokedAt])
+}
+
+/** Архив удалённого пользователя (хранение 5 лет после удаления аккаунта) */
+model UserArchive {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  displayName String?
+  emailHash   String?
+  phoneHash   String?
+  /** JSON-снимок активности без открытых контактов */
+  snapshot    String
+  archivedAt  DateTime  @default(now())
+  retainUntil DateTime
+  purgedAt    DateTime?
+
+  @@index([retainUntil, purgedAt])
+}
+
+/** Уведомления в личном кабинете (чек-ин, безопасность и т.п.) */
+model UserNotification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** CHECK_IN | SECURITY | SYSTEM | FRIEND_REQUEST | MESSAGE | MODERATION | … */
+  type      String
+  title     String
+  body      String
+  meta      String?   // JSON
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+}
+
+/** Browser Web Push subscriptions (one user → many devices) */
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model UserAchievement {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code       String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userId, code])
+  @@index([userId])
+}
+
+model PendingUser {
+  id          String   @id @default(cuid())
+  name        String
+  email       String   @unique
+  phone       String
+  password    String
+  token       String
+  /** JSON: consent versions + birthDate ISO */
+  meta        String?
+  expires     DateTime
+  createdAt   DateTime @default(now())
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// Проекты (Сочинская Лига КВН, и т.д.)
+model Project {
+  id           String        @id @default(cuid())
+  title        String
+  description  String       
+  image        String?
+  gallery      String?
+  /** Краткая цель проекта (1–2 предложения) */
+  goal         String?
+  /** Миссия / зачем проект миру и городу */
+  mission      String?
+  /** JSON roadmap: { title, status, due?, description? }[] */
+  roadmapJson  String?
+  /** JSON роли: { role, duties, userId?, name? }[] */
+  rolesJson    String?
+  /** JSON задачи: { title, status, assigneeName?, done? }[] */
+  tasksJson    String?
+  applications Application[]
+  invites      EntityInvite[]
+  /** Unique viewers (ContentView) */
+  viewCount  Int      @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  template    String    @default("DEFAULT")
+  isDemoData Boolean @default(false)
+  status    String    @default("ACTIVE")
+}
+
+// Клубы
+model Club {
+  id              String        @id @default(cuid())
+  title           String
+  description     String
+  image           String?
+  gallery         String?
+  /** Цель клуба */
+  goal            String?
+  /** Миссия / польза */
+  mission         String?
+  /** JSON roadmap */
+  roadmapJson     String?
+  /** JSON роли */
+  rolesJson       String?
+  /** JSON задачи / активности */
+  tasksJson       String?
+  /** Когда встречаются, напр. «По средам в 18:00» */
+  meetingSchedule String?
+  /** Где встречаются */
+  meetingPlace    String?
+  curatorName     String?
+  curatorContact  String?
+  /** Показывать контакт куратора публично */
+  curatorContactPublic Boolean @default(true)
+  /** Теги интересов через запятую */
+  tags            String?
+  /** External signup / Telegram invite (t.me, form, etc.) */
+  signupUrl       String?
+  applications    Application[]
+  invites         EntityInvite[]
+  /** Unique viewers (ContentView) */
+  viewCount  Int      @default(0)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  template        String        @default("DEFAULT")
+  isDemoData      Boolean       @default(false)
+  status          String        @default("ACTIVE")
+}
+
+// Молодежные пространства (Дом молодежи, Тимирязева 6 и т.д.)
+model Space {
+  id          String    @id @default(cuid())
+  title       String
+  address     String?
+  lat         Float?
+  lng         Float?
+  description String?  
+  image       String?
+  gallery     String?
+  /** Catalog category: Коворкинг, Зал мероприятий, Спорт, … */
+  category    String    @default("Общее")
+  /** JSON array of amenity ids: wifi, gym, game_zone, … */
+  amenities   String?
+  capacity    Int       @default(50)
+  template    String    @default("DEFAULT")
+  bookings    Booking[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  isDemoData Boolean @default(false)
+  status    String    @default("ACTIVE")
+}
+
+// Гранты / Добро (волонтёрство) / Самоуправление — единый каталог программ
+model PortalProgram {
+  id          String   @id @default(cuid())
+  /** GRANT | DOBRO | SELF_GOV */
+  kind        String
+  title       String
+  /** Короткий анонс на карточке */
+  summary     String?
+  description String
+  image       String?
+  /** DRAFT | OPEN | CLOSED | ARCHIVED */
+  status      String   @default("OPEN")
+  organizer   String?
+  place       String?
+  /** Внешняя ссылка (Добро.ру, положение и т.п.) */
+  externalUrl String?
+  tags        String?
+  /** Старт набора / акции */
+  startsAt    DateTime?
+  /** Дедлайн гранта / конец акции / срок полномочий */
+  endsAt      DateTime?
+  /** Лимит мест (волонтёры, места в совете); null = без лимита */
+  seats       Int?
+  /** Для грантов: «до 300 000 ₽» */
+  amountLabel String?
+  /** SELF_GOV: COUNCIL | PARLIAMENT | SCHOOL | INITIATIVE */
+  bodyType    String?
+  sortOrder   Int      @default(0)
+  isDemoData  Boolean  @default(false)
+  applications Application[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([kind, status])
+  @@index([endsAt])
+}
+
+// Универсальная модель для заявок в проекты, клубы и программы
+model Application {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clubId    String?
+  club      Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  programId String?
+  program   PortalProgram? @relation(fields: [programId], references: [id], onDelete: Cascade)
+
+  status       ApplicationStatus @default(PENDING)
+  message      String?
+  /// Comment from moderator when status is REJECTED
+  rejectReason String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDemoData Boolean @default(false)
+
+  @@unique([userId, clubId], map: "Application_userId_clubId_key")
+  @@unique([userId, projectId], map: "Application_userId_projectId_key")
+  @@unique([userId, programId], map: "Application_userId_programId_key")
+  @@index([status, createdAt])
+  @@index([userId, status])
+  @@index([projectId])
+  @@index([clubId])
+  @@index([programId])
+}
+
+// Бронирование пространств (Мероприятия)
+model Booking {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  /** Категория мероприятия для афиши */
+  category    String   @default("Общее")
+  startTime   DateTime
+  endTime     DateTime
+
+  spaceId String
+  space   Space  @relation(fields: [spaceId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status       ApplicationStatus @default(PENDING)
+  /// Comment from moderator when status is REJECTED
+  rejectReason String?
+
+  /** PROFILE | CUSTOM | HIDDEN — контакты на карточке афиши */
+  contactMode          String  @default("PROFILE")
+  contactPhone         String?
+  contactTelegram      String?
+  contactVk            String?
+  contactMax           String?
+  /** Показывать ссылку на профиль организатора (/u/…) */
+  showOrganizerProfile Boolean @default(true)
+
+  participants BookingParticipant[]
+  waitlist     BookingWaitlist[]
+  checkIns     TicketCheckIn[]
+  invites      BookingInvite[]
+  contests     Contest[]
+  reminderSentAt DateTime?
+
+  /** Unique viewers (ContentView) */
+  viewCount  Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDemoData Boolean @default(false)
+
+  @@index([status, startTime])
+  @@index([spaceId, startTime])
+  @@index([userId, createdAt])
+}
+
+model BookingParticipant {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** PENDING | CHECKED_IN | NO_SHOW */
+  attendanceStatus   String    @default("PENDING")
+  attendanceSettledAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@unique([bookingId, userId])
+  @@index([attendanceStatus, attendanceSettledAt])
+  @@index([userId])
+}
+
+model BookingWaitlist {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([bookingId, userId])
+  @@index([bookingId, createdAt])
+  @@index([userId])
+}
+
+// Сканирование QR-билетов на входе (сервисный аккаунт SCANNER)
+model TicketCheckIn {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation("TicketHolder", fields: [userId], references: [id], onDelete: Cascade)
+  scannedById String
+  scannedBy   User     @relation("ScannedBy", fields: [scannedById], references: [id], onDelete: Cascade)
+  method      String   @default("QR") // QR | MANUAL
+  createdAt   DateTime @default(now())
+
+  @@unique([bookingId, userId])
+  @@index([bookingId])
+  @@index([createdAt])
+  @@index([scannedById])
+  @@index([userId])
+}
+
+// Статические страницы (О нас, Гранты, Документы, Контакты)
+model PageContent {
+  id        String   @id @default(cuid())
+  slug      String   @unique // about, grants, dobro, documents, contacts, self-gov
+  title     String
+  content   String  
+  images    String // Строка (JSON) для ссылок на изображения
+  menuPosition String @default("NONE") // FOOTER, HEADER_MAIN, HEADER_SUB, NONE
+  template  String @default("DEFAULT") // DEFAULT, GALLERY, TEAM, FAQ
+  status    String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  publishedAt DateTime?
+  updatedAt DateTime @updatedAt
+
+  @@index([menuPosition, status])
+}
+
+// Настройки сайта (SMTP, Контакты и т.д.)
+model SiteSettings {
+  id        String   @id @default("1")
+  smtpHost  String?
+  smtpPort  Int?
+  smtpUser  String?
+  smtpPass  String?
+  smtpFrom  String?
+  publicEventsVisibility Boolean @default(false)
+  siteName        String  @default("YoungPortal")
+  logoUrl         String? // /brand/logo.svg или /uploads/brand/...
+  /** Фон главной: URL или пусто → /hero-bg.jpg */
+  heroImageUrl    String?
+  /** Видео-фон главной (mp4); пусто → только картинка */
+  heroVideoUrl    String?
+  /** static | animated */
+  heroAnimationMode String @default("animated")
+
+  /** Показывать галерею деятельности портала на главной (гостям — только если galleryPublicEnabled) */
+  galleryHomepageEnabled Boolean @default(true)
+  /** Отдельная страница /gallery с деятельностью администрации портала */
+  galleryPageEnabled     Boolean @default(true)
+  /** Галерея доступна гостям (неавторизованным) на главной и /gallery */
+  galleryPublicEnabled   Boolean @default(false)
+  /** JSON: { url, caption? }[] — галерея деятельности администрации портала */
+  orgGalleryJson         String?
+  /** Лимит фото в личной галерее пользователя (базовый; соцрейтинг даёт бонус) */
+  galleryMaxPerUser      Int @default(12)
+  /** Макс. размер загружаемого фото галереи, байт */
+  galleryMaxUploadBytes  Int @default(2097152)
+  contactEmail    String?
+  supportEmail    String?
+  contactPhone    String?
+  address         String?
+  workHours       String? // текст режима работы для /contacts
+  bookingOpenTime  String @default("09:00") // HH:MM — начало рабочего окна брони
+  bookingCloseTime String @default("21:00") // HH:MM — конец рабочего окна брони
+  
+  vkLink          String?
+  vkEnabled       Boolean @default(false)
+  tgLink          String?
+  tgEnabled       Boolean @default(false)
+  okLink          String?
+  okEnabled       Boolean @default(false)
+  whatsappLink    String?
+  whatsappEnabled Boolean @default(false)
+  rutubeLink      String?
+  rutubeEnabled   Boolean @default(false)
+  /** Мессенджер MAX (max.ru) */
+  maxLink         String?
+  maxEnabled      Boolean @default(false)
+
+  // VK API Settings
+  vkApiToken      String?
+  vkGroupId       String?
+  vkSyncEnabled   Boolean @default(false)
+  vkLastSync      DateTime?
+  /** JSON: { hours: number[], weekdays: string } — see src/lib/vk-sync-schedule.ts */
+  vkSyncScheduleJson String?
+
+  // Booking Settings
+  minBookingHours     Int     @default(3)
+  autoApproveBookings Boolean @default(false)
+  reminderHoursBefore Int     @default(24)
+
+  // Analytics
+  yandexMetrikaId     String?
+
+  /** Public site URL / domain (https://example.ru) — overrides NEXTAUTH_URL for links, emails, ICS, legal */
+  publicSiteUrl       String?
+
+  // Legal / compliance (RF, 152-FZ cookie opt-in, copy protection, operator)
+  copyProtectionEnabled      Boolean @default(true)
+  cookieBannerEnabled        Boolean @default(true)
+  /** Block Yandex Metrika until analytics cookies are accepted */
+  analyticsConsentRequired   Boolean @default(true)
+  operatorName               String?
+  operatorInn                String?
+  operatorOgrn               String?
+  pdnResponsibleEmail        String?
+
+  // Homepage government widgets (Gosuslugi board etc.)
+  govWidgetsEnabled          Boolean @default(false)
+  govWidgetsTitle            String  @default("Государственные сервисы")
+  /** JSON: GovWidget[] — see src/lib/gov-widgets.ts */
+  govWidgetsJson             String?
+
+  /** Weekly youth afisha (from VK wall post) — editable in admin */
+  afishaWeekEnabled          Boolean @default(false)
+  /** JSON: AfishaWeekConfig — see src/lib/afisha-week.ts */
+  afishaWeekJson             String?
+
+  /** JSON: ModerationConfig — see src/lib/moderation-config.ts */
+  moderationConfigJson       String?
+
+  /** Allow new user self-registration */
+  registrationEnabled Boolean @default(true)
+  /** When false — silence mode: users cannot DM each other (ADMIN/MODERATOR exempt) */
+  messagingEnabled    Boolean @default(true)
+
+  /** JSON draft fields for RKN operator notification pack — see src/lib/rkn-pack.ts */
+  rknPackJson         String?
+
+  /** Days between portfolio submit-to-review attempts (0 = no limit). Default 7. */
+  portfolioSubmitCooldownDays Int @default(7)
+
+  /** JSON kill-switches — src/lib/module-flags.ts (missing key = on) */
+  moduleFlagsJson     String?
+
+  /** JSON: EcoPoolConfig — src/lib/eco-pool.ts (total / display flags) */
+  ecoPoolJson         String?
+
+  /** JSON: ReplicaConfig — src/lib/replica-config.ts (HA / standby) */
+  replicaJson         String?
+
+  // Maintenance / works mode
+  maintenanceMode     Boolean @default(false)
+  maintenanceMessage  String?
+  maintenanceEta      String?
+
+  updatedAt DateTime @updatedAt
+  // --- Notifications: Telegram bot + MAX bot (added by integration) ---
+  telegramBotToken      String?
+  telegramAlertChatIds  String?
+  telegramAlertsEnabled Boolean  @default(false)
+  /** Ежедневный бэкап в Telegram только выбранному chat id */
+  dailyBackupEnabled    Boolean  @default(false)
+  dailyBackupChatId     String?
+  /** Час MSK (0–23), когда слать ежедневный бэкап */
+  dailyBackupHour       Int      @default(3)
+  maxBotToken           String?
+  maxWebhookSecret      String?
+  maxAlertChatIds       String?
+  maxBotEnabled         Boolean  @default(false)
+}
+
+/** One-time encrypted export of user data for law-enforcement / regulator requests */
+model LeaDataExport {
+  id              String   @id @default(cuid())
+  targetUserId    String
+  issuedById      String
+  reason          String
+  legalBasis      String?
+  archiveSha256   String
+  keyFingerprint  String
+  /** Ciphertext stored on disk under uploads/lea/… */
+  storagePath     String
+  byteSize        Int      @default(0)
+  /** Plaintext key returned only once via API; never stored */
+  keyRevealedAt   DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([targetUserId, createdAt])
+  @@index([issuedById, createdAt])
+}
+
+/** Encrypted signed project backup from admin panel */
+model ProjectBackup {
+  id              String   @id @default(cuid())
+  issuedById      String
+  label           String?
+  note            String?
+  archiveSha256   String
+  contentHash     String
+  signature       String
+  keyFingerprint  String
+  /** Ciphertext under uploads/backups/… */
+  storagePath     String
+  byteSize        Int      @default(0)
+  schemaVersion   String   @default("youngportal.backup.v1")
+  keyRevealedAt   DateTime?
+  createdAt       DateTime @default(now())
+
+  @@index([issuedById, createdAt])
+}
+
+// Документы портала (положения, формы) с просмотром на сайте
+model SiteDocument {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  category    String   @default("Общее")
+  fileUrl     String
+  fileName    String
+  mimeType    String
+  sizeBytes   Int      @default(0)
+  status      String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  publishedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDemoData  Boolean  @default(false)
+}
+
+// Новости (Синхронизация из ВК или созданные вручную)
+model News {
+  id        String   @id @default(cuid())
+  vkPostId  String?  @unique // ID поста в ВК (например, 12345), чтобы избегать дублей
+  title     String?  // Заголовок (например, первая строчка или обрезанный текст)
+  text      String   // Полный текст новости
+  imageUrl  String?  // Ссылка на скачанную картинку или ссылку из ВК
+  /** VK embed player URL (video_ext.php) when the post has a video attachment */
+  videoEmbedUrl String?
+  vkLink    String?  // Прямая ссылка на пост в ВК
+  status    String   @default("PUBLISHED") // DRAFT | PUBLISHED
+  publishedAt DateTime?
+  /** Unique viewers (ContentView) */
+  viewCount  Int      @default(0)
+  createdAt DateTime @default(now()) // Дата публикации
+  updatedAt DateTime @updatedAt
+  isDemoData Boolean @default(false)
+
+  @@index([status, publishedAt])
+  @@index([status, createdAt])
+}
+
+/** Заявки в друзья / принятая дружба */
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  requester   User     @relation("FriendRequestsSent", fields: [requesterId], references: [id], onDelete: Cascade)
+  addresseeId String
+  addressee   User     @relation("FriendRequestsReceived", fields: [addresseeId], references: [id], onDelete: Cascade)
+  /** PENDING | ACCEPTED | DECLINED | BLOCKED */
+  status      String   @default("PENDING")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@index([requesterId, status])
+}
+
+/** Диалог: DM (pairKey = sortedIdA_sortedIdB) или PROJECT/CLUB (pairKey = project:id / club:id) */
+model Conversation {
+  id        String          @id @default(cuid())
+  pairKey   String          @unique
+  /** DM | PROJECT | CLUB */
+  kind      String          @default("DM")
+  projectId String?
+  clubId    String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  messages  DirectMessage[]
+  userStates ConversationUserState[]
+
+  @@index([kind, projectId])
+  @@index([kind, clubId])
+}
+
+model ConversationUserState {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  pinnedAt       DateTime?
+  archivedAt     DateTime?
+  mutedAt        DateTime?
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([userId, conversationId])
+  @@index([userId, archivedAt])
+  @@index([userId, pinnedAt])
+}
+
+
+
+model DirectMessage {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  body           String
+  /** TEXT | EVENT_INVITE | PLACE_INVITE | ENTITY_INVITE */
+  kind           String       @default("TEXT")
+  /** JSON payload for rich cards (event/place invite) */
+  metaJson       String?
+  /** Сообщение прошло soft-модерацию (тело уже с маской) */
+  flagged        Boolean      @default(false)
+  readAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
+  @@index([senderId, createdAt])
+}
+
+/** Флаги модерации контента (переписки и др.) */
+model ContentFlag {
+  id               String    @id @default(cuid())
+  /** Primary category: PROFANITY | VIOLENCE | EXTREMISM | HATE | THREAT */
+  category         String
+  /** JSON string[] all matched categories */
+  categories       String?
+  severity         Int       @default(1)
+  sourceType       String    @default("DIRECT_MESSAGE")
+  sourceId         String
+  conversationId   String?
+  actorUserId      String
+  actor            User      @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+  originalText     String
+  maskedText       String
+  matches          String?
+  status           String    @default("OPEN")
+  reviewedAt       DateTime?
+  reviewedById     String?
+  reviewNote       String?
+  reliabilityDelta Int       @default(0)
+  warnIssued       Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([category, createdAt])
+  @@index([sourceType, sourceId])
+}
+
+/** Пользователи, выбранные для блока команды на странице «О нас» */
+model AboutFeaturedUser {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleTitle String
+  sortOrder Int      @default(0)
+  isVisible Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isVisible, sortOrder])
+}
+
+enum PortfolioStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
+  ARCHIVED
+}
+
+/** Публичное портфолио пользователя (после одобрения модератором/админом) */
+model UserPortfolio {
+  id           String          @id @default(cuid())
+  userId       String          @unique
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  headline     String?
+  summary      String?
+  coverImage   String?
+  theme        String          @default("MODERN")
+  status       PortfolioStatus @default(DRAFT)
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  reviewedById String?
+  rejectReason String?
+  publishedAt  DateTime?
+  contentHash  String?
+  publicSlug   String?         @unique
+  /** JSON snapshot of last APPROVED payload — for admin diff on resubmit */
+  approvedSnapshot String?
+  /** JSON PortfolioDiff computed at last submit */
+  pendingDiffJson  String?
+  sections     PortfolioSection[]
+  certificates PortfolioCertificate[]
+  achievementLinks PortfolioAchievementLink[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([status, updatedAt])
+}
+
+model PortfolioSection {
+  id          String        @id @default(cuid())
+  portfolioId String
+  portfolio   UserPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  type        String        @default("CUSTOM")
+  title       String
+  body        String        @default("")
+  mediaUrl    String?
+  sortOrder   Int           @default(0)
+  isVisible   Boolean       @default(true)
+
+  @@index([portfolioId, sortOrder])
+}
+
+model PortfolioCertificate {
+  id          String        @id @default(cuid())
+  portfolioId String
+  portfolio   UserPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  title       String
+  issuer      String?
+  issuedAt    DateTime?
+  fileUrl     String?
+  fileName    String?
+  mimeType    String?
+  sortOrder   Int           @default(0)
+  isVisible   Boolean       @default(true)
+
+  @@index([portfolioId, sortOrder])
+}
+
+model PortfolioAchievementLink {
+  id          String        @id @default(cuid())
+  portfolioId String
+  portfolio   UserPortfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  code        String
+  sortOrder   Int           @default(0)
+
+  @@unique([portfolioId, code])
+}
+
+/** Категории «Куда сходить в Сочи» */
+enum PlaceCategory {
+  HISTORICAL
+  BEACH
+  MOUNTAIN
+  PARK
+  MUSEUM
+  VIEWPOINT
+  UNIQUE
+  FAMILY
+}
+
+enum PlaceStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+/** Места Сочи — каталог «Куда сходить» */
+model Place {
+  id             String        @id @default(cuid())
+  title          String
+  slug           String        @unique
+  summary        String?
+  description    String
+  category       PlaceCategory
+  address        String?
+  district       String?
+  lat            Float?
+  lng            Float?
+  image          String?
+  galleryJson    String?
+  /** JSON array of {icon,title,text} perk cards */
+  featuresJson   String?
+  tips           String?
+  bestSeason     String?
+  visitTime      String?
+  priceHint      String?
+  status         PlaceStatus   @default(DRAFT)
+  sortOrder      Int           @default(0)
+  ratingAvg      Float         @default(0)
+  ratingCount    Int           @default(0)
+  favoritesCount Int           @default(0)
+  isDemoData     Boolean       @default(false)
+  /** Unique viewers (ContentView) */
+  viewCount  Int      @default(0)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  favorites PlaceFavorite[]
+  ratings   PlaceRating[]
+  reviews   PlaceReview[]
+  invites   PlaceInvite[]
+
+  @@index([status, sortOrder])
+  @@index([category, status])
+  @@index([district])
+}
+
+model PlaceFavorite {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, placeId])
+  @@index([userId])
+  @@index([placeId])
+}
+
+model PlaceRating {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeId   String
+  place     Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  /** 1–5 */
+  score     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, placeId])
+  @@index([placeId])
+}
+
+model PlaceReview {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  placeId   String
+  place     Place             @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  body      String
+  status    ApplicationStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  @@index([placeId, status])
+  @@index([userId])
+  @@index([status, createdAt])
+}
+
+model PlaceInvite {
+  id         String   @id @default(cuid())
+  fromUserId String
+  fromUser   User     @relation("PlaceInvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("PlaceInvitesReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  placeId    String
+  place      Place    @relation(fields: [placeId], references: [id], onDelete: Cascade)
+  message    String?
+  createdAt  DateTime @default(now())
+
+  @@index([toUserId, createdAt])
+  @@index([placeId])
+  @@index([fromUserId, placeId, toUserId])
+}
+
+/** Приглашение друга на мероприятие (афиша / бронь) */
+model BookingInvite {
+  id         String   @id @default(cuid())
+  fromUserId String
+  fromUser   User     @relation("BookingInvitesSent", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId   String
+  toUser     User     @relation("BookingInvitesReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  bookingId  String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  message    String?
+  /** SENT | JOINED | DECLINED */
+  status     String   @default("SENT")
+  messageId  String?
+  createdAt  DateTime @default(now())
+
+  @@index([toUserId, createdAt])
+  @@index([bookingId])
+  @@index([fromUserId, bookingId, toUserId])
+}
+
+/** История изменений авторитета / соцрейтинга / эко-баллов */
+model ReputationEvent {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** AUTHORITY | SOCIAL | ECO */
+  kind         String
+  delta        Int
+  balanceAfter Int
+  reason       String
+  metaJson     String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId, kind, createdAt])
+  @@index([userId, createdAt])
+}
+
+/** Приглашение друга в проект или клуб */
+model EntityInvite {
+  id          String   @id @default(cuid())
+  /** PROJECT | CLUB */
+  kind        String
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clubId      String?
+  club        Club?    @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  inviterId   String
+  inviter     User     @relation("EntityInvitesSent", fields: [inviterId], references: [id], onDelete: Cascade)
+  inviteeId   String
+  invitee     User     @relation("EntityInvitesReceived", fields: [inviteeId], references: [id], onDelete: Cascade)
+  /** PENDING | ACCEPTED | DECLINED | CANCELLED */
+  status      String   @default("PENDING")
+  message     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([inviteeId, status])
+  @@index([projectId, status])
+  @@index([clubId, status])
+  @@index([inviterId, createdAt])
+}
+
+/** ===== Vacancies & Contests (2026-08-08) ===== */
+
+model Employer {
+  id          String   @id @default(cuid())
+  /** Official center employer */
+  isInternal  Boolean  @default(false)
+  title       String
+  description String?
+  contactName String?
+  contactEmail String?
+  contactPhone String?
+  websiteUrl  String?
+  /** PENDING | APPROVED | REJECTED | SUSPENDED */
+  status      String   @default("PENDING")
+  rejectReason String?
+  submittedById String?
+  submittedBy   User?  @relation("EmployerSubmitted", fields: [submittedById], references: [id], onDelete: SetNull)
+  vacancies   Vacancy[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([isInternal])
+}
+
+model Vacancy {
+  id          String   @id @default(cuid())
+  employerId  String
+  employer    Employer @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  title       String
+  description String
+  /** JSON string[] soft requirements shown to applicants */
+  requirementsJson String?
+  /** offline | hybrid | remote */
+  workFormat  String   @default("offline")
+  city        String?
+  ageMin      Int?
+  ageMax      Int?
+  minReliability Int   @default(0)
+  minSocial   Int      @default(0)
+  needInstructions Boolean @default(true)
+  seats       Int?
+  /** DRAFT | PENDING_MOD | OPEN | CLOSED | ARCHIVED */
+  status      String   @default("DRAFT")
+  opensAt     DateTime?
+  closesAt    DateTime?
+  /** Min % to pass auto screen (0-100) */
+  screenPassScore Int @default(70)
+  sortOrder   Int      @default(0)
+  questions   VacancyQuestion[]
+  applications VacancyApplication[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, closesAt])
+  @@index([employerId])
+}
+
+model VacancyQuestion {
+  id          String   @id @default(cuid())
+  vacancyId   String
+  vacancy     Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  /** single | multi | text | number | bool */
+  kind        String   @default("single")
+  prompt      String
+  /** JSON options for single/multi */
+  optionsJson String?
+  /** Expected answer JSON (string | string[] | number | boolean) */
+  correctJson String?
+  weight      Int      @default(1)
+  knockout    Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  @@index([vacancyId, sortOrder])
+}
+
+model VacancyApplication {
+  id          String   @id @default(cuid())
+  vacancyId   String
+  vacancy     Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** PENDING | SCREENING | PENDING_REVIEW | APPROVED | REJECTED | WITHDRAWN */
+  status      String   @default("PENDING")
+  coverLetter String?
+  answersJson String?
+  autoScore   Int?
+  autoPassed  Boolean?
+  rejectReason String?
+  reviewedAt  DateTime?
+  reviewedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, vacancyId])
+  @@index([vacancyId, status])
+  @@index([userId, status])
+  @@index([status, createdAt])
+}
+
+model Contest {
+  id          String   @id @default(cuid())
+  /** SUBMISSION | RAFFLE */
+  kind        String
+  title       String
+  summary     String?
+  rulesHtml   String
+  prizeText   String?
+  /** DRAFT | OPEN | VOTING | CLOSED | ARCHIVED */
+  status      String   @default("DRAFT")
+  startsAt    DateTime?
+  endsAt      DateTime?
+  voteEndsAt  DateTime?
+  allowVoting Boolean  @default(true)
+  maxSubmissionsPerUser Int @default(1)
+  /** For RAFFLE: linked event */
+  bookingId   String?
+  booking     Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  /** JSON eligibility: minSocial, minReliability, needCheckIn */
+  eligibilityJson String?
+  winnerCount Int      @default(1)
+  drawSeed    String?
+  drawnAt     DateTime?
+  submissions ContestSubmission[]
+  raffleEntries ContestRaffleEntry[]
+  winners     ContestWinner[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([kind, status])
+  @@index([endsAt])
+  @@index([bookingId])
+}
+
+model ContestSubmission {
+  id          String   @id @default(cuid())
+  contestId   String
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String?
+  bodyText    String?
+  imageUrl    String?
+  linkUrl     String?
+  /** PENDING | APPROVED | REJECTED */
+  status      String   @default("PENDING")
+  rejectReason String?
+  voteCount   Int      @default(0)
+  votes       ContestVote[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([contestId, status])
+  @@index([userId, contestId])
+}
+
+model ContestVote {
+  id            String   @id @default(cuid())
+  submissionId  String
+  submission    ContestSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime @default(now())
+
+  @@unique([submissionId, userId])
+  @@index([userId])
+}
+
+model ContestRaffleEntry {
+  id          String   @id @default(cuid())
+  contestId   String
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /** CHECK_IN | TICKET | MANUAL */
+  source      String   @default("CHECK_IN")
+  createdAt   DateTime @default(now())
+
+  @@unique([contestId, userId])
+  @@index([contestId])
+}
+
+model ContestWinner {
+  id          String   @id @default(cuid())
+  contestId   String
+  contest     Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  place       Int      @default(1)
+  drawnAt     DateTime @default(now())
+  drawnById   String?
+
+  @@index([contestId, place])
+  @@unique([contestId, userId])
+}
+
+model ContentView {
+  id          String   @id @default(cuid())
+  /** PROJECT | CLUB | NEWS | PLACE | EVENT | GAME */
+  contentType String
+  contentId   String
+  /** u:{userId} | d:{deviceId} */
+  viewerKey   String
+  userId      String?
+  deviceId    String?
+  ipHash      String?
+  createdAt   DateTime @default(now())
+
+  @@unique([contentType, contentId, viewerKey])
+  @@index([contentType, contentId])
+  @@index([userId, createdAt])
+}
+
+model ContentViewStats {
+  id          String   @id @default(cuid())
+  contentType String
+  contentId   String
+  viewCount   Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  @@unique([contentType, contentId])
+}
+
+
+/** Реферальная программа: кто кого привёл */
+model Referral {
+  id             String    @id @default(cuid())
+  referrerId     String
+  referrer       User      @relation("ReferralsSent", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId      String    @unique
+  referee        User      @relation("ReferralReceived", fields: [refereeId], references: [id], onDelete: Cascade)
+  code           String
+  /** PENDING | SIGNED_UP | QUALIFIED | REJECTED */
+  status         String    @default("SIGNED_UP")
+  signupIpHash   String?
+  signupFp       String?
+  fraudScore     Int       @default(0)
+  fraudFlagsJson String?
+  qualifiedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  rewards        ReferralReward[]
+
+  @@index([referrerId, status])
+  @@index([signupIpHash, createdAt])
+  @@index([signupFp])
+  @@index([code])
+}
+
+/** Идемпотентный журнал наград по рефералу */
+model ReferralReward {
+  id             String   @id @default(cuid())
+  referralId     String
+  referral       Referral @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  referrerId     String
+  referrer       User     @relation("ReferralRewardsReferrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  refereeId      String
+  /** SIGNUP | INSTRUCTIONS | CHECK_IN | PROFILE | FRIEND | MILESTONE_3 | MILESTONE_10 */
+  kind           String
+  ecoDelta       Int      @default(0)
+  socialDelta    Int      @default(0)
+  authorityDelta Int      @default(0)
+  metaJson       String?
+  createdAt      DateTime @default(now())
+
+  @@unique([referralId, kind])
+  @@index([referrerId, createdAt])
+  @@index([referrerId, kind])
+}
+
+/** Журнал действий администраторов / TECH (пароли, роли, блокировки, активации) */
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  actorId     String
+  actorEmail  String?
+  actorRole   String?
+  action      String
+  targetType  String
+  targetId    String?
+  targetEmail String?
+  ip          String?
+  userAgent   String?
+  /** JSON details — без открытых паролей */
+  detail      String?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([targetId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetEmail, createdAt])
+}
