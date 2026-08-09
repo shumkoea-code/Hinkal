@@ -26,6 +26,26 @@
 #       --timeout <сек>   таймаут на запрос (по умолчанию 20)
 #   -h, --help            справка
 #
+# Проверка с авторизацией (для СВОЕГО сайта):
+#       --login <телефон> вход по номеру: запросит SMS-код и залогинится
+#       --code <код>      код из SMS (иначе спросит интерактивно)
+#       --token <bearer>  использовать готовый Bearer-токен (без SMS)
+#       --api-base <url>  база API (по умолчанию = origin цели)
+#       --send-code-only  только запросить SMS-код и выйти (двухшаговый вход)
+#       --skip-send       не отправлять код повторно (код уже на руках)
+#
+# Что проверяет режим авторизации (только чтение, без создания заказов/оплат):
+#   - вход по SMS-коду и получение сессии;
+#   - что защищённые эндпоинты требуют токен (иначе — broken auth);
+#   - что неверный токен отклоняется;
+#   - что обычный пользователь НЕ имеет доступа к /api/admin/* (broken access control);
+#   - хранение токена, кэширование и CORS на API.
+#
+# Примеры:
+#   bash tools/websec-scan.sh --login 89001234567 https://site.ru      # спросит код
+#   bash tools/websec-scan.sh --send-code-only --login 89001234567 https://site.ru
+#   bash tools/websec-scan.sh --login 89001234567 --code 1234 --skip-send https://site.ru
+#
 # Зависимости: bash, curl, openssl (для TLS-проверок), grep, sed, awk.
 ###############################################################################
 set -u
@@ -36,6 +56,12 @@ OUTPUT=""
 SKIP_FILES=0
 TIMEOUT=20
 USE_COLOR=1
+LOGIN_PHONE=""
+OPT_CODE=""
+OPT_TOKEN=""
+API_BASE=""
+SEND_CODE_ONLY=0
+SKIP_SEND=0
 
 usage() { sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'; exit 0; }
 
@@ -45,6 +71,12 @@ while [ $# -gt 0 ]; do
     --skip-files) SKIP_FILES=1; shift ;;
     --no-color)   USE_COLOR=0; shift ;;
     --timeout)    TIMEOUT="${2:-20}"; shift 2 ;;
+    --login)      LOGIN_PHONE="${2:-}"; shift 2 ;;
+    --code)       OPT_CODE="${2:-}"; shift 2 ;;
+    --token)      OPT_TOKEN="${2:-}"; shift 2 ;;
+    --api-base)   API_BASE="${2:-}"; shift 2 ;;
+    --send-code-only) SEND_CODE_ONLY=1; shift ;;
+    --skip-send)  SKIP_SEND=1; shift ;;
     -h|--help)    usage ;;
     -* ) echo "Неизвестная опция: $1" >&2; exit 2 ;;
     *  ) TARGET="$1"; shift ;;
@@ -77,6 +109,7 @@ SCHEME="${TARGET%%://*}"
 HOSTPORT="${TARGET#*://}"; HOSTPORT="${HOSTPORT%%/*}"
 HOST="${HOSTPORT%%:*}"
 PORT="${HOSTPORT##*:}"; [ "$PORT" = "$HOSTPORT" ] && PORT=""
+[ -n "$API_BASE" ] && API_BASE="${API_BASE%/}" || API_BASE="${SCHEME}://${HOSTPORT}"
 
 # ------------------------------ отчёт ----------------------------------------
 if [ -z "$OUTPUT" ]; then
@@ -120,6 +153,51 @@ printf 'Время:  %s\n' "$(date -u '+%Y-%m-%d %H:%M:%S UTC')"
 printf 'Отчёт:  %s\n' "$OUTPUT"
 
 CURL=(curl -sS --max-time "$TIMEOUT" -A "websec-scan/1.0 (passive audit)")
+
+# --- JSON-хелперы для режима авторизации (задают RETCODE и RESP_BODY) --------
+RESP_BODY=""
+api_post_json() { # <url> <json>
+  local out marker=$'\n__WSSIG__'
+  out="$("${CURL[@]}" -H 'Content-Type: application/json' --data "$2" -w "${marker}%{http_code}" "$1" 2>/dev/null)"
+  RETCODE="${out##*__WSSIG__}"; RESP_BODY="${out%$marker*}"
+}
+api_get_auth() { # <url> [token]
+  local out marker=$'\n__WSSIG__'; local args=()
+  [ -n "${2:-}" ] && args=(-H "Authorization: Bearer $2")
+  out="$("${CURL[@]}" "${args[@]}" -w "${marker}%{http_code}" "$1" 2>/dev/null)"
+  RETCODE="${out##*__WSSIG__}"; RESP_BODY="${out%$marker*}"
+}
+json_field() { # <field> — извлечь строковое поле верхнего уровня из RESP_BODY
+  if command -v python3 >/dev/null 2>&1; then
+    python3 -c 'import sys,json
+try: d=json.load(sys.stdin)
+except Exception: sys.exit(0)
+def g(o,k):
+    if isinstance(o,dict):
+        if k in o and isinstance(o[k],str): return o[k]
+        for v in o.values():
+            r=g(v,k)
+            if r: return r
+    return ""
+print(g(d,sys.argv[1]))' "$1" <<<"$RESP_BODY" 2>/dev/null
+  else
+    sed -n "s/.*\"$1\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p" <<<"$RESP_BODY" | head -1
+  fi
+}
+
+# --- Двухшаговый вход: только запросить SMS-код и выйти ----------------------
+if [ "$SEND_CODE_ONLY" = 1 ]; then
+  [ -n "$LOGIN_PHONE" ] || { echo "Для --send-code-only нужен --login <телефон>"; exit 2; }
+  api_post_json "$API_BASE/api/auth/send-code" "$(printf '{"phone":"%s"}' "$LOGIN_PHONE")"
+  echo "POST $API_BASE/api/auth/send-code (phone=$LOGIN_PHONE) → HTTP $RETCODE"
+  [ -n "$RESP_BODY" ] && echo "Ответ: $RESP_BODY"
+  if [ "$RETCODE" = "200" ] || [ "$RETCODE" = "201" ] || [ "$RETCODE" = "204" ]; then
+    echo "SMS-код отправлен. Повторите запуск с --code <код> --skip-send для входа."
+  else
+    echo "Не удалось запросить код (HTTP $RETCODE)."
+  fi
+  exit 0
+fi
 
 # получить заголовки главной страницы (следуя редиректам)
 HDRS_FINAL="$("${CURL[@]}" -L -D - -o /dev/null "$TARGET/" 2>/dev/null)"
@@ -385,6 +463,112 @@ if [ "$SCHEME" = "https" ]; then
   fi
 fi
 
+# ------------------------------ 11. Проверка с авторизацией ------------------
+AUTH_TOKEN=""; USER_ROLE=""
+if [ -n "$OPT_TOKEN" ] || [ -n "$LOGIN_PHONE" ]; then
+  section "11. Проверка с авторизацией (API)"
+
+  if [ -n "$OPT_TOKEN" ]; then
+    AUTH_TOKEN="$OPT_TOKEN"
+    add_result info INFO "Аутентификация" "используется переданный --token"
+  else
+    # 1) запросить SMS-код (если не пропущено)
+    if [ "$SKIP_SEND" = 0 ]; then
+      api_post_json "$API_BASE/api/auth/send-code" "$(printf '{"phone":"%s"}' "$LOGIN_PHONE")"
+      if [ "$RETCODE" = "200" ] || [ "$RETCODE" = "201" ] || [ "$RETCODE" = "204" ]; then
+        add_result info INFO "Запрос SMS-кода" "send-code → HTTP $RETCODE"
+      else
+        add_result med WARN "Запрос SMS-кода" "send-code → HTTP $RETCODE ($RESP_BODY)"
+      fi
+    fi
+    # 2) получить код
+    CODE="$OPT_CODE"
+    if [ -z "$CODE" ]; then
+      if [ -t 0 ]; then printf '%s' "Введите код из SMS для $LOGIN_PHONE: "; read -r CODE
+      else add_result high WARN "Аутентификация" "код не задан (--code) и нет интерактивного ввода"; fi
+    fi
+    # 3) verify-code → токен
+    if [ -n "$CODE" ]; then
+      api_post_json "$API_BASE/api/auth/verify-code" "$(printf '{"phone":"%s","code":"%s"}' "$LOGIN_PHONE" "$CODE")"
+      if [ "$RETCODE" = "200" ]; then
+        AUTH_TOKEN="$(json_field token)"
+        USER_ROLE="$(json_field role)"
+        if [ -n "$AUTH_TOKEN" ]; then
+          add_result low OK "Вход по SMS-коду" "verify-code → 200, токен получен${USER_ROLE:+, роль: $USER_ROLE}"
+        else
+          add_result high WARN "Вход по SMS-коду" "verify-code → 200, но токен не найден в ответе"
+        fi
+      else
+        add_result high FAIL "Вход по SMS-коду" "verify-code → HTTP $RETCODE ($RESP_BODY)"
+      fi
+    fi
+  fi
+
+  if [ -n "$AUTH_TOKEN" ]; then
+    # --- хранение токена (по статическому анализу бандла) ---
+    add_result med WARN "Хранение токена" "Bearer-токен хранится в localStorage — при XSS может быть украден (лучше httpOnly-cookie)"
+
+    AUTH_EPS=("/api/loyalty/balance" "/api/order/my")
+
+    # A) сессия работает (с токеном ожидаем 200)
+    for ep in "${AUTH_EPS[@]}"; do
+      api_get_auth "$API_BASE$ep" "$AUTH_TOKEN"
+      if [ "$RETCODE" = "200" ]; then add_result low OK "GET $ep (с токеном)" "→ 200 (доступ есть)"
+      else add_result info INFO "GET $ep (с токеном)" "→ $RETCODE"; fi
+      # кэширование чувствительных данных
+      CC="$("${CURL[@]}" -H "Authorization: Bearer $AUTH_TOKEN" -D - -o /dev/null "$API_BASE$ep" 2>/dev/null | grep -i '^cache-control:' | head -1 | sed 's/\r//')"
+      if [ "$RETCODE" = "200" ]; then
+        if grep -Eiq 'no-store|private' <<<"$CC"; then add_result low OK "Кэш $ep" "${CC:-Cache-Control}"
+        else add_result med WARN "Кэш $ep" "нет no-store/private — приватные данные могут кэшироваться (${CC:-нет Cache-Control})"; fi
+      fi
+    done
+
+    # B) требуется ли авторизация (без токена ожидаем 401/403)
+    for ep in "${AUTH_EPS[@]}"; do
+      api_get_auth "$API_BASE$ep"
+      case "$RETCODE" in
+        401|403) add_result low OK "Защита $ep (без токена)" "→ $RETCODE (требует авторизацию)";;
+        200)     add_result high FAIL "Защита $ep (без токена)" "→ 200: доступен БЕЗ токена (broken authentication)";;
+        *)       add_result info INFO "Защита $ep (без токена)" "→ $RETCODE";;
+      esac
+    done
+
+    # C) неверный токен должен отклоняться
+    api_get_auth "$API_BASE/api/loyalty/balance" "invalid.$(date +%s).token"
+    case "$RETCODE" in
+      401|403) add_result low OK "Неверный токен" "→ $RETCODE (отклонён)";;
+      200)     add_result high FAIL "Неверный токен" "→ 200: принят невалидный токен";;
+      5*)      add_result med WARN "Неверный токен" "→ $RETCODE: сервер падает вместо 401";;
+      *)       add_result info INFO "Неверный токен" "→ $RETCODE";;
+    esac
+
+    # D) контроль доступа к админке (обычный пользователь не должен иметь доступ)
+    ADMIN_EPS=("/api/admin/stats" "/api/admin/users" "/api/admin/orders" "/api/admin/menu")
+    IS_ADMIN=0; [ "$USER_ROLE" = "admin" ] && IS_ADMIN=1
+    for ep in "${ADMIN_EPS[@]}"; do
+      api_get_auth "$API_BASE$ep" "$AUTH_TOKEN"
+      if [ "$IS_ADMIN" = 1 ]; then
+        add_result info INFO "Админ $ep" "→ $RETCODE (учётка admin — доступ ожидаем)"
+      else
+        case "$RETCODE" in
+          401|403) add_result low OK "Контроль доступа $ep" "→ $RETCODE (закрыт для пользователя)";;
+          200)     add_result high FAIL "Контроль доступа $ep" "→ 200: обычный пользователь получил доступ к админке (broken access control / privilege escalation)";;
+          *)       add_result info INFO "Контроль доступа $ep" "→ $RETCODE";;
+        esac
+      fi
+    done
+
+    # E) CORS на API
+    ACAO_API="$("${CURL[@]}" -H "Origin: https://evil.example" -H "Authorization: Bearer $AUTH_TOKEN" -D - -o /dev/null "$API_BASE/api/loyalty/balance" 2>/dev/null | grep -i '^access-control-allow-origin:' | head -1 | sed 's/\r//' | sed 's/^[^:]*:[[:space:]]*//')"
+    if [ -z "$ACAO_API" ]; then add_result low OK "CORS API" "Access-Control-Allow-Origin не выставляется"
+    elif grep -iq 'evil.example' <<<"$ACAO_API"; then add_result high WARN "CORS API" "отражает произвольный Origin ($ACAO_API)"
+    elif [ "$ACAO_API" = "*" ]; then add_result med WARN "CORS API" "Access-Control-Allow-Origin: *"
+    else add_result low OK "CORS API" "ограничен: $ACAO_API"; fi
+  else
+    add_result info INFO "Авторизованные проверки" "пропущены — не удалось получить токен"
+  fi
+fi
+
 # ------------------------------ ИТОГ / оценка --------------------------------
 SCORE=$((100 - N_HIGH*15 - N_MED*7 - N_LOW*2))
 [ "$SCORE" -lt 0 ] && SCORE=0
@@ -406,7 +590,12 @@ printf '  Отчёт:     %s\n' "$OUTPUT"
   echo
   echo "- **Цель:** $TARGET"
   echo "- **Дата:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
-  echo "- **Метод:** пассивный неинвазивный аудит (только GET/HEAD/OPTIONS)"
+  if [ -n "$AUTH_TOKEN" ]; then
+    echo "- **Метод:** пассивный аудит + авторизованные проверки API (только чтение; без создания заказов/оплат)"
+    [ -n "$USER_ROLE" ] && echo "- **Роль учётной записи:** $USER_ROLE"
+  else
+    echo "- **Метод:** пассивный неинвазивный аудит (только GET/HEAD/OPTIONS)"
+  fi
   echo "- **Инструмент:** websec-scan.sh"
   echo
   echo "## Итоговая оценка: $GRADE ($SCORE/100)"
