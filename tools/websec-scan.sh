@@ -306,13 +306,18 @@ else
   add_result med FAIL "HSTS (Strict-Transport-Security)" "отсутствует"
 fi
 
-# CSP
+# CSP — оцениваем реальный XSS-риск по script-src (style-src 'unsafe-inline'
+# распространён и допустим, поэтому его не штрафуем).
 if has_hdr "content-security-policy"; then
   CSP="$(hdr content-security-policy)"
-  if grep -Eiq "unsafe-inline|unsafe-eval" <<<"$CSP"; then
-    add_result med WARN "Content-Security-Policy" "есть, но содержит unsafe-inline/unsafe-eval"
+  SCRIPTSRC="$(grep -oiE "script-src[^;]*" <<<"$CSP" | head -1)"
+  [ -z "$SCRIPTSRC" ] && SCRIPTSRC="$(grep -oiE "default-src[^;]*" <<<"$CSP" | head -1)"
+  if grep -Eiq "unsafe-inline|unsafe-eval" <<<"$SCRIPTSRC"; then
+    add_result med WARN "Content-Security-Policy" "script-src содержит unsafe-inline/unsafe-eval (XSS-риск)"
+  elif grep -Eiq "style-src[^;]*unsafe-inline" <<<"$CSP"; then
+    add_result low OK "Content-Security-Policy" "script-src строгий (nonce/strict-dynamic); style-src 'unsafe-inline' — допустимо"
   else
-    add_result low OK "Content-Security-Policy" "присутствует"
+    add_result low OK "Content-Security-Policy" "строгая политика"
   fi
 else
   add_result med FAIL "Content-Security-Policy" "отсутствует"
