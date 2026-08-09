@@ -22,7 +22,9 @@
 | [`security/05-checklist.md`](security/05-checklist.md) | Чек‑лист для более глубокого (авторизованного) тестирования владельцем |
 | [`fixes/nginx/hinkalnayaureki.conf`](fixes/nginx/hinkalnayaureki.conf) | Готовый усиленный конфиг nginx (security‑заголовки, TLS, CSP) |
 | [`fixes/well-known/security.txt`](fixes/well-known/security.txt) | Шаблон `/.well-known/security.txt` |
-| [`tools/check-headers.sh`](tools/check-headers.sh) | Скрипт для повторной пассивной проверки заголовков |
+| [`tools/websec-scan.sh`](tools/websec-scan.sh) | **Полный** пассивный сканер: TLS, заголовки, cookies, CORS, методы, утечки, 404 → оценка + Markdown-отчёт. Принимает любой сайт (аргументом или интерактивно) |
+| [`tools/check-headers.sh`](tools/check-headers.sh) | Быстрый скрипт для повторной пассивной проверки заголовков |
+| [`reports/`](reports/) | Готовые Markdown-отчёты сканера (напр. [`hinkalnayaureki.ru.md`](reports/hinkalnayaureki.ru.md)) |
 
 ## Краткий итог (TL;DR)
 
@@ -42,7 +44,29 @@
 
 ## Как пользоваться
 
+### Полная проверка любого сайта
+
+```bash
+# проверить конкретный сайт и сохранить отчёт в reports/<host>-<дата>.md
+bash tools/websec-scan.sh https://hinkalnayaureki.ru
+
+# спросит URL интерактивно
+bash tools/websec-scan.sh
+
+# указать файл отчёта / пропустить проверку утечек / без цвета
+bash tools/websec-scan.sh -o report.md --skip-files --no-color https://example.com
+```
+
+Сканер проверяет: редирект HTTP→HTTPS, TLS (издатель, срок, протоколы 1.0–1.3),
+заголовки безопасности (HSTS, CSP, X-Content-Type-Options, X-Frame-Options/frame-ancestors,
+Referrer-Policy, Permissions-Policy, COOP/CORP), раскрытие версии ПО, флаги cookies
+(Secure/HttpOnly/SameSite), CORS, HTTP-методы (в т.ч. TRACE), публичные файлы,
+поведение 404, листинг каталогов, типовые «утекшие» файлы (`.git`, `.env`, …)
+с корректным отсевом SPA-fallback, и смешанный контент. На выходе — оценка A–F и Markdown-отчёт.
+
+### Исправление найденного
+
 1. Прочитайте [`security/01-goals.md`](security/01-goals.md) → [`security/03-findings.md`](security/03-findings.md).
 2. Примените конфиг из [`fixes/nginx/hinkalnayaureki.conf`](fixes/nginx/hinkalnayaureki.conf)
    (сначала в режиме `Content-Security-Policy-Report-Only`, см. комментарии в файле).
-3. Проверьте результат: `bash tools/check-headers.sh https://hinkalnayaureki.ru`.
+3. Перепроверьте: `bash tools/websec-scan.sh https://hinkalnayaureki.ru`.
