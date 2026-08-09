@@ -20,3 +20,8 @@
 
 - Hero JPG, brand templates, covers SVG, seed project/space photos updated on prod.
 - Doc: [visual-refresh.md](related/visual-refresh.md)
+
+## 2026-08-09 — Games UI fix
+
+- Подключён `games.css`, обёртка `games-root` + topbar; карточки хаба.
+- Doc: [games-ui-fix.md](../games-ui-fix.md)
