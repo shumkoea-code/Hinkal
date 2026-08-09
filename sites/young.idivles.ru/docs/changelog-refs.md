@@ -1,3 +1,4 @@
+- 2026-08-09: публичный профиль `/u/…` — рейтинги в ряд, компактный гайд, navbar → publicCode (`public-profile-display.md`, tag `public-profile-display`)
 - 2026-08-09: профиль компактнее, фикс иконок рейтингов, тосты по порядку (`profile-ui-compact.md`, tag `profile-ui-compact`)
 - 2026-08-09: полный QA сайта + фикс contentView duplicates (`full-site-qa-2026-08-09.md`, tag `qa-contentview-fix`)
 - 2026-08-09: если почта не настроена — skip OTP/писем (`email-skip-when-unconfigured.md`, tag `email-skip`)

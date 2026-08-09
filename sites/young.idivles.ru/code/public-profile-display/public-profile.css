@@ -1,0 +1,77 @@
+/* Public profile polish */
+.public-profile-ratings {
+  margin-top: 0.85rem;
+}
+.public-profile-ratings .rating-chips {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+.public-profile-ratings .rating-chip {
+  padding: 0.32rem 0.45rem 0.32rem 0.3rem;
+}
+.public-profile-ratings .rating-chip__text strong {
+  font-size: 0.74rem;
+}
+@media (max-width: 640px) {
+  .public-profile-ratings .rating-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.public-profile-guide {
+  padding: 0.55rem 0.85rem;
+}
+.public-profile-guide > summary {
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.public-profile-guide > summary::-webkit-details-marker {
+  display: none;
+}
+.public-profile-guide > summary::before {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-right: 2px solid #64748b;
+  border-bottom: 2px solid #64748b;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+.public-profile-guide[open] > summary::before {
+  transform: rotate(45deg);
+}
+.public-profile-guide__meta {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: #64748b;
+}
+.public-profile-guide ol {
+  margin: 0.65rem 0 0.15rem;
+  padding-left: 1.1rem;
+  color: #475569;
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+.public-profile-section {
+  min-width: 0;
+}
+.public-profile-portfolio {
+  display: grid;
+  gap: 0.65rem;
+}
+.public-profile-portfolio__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.public-profile-portfolio__actions .btn {
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 8.5rem;
+}
