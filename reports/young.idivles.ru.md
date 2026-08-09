@@ -1,17 +1,17 @@
 # Отчёт по безопасности — young.idivles.ru
 
 - **Цель:** https://young.idivles.ru
-- **Дата:** 2026-08-09 05:09:27 UTC
+- **Дата:** 2026-08-09 05:37:39 UTC
 - **Метод:** пассивный неинвазивный аудит (только GET/HEAD/OPTIONS)
 - **Инструмент:** websec-scan.sh
 
-## Итоговая оценка: B (85/100)
+## Итоговая оценка: A (91/100)
 
 | Уровень | Кол-во проблем |
 |---------|----------------|
 | Высокие | 0 |
 | Средние | 1 |
-| Низкие  | 4 |
+| Низкие  | 1 |
 
 ## Подробные результаты
 
@@ -27,11 +27,10 @@
 | OK | LOW | X-Content-Type-Options | nosniff |
 | OK | LOW | Защита от кликджекинга | DENY |
 | OK | LOW | Referrer-Policy | strict-origin-when-cross-origin |
-| FAIL | LOW | Permissions-Policy | отсутствует |
+| OK | LOW | Permissions-Policy | camera=(), microphone=(), geolocation=(), payment=(), usb=() |
 | INFO | INFO | cross-origin-opener-policy | не задан (опционально) |
 | INFO | INFO | cross-origin-resource-policy | не задан (опционально) |
-| WARN | LOW | Заголовок Server | раскрывает версию: nginx/1.22.1 |
-| WARN | LOW | Заголовок x-powered-by | раскрывает стек: Next.js |
+| OK | LOW | Заголовок Server | nginx (без версии) |
 | INFO | INFO | Set-Cookie | куки не устанавливаются на главной |
 | OK | INFO | CORS | Access-Control-Allow-Origin не выставляется |
 | OK | LOW | Метод TRACE | отключён (код 405) |
