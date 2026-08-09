@@ -1,3 +1,4 @@
+- 2026-08-09: если почта не настроена — skip OTP/писем (`email-skip-when-unconfigured.md`, tag `email-skip`)
 - 2026-08-09: полный аудит auth — keepAlive на смене пароля, hardening reset/login/register (`auth-full-audit.md`, tag `auth-hardening`)
 # Связанные материалы проекта
 

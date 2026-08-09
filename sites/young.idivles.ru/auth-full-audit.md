@@ -22,15 +22,12 @@
 
 **Фикс:** как у revoke-others — `newTokenKeepAlive()`, ответ с `keepAlive`, клиент `update({ keepAlive })`. То же для смены пароля в профиле (`PUT /api/user/profile` + dashboard).
 
-### 2. Письма регистрации / forgot-password — **блокер ops**
-- `RESEND_API_KEY` в `.env` **отсутствует**
-- `EMAIL_PROVIDER=resend`, `EMAIL_SMTP_BLOCKED=1`
-- `SiteSettings.smtpPass` длина **16** (невалидный Resend key)
-- В логах ранее: `API key is invalid`
+### 2. Письма не настроены — **пропуск (не блокер)**
+Если Resend/SMTP не готовы, отправка **пропускается**:
+- регистрация сразу активирует аккаунт (`emailSkipped`);
+- forgot-password предлагает фразу/админа без требования ключа.
 
-Без валидного ключа Resend регистрация возвращает `503` + `emailDeliveryFailed: true` (заявка **сохраняется**), forgot-password — `503`.
-
-**Нужно:** задать `RESEND_API_KEY` (и при необходимости обновить smtpPass в админке).
+См. `email-skip-when-unconfigured.md`. При появлении валидного ключа OTP/письма включаются сами.
 
 ### 3. `reset-password` по email — **исправлено**
 Было `update({ where: { email: identifier } })` (хрупко к регистру). Стало: поиск `mode: 'insensitive'` → `update` по `id`, сброс `mustChangePassword`, `bcrypt` cost 12.
