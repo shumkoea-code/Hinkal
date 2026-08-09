@@ -24,7 +24,7 @@
 | [`fixes/well-known/security.txt`](fixes/well-known/security.txt) | Шаблон `/.well-known/security.txt` |
 | [`tools/websec-scan.sh`](tools/websec-scan.sh) | **Полный** пассивный сканер: TLS, заголовки, cookies, CORS, методы, утечки, 404 → оценка + Markdown-отчёт. Принимает любой сайт (аргументом или интерактивно) |
 | [`tools/check-headers.sh`](tools/check-headers.sh) | Быстрый скрипт для повторной пассивной проверки заголовков |
-| [`reports/`](reports/) | Готовые Markdown-отчёты сканера (напр. [`hinkalnayaureki.ru.md`](reports/hinkalnayaureki.ru.md)) |
+| [`reports/`](reports/) | Готовые Markdown-отчёты: [`hinkalnayaureki.ru.md`](reports/hinkalnayaureki.ru.md) (пассивный) и [`hinkalnayaureki.ru-auth.md`](reports/hinkalnayaureki.ru-auth.md) (с авторизацией) |
 
 ## Краткий итог (TL;DR)
 
@@ -38,6 +38,15 @@
 - SPA‑fallback возвращает `index.html` с кодом `200` на любые несуществующие пути
   (в т.ч. `/sitemap.xml`, `/.well-known/security.txt`) вместо честного `404`;
 - версия nginx 1.18.0 устарела и требует обновления.
+
+Проверка **с авторизацией** (вход по SMS в аккаунт, только чтение) показала, что базовая
+безопасность API в порядке: вход по одноразовому коду работает, защищённые эндпоинты требуют
+токен, неверный токен отклоняется, а **контроль доступа к админке корректен** (`/api/admin/*`
+даёт `403` обычному пользователю — повышения привилегий нет). Дополнительно найдено на уровне API:
+
+- слишком широкая политика CORS (API отражает любой `Origin`);
+- токен сессии хранится в `localStorage` (риск кражи при XSS);
+- приватные ответы API отдаются без `Cache-Control: no-store`.
 
 Все находки и способы их устранения подробно описаны в [`security/`](security/).
 Готовые исправления лежат в [`fixes/`](fixes/).

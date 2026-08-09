@@ -88,6 +88,45 @@ location / {
 (шаблон: [`../fixes/well-known/security.txt`](../fixes/well-known/security.txt)) и отдавать
 его как статику. Закрывает: **F‑9**.
 
+## R‑11. CORS: белый список
+Не отражать произвольный `Origin`. Разрешать только доверенные источники (свой домен).
+Пример для nginx перед backend:
+```nginx
+# отдавать ACAO только для своего origin, иначе не выставлять заголовок
+map $http_origin $cors_ok {
+    default "";
+    "https://hinkalnayaureki.ru" $http_origin;
+}
+location /api/ {
+    add_header Access-Control-Allow-Origin $cors_ok always;
+    add_header Vary Origin always;
+    # Access-Control-Allow-Credentials НЕ включать без крайней необходимости
+    proxy_pass http://127.0.0.1:PORT;
+}
+```
+Если бэкенд (Express и т.п.) сам ставит CORS — настроить `origin` списком, а не отражением.
+Закрывает: **F‑11**.
+
+## R‑12. Хранение токена
+Перевести сессию на `Secure; HttpOnly; SameSite=Strict/Lax` cookie (недоступна из JS),
+либо, если остаётся Bearer в `localStorage`, обязательно закрыть XSS строгим CSP (R‑2),
+сделать токены короткоживущими и предусмотреть их отзыв (logout/ротация).
+Закрывает: **F‑12**.
+
+## R‑13. Запрет кэширования приватных ответов
+Для авторизованных/персональных ответов API добавить:
+```
+Cache-Control: no-store
+```
+На уровне бэкенда для всех `/api/*`, возвращающих данные пользователя, либо в nginx:
+```nginx
+location /api/ {
+    add_header Cache-Control "no-store" always;
+    proxy_pass http://127.0.0.1:PORT;
+}
+```
+Закрывает: **F‑13**.
+
 ## R‑10. Backend онлайн‑заказа (организационно)
 Для F‑10 нужен отдельный авторизованный аудит. Базовые требования, которые стоит проверить:
 валидация и экранирование ввода, защита от CSRF, ограничение частоты запросов (rate limiting),
