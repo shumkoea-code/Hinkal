@@ -1,0 +1,198 @@
+herit;
+}
+
+
+/* ===== Profile compact + toast stack 2026-08-09 ===== */
+.yp-toaster {
+  pointer-events: none;
+}
+.yp-toaster > div {
+  pointer-events: auto;
+}
+.yp-toast {
+  line-height: 1.35 !important;
+}
+
+.profile-view {
+  gap: 0.65rem;
+}
+.profile-section {
+  padding: 0.7rem 0.85rem;
+}
+.profile-section__title {
+  margin-bottom: 0.45rem;
+}
+.profile-hero__stats {
+  margin-top: 0.55rem;
+}
+.profile-hero__stats .rating-icons {
+  gap: 0.35rem;
+}
+.profile-hero__stats .rating-icons__hint {
+  display: none;
+}
+.profile-meta-row {
+  margin-top: 0;
+  gap: 0.35rem 0.85rem;
+  font-size: 0.82rem;
+}
+
+.profile-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+@media (max-width: 560px) {
+  .profile-choice-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.profile-choice {
+  display: flex;
+  gap: 0.45rem;
+  align-items: flex-start;
+  padding: 0.45rem 0.55rem;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+  cursor: pointer;
+  min-width: 0;
+}
+.profile-choice.is-on {
+  border-color: rgba(37, 99, 235, 0.45);
+  background: rgba(37, 99, 235, 0.06);
+}
+.profile-choice.is-on-green {
+  border-color: rgba(34, 197, 94, 0.45);
+  background: rgba(34, 197, 94, 0.08);
+}
+.profile-choice input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+}
+.profile-choice strong {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.2;
+}
+.profile-choice span {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.profile-edit-sticky {
+  position: sticky;
+  bottom: 0.65rem;
+  z-index: 20;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 0.55rem 0.65rem;
+  margin-top: 0.75rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, #fff 88%, transparent);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+}
+
+.eco-panel--compact {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.eco-panel__shop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.45rem;
+}
+.eco-panel__shop-head .eco-panel__lead {
+  margin: 0;
+}
+.eco-panel__shop-toggle {
+  appearance: none;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.28rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.eco-panel__slot-group {
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 12px;
+  background: #fff;
+  margin: 0 0 0.45rem;
+  overflow: hidden;
+}
+.eco-panel__slot-group > summary.eco-panel__slot-title {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  user-select: none;
+}
+.eco-panel__slot-group > summary::-webkit-details-marker { display: none; }
+.eco-panel__slot-count {
+  margin-left: auto;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94a3b8;
+}
+.eco-panel__slot-group .eco-panel__catalog {
+  margin: 0;
+  padding: 0 0.55rem 0.55rem;
+  gap: 0.35rem;
+}
+.eco-panel__item {
+  padding: 0.4rem 0.5rem;
+  gap: 0.4rem;
+}
+.eco-panel__item-actions {
+  gap: 0.3rem;
+}
+
+.collectibles-panel details.collectibles-fold {
+  border: 1px solid rgba(15, 23, 42, 0.07);
+  border-radius: 12px;
+  background: #fff;
+  margin-top: 0.5rem;
+}
+.collectibles-panel details.collectibles-fold > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 0.6rem 0.75rem;
+  font-weight: 750;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.collectibles-panel details.collectibles-fold > summary::-webkit-details-marker { display: none; }
+.collectibles-panel details.collectibles-fold > .collectibles-fold__body {
+  padding: 0 0.75rem 0.75rem;
+}
+
+.yp-notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.profile-hero__stats .rating-chips {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+@media (max-width: 560px) {
+  .profile-hero__stats .rating-chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

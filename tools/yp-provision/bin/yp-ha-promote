@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+###############################################################################
+# yp-ha-promote — перевести standby в primary (failover)
+###############################################################################
+set -euo pipefail
+CONF="${YP_HA_CONF:-/etc/yp-ha.conf}"
+# shellcheck disable=SC1090
+[[ -f "$CONF" ]] && . "$CONF"
+LOG="${LOG:-/var/log/yp-ha/ha.log}"
+STATE_DIR="${STATE_DIR:-/var/lib/yp-ha}"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+log() { echo "[$(ts)] PROMOTE: $*" | tee -a "$LOG"; }
+
+FORCE="${1:-}"
+if [[ "$FORCE" != "--yes" ]]; then
+  read -r -p "Promote THIS node to primary? Domain=$YP_SITE_DOMAIN [y/N]: " a
+  [[ "$a" == "y" || "$a" == "Y" ]] || exit 1
+fi
+
+log "stopping sync timer"
+systemctl stop yp-ha-sync.timer || true
+systemctl disable yp-ha-sync.timer || true
+
+# Flip role in conf
+sed -i 's/^YP_ROLE=.*/YP_ROLE=primary/' "$CONF"
+echo "$(ts)" > "$STATE_DIR/promoted-at"
+echo primary > "$STATE_DIR/role"
+
+cd "${YP_INSTALL_DIR:-/opt/sochi-portal}"
+docker compose up -d || docker-compose up -d
+
+# Mark DB
+docker compose exec -T db psql -U portal -d portal -c \
+  "INSERT INTO \"ReplicaMeta\"(key,value) VALUES ('role','primary'),('promotedAt','$(ts)')
+   ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, \"updatedAt\"=now();" || true
+
+case "${YP_FAILOVER_MODE:-manual}" in
+  manual)
+    cat <<EOF
+MANUAL DNS FAILOVER
+  1) Укажите A-запись $YP_PRIMARY_HOST (или боевой домен) на IP этого VPS.
+  2) Дождитесь TTL (рекомендуется держать TTL ≤ 60–120с на primary).
+  3) Проверьте https://$YP_PRIMARY_HOST/api/health
+EOF
+    ;;
+  dns-ttl)
+    if [[ -n "${YP_DNS_HOOK:-}" ]]; then
+      log "running DNS hook $YP_DNS_HOOK"
+      "$YP_DNS_HOOK" promote "$(curl -fsS ifconfig.me || true)"
+    else
+      log "YP_DNS_HOOK not set — update DNS manually"
+    fi
+    ;;
+  floating-ip)
+    if [[ -n "${YP_FLOATING_IP_HOOK:-}" ]]; then
+      "$YP_FLOATING_IP_HOOK" attach
+    else
+      log "Attach floating IP in panel, then recheck health"
+    fi
+    ;;
+esac
+
+log "promote complete — THIS NODE IS PRIMARY"
+curl -fsS "${YP_LOCAL_HEALTH_URL:-http://127.0.0.1:3000/api/health}" || true
+echo

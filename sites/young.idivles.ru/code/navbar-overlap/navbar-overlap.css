@@ -1,0 +1,94 @@
+/* navbar-overlap — append to src/app/globals.css */
+
+/* End cluster (search + icons) always above menu text */
+.glass-nav-end {
+  position: relative;
+  z-index: 40;
+  flex-shrink: 0;
+  isolation: isolate;
+  background: #ffffff;
+  padding-left: 0.55rem;
+  margin-left: 0;
+  box-shadow: -14px 0 18px 10px #ffffff;
+}
+
+.glass-nav-inner {
+  overflow: visible;
+}
+
+/* Menu must not paint over icons / badges */
+.desktop-nav {
+  overflow: hidden !important;
+  min-width: 0;
+  max-width: 100%;
+  mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 10px), transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 calc(100% - 10px), transparent 100%);
+}
+
+.desktop-nav .nav-item,
+.desktop-nav > a,
+.desktop-nav > .nav-more {
+  flex-shrink: 0;
+}
+
+/* Progressive hide: items marked by JS fit */
+.desktop-nav [data-nav-overflow='1'] {
+  display: none !important;
+}
+
+.nav-more-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Notification badge stays inside the bell, never over menu labels */
+.yp-notif-bell {
+  overflow: visible;
+}
+.yp-notif-bell__badge {
+  top: -2px;
+  right: -2px;
+  z-index: 3;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.nav-auth-slot,
+.nav-auth-icons,
+.nav-search-desktop {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+/* Earlier hamburger when desktop nav is too dense */
+@media (max-width: 1360px) {
+  .desktop-nav,
+  .nav-search-desktop {
+    display: none !important;
+  }
+  .nav-header-mobile {
+    display: flex !important;
+  }
+  .nav-auth-desktop {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: grid !important;
+  }
+  .glass-nav-inner {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .glass-nav-end {
+    box-shadow: none;
+    padding-left: 0.2rem;
+  }
+}
+
+/* Keep previous 1199 rules as safety net for older builds */
+@media (max-width: 1199px) {
+  .desktop-nav,
+  .nav-search-desktop {
+    display: none !important;
+  }
+}

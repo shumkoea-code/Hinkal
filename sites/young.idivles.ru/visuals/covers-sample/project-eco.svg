@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-1525990185" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="45%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#065F46"/>
+    </linearGradient>
+    <radialGradient id="r-1525990185" cx="18%" cy="14%" r="72%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.32"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shine-1525990185" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#fff" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="vignette-1525990185" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="55%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.28"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g-1525990185)"/>
+  <rect width="1200" height="800" fill="url(#r-1525990185)"/>
+  <rect x="-120" y="0" width="420" height="800" fill="url(#shine-1525990185)" opacity="0.95" transform="skewX(-14) rotate(1)"/>
+  <circle cx="1080" cy="120" r="160" fill="#67E8F9" opacity="0.10"/>
+  
+  <ellipse cx="945" cy="155" rx="72" ry="118" fill="#fff" opacity="0.12" transform="rotate(-28 945 155)"/>
+  <ellipse cx="855" cy="195" rx="44" ry="78" fill="#fff" opacity="0.08" transform="rotate(18 855 195)"/>
+  <path d="M945 59 Q987 155 945 251" stroke="#fff" stroke-width="4" fill="none" opacity="0.28"/>
+  <path d="M0 600 C300 540, 600 680, 900 590 S1200 610, 1200 610 L1200 800 L0 800 Z" fill="#000" opacity="0.12"/>
+
+  <rect width="1200" height="800" fill="url(#vignette-1525990185)"/>
+</svg>

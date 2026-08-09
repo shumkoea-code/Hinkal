@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Центр развития молодежи Сочи" shape-rendering="geometricPrecision">
+  <defs>
+    <linearGradient id="ms-blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0369A1"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="ms-cyan" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06B6D4"/>
+      <stop offset="100%" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="ms-sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#FB7185"/>
+      <stop offset="100%" stop-color="#F43F5E"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#ms-blue)" d="M14 98V30h18l16 42 16-42h18v68H66V58L50 98H46L30 58v40H14z"/>
+  <path fill="#ffffff" d="M46 78l4-10 4 10H46z"/>
+  <path fill="url(#ms-cyan)" d="M108 64c0 24-18 40-40 40-8 0-15-2-21-5l8-14c4 2 8 3 13 3 14 0 24-10 24-24s-10-24-24-24c-5 0-9 1-13 3l-8-14c6-3 13-5 21-5 22 0 40 16 40 40z"/>
+  <path fill="url(#ms-sun)" d="M78 64c0-10 6-18 14-22v44c-8-4-14-12-14-22z"/>
+  <path fill="url(#ms-cyan)" d="M18 108c18-10 28-6 42 0 14 6 26 6 42-2v10H18v-8z"/>
+</svg>

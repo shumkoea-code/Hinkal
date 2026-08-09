@@ -1,0 +1,12 @@
+[Unit]
+Description=Young Portal HA health timer
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=2min
+AccuracySec=30s
+Persistent=true
+Unit=yp-ha-watchdog.service
+
+[Install]
+WantedBy=timers.target

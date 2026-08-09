@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+###############################################################################
+# yp-ha-health — проверка primary; при авто-режиме может инициировать promote
+###############################################################################
+set -euo pipefail
+CONF="${YP_HA_CONF:-/etc/yp-ha.conf}"
+# shellcheck disable=SC1090
+[[ -f "$CONF" ]] && . "$CONF"
+LOG="${LOG:-/var/log/yp-ha/ha.log}"
+STATE_DIR="${STATE_DIR:-/var/lib/yp-ha}"
+mkdir -p "$STATE_DIR" "$(dirname "$LOG")"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+log() { echo "[$(ts)] HEALTH: $*" >>"$LOG"; }
+
+URL="${YP_HEALTH_URL:-https://young.idivles.ru/api/health}"
+FAILS_FILE="$STATE_DIR/primary-fail-count"
+THRESHOLD="${YP_FAIL_THRESHOLD:-3}"
+AUTO_PROMOTE="${YP_AUTO_PROMOTE:-0}"
+
+code=$(curl -fsS -o /tmp/yp-health.json -w '%{http_code}' --max-time 12 "$URL" || echo 000)
+if [[ "$code" == "200" ]]; then
+  echo 0 > "$FAILS_FILE"
+  log "primary ok ($code)"
+  exit 0
+fi
+
+fails=$(cat "$FAILS_FILE" 2>/dev/null || echo 0)
+fails=$((fails + 1))
+echo "$fails" > "$FAILS_FILE"
+log "primary FAIL code=$code fails=$fails/$THRESHOLD"
+
+if [[ "$fails" -ge "$THRESHOLD" && "$AUTO_PROMOTE" == "1" && "${YP_ROLE:-}" == "standby" ]]; then
+  log "AUTO PROMOTE triggered"
+  /opt/yp-ha/yp-ha-promote --yes
+fi
+exit 1

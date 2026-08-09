@@ -1,0 +1,14 @@
+[Unit]
+Description=Young Portal HA sync (primary → standby)
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/yp-ha/yp-ha-sync
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7
+
+[Install]
+WantedBy=multi-user.target
