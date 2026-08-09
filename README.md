@@ -64,6 +64,31 @@ Referrer-Policy, Permissions-Policy, COOP/CORP), раскрытие версии
 поведение 404, листинг каталогов, типовые «утекшие» файлы (`.git`, `.env`, …)
 с корректным отсевом SPA-fallback, и смешанный контент. На выходе — оценка A–F и Markdown-отчёт.
 
+### Проверка со входом (для своего сайта)
+
+Сайт использует вход по номеру телефона и SMS-коду (`/api/auth/send-code` → `/api/auth/verify-code`,
+далее `Authorization: Bearer <token>`). Сканер умеет логиниться и проверять API уже под сессией.
+
+```bash
+# 1) запросить SMS-код (придёт на телефон)
+bash tools/websec-scan.sh --send-code-only --login 89001234567 https://hinkalnayaureki.ru
+
+# 2) войти с кодом и выполнить авторизованные проверки
+bash tools/websec-scan.sh --login 89001234567 --code 1234 --skip-send https://hinkalnayaureki.ru
+
+# либо одной командой (спросит код интерактивно):
+bash tools/websec-scan.sh --login 89001234567 https://hinkalnayaureki.ru
+
+# либо с готовым токеном, без SMS:
+bash tools/websec-scan.sh --token "<bearer>" https://hinkalnayaureki.ru
+```
+
+Авторизованный режим **только читает** и проверяет: что вход по коду работает; что защищённые
+эндпоинты (`/api/loyalty/balance`, `/api/order/my`) требуют токен; что неверный токен отклоняется;
+что обычный пользователь **не** имеет доступа к `/api/admin/*` (broken access control); а также
+хранение токена, кэширование приватных данных и CORS на API. Заказы и оплаты (`/api/order/create`,
+`/api/pay/tinkoff/init`) **не** вызываются.
+
 ### Исправление найденного
 
 1. Прочитайте [`security/01-goals.md`](security/01-goals.md) → [`security/03-findings.md`](security/03-findings.md).
