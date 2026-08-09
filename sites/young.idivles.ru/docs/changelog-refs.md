@@ -35,3 +35,7 @@
 
 - Фикс схлопывания пятнашек; mobile/PC UX.
 - Doc: [games-ux-fix.md](../games-ux-fix.md)
+
+## 2026-08-09 — Admin password reset + audit + pending activate
+
+- Doc: [admin-password-audit.md](../admin-password-audit.md)
