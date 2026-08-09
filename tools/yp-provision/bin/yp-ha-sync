@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+###############################################################################
+# yp-ha-sync — синхронизация primary → standby
+# Данные: PostgreSQL dump, uploads, .env (избирательно), docker image tag meta
+###############################################################################
+set -euo pipefail
+CONF="${YP_HA_CONF:-/etc/yp-ha.conf}"
+# shellcheck disable=SC1090
+[[ -f "$CONF" ]] && . "$CONF"
+
+LOG="${LOG:-/var/log/yp-ha/ha.log}"
+STATE_DIR="${STATE_DIR:-/var/lib/yp-ha}"
+mkdir -p "$(dirname "$LOG")" "$STATE_DIR"
+ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
+log() { echo "[$(ts)] $*" | tee -a "$LOG"; }
+
+[[ "${YP_ROLE:-standby}" == "standby" ]] || { log "skip: role=${YP_ROLE}"; exit 0; }
+
+PASS_FILE="${YP_PRIMARY_SSH_PASS_FILE:-}"
+KEY="${YP_PRIMARY_SSH_KEY:-}"
+HOST="${YP_PRIMARY_SSH_HOST:?}"
+PORT="${YP_PRIMARY_SSH_PORT:-22}"
+USER="${YP_PRIMARY_SSH_USER:-root}"
+PDIR="${YP_PRIMARY_DIR:-/opt/sochi-portal}"
+IDIR="${YP_INSTALL_DIR:-/opt/sochi-portal}"
+
+ssh_cmd() {
+  if [[ -n "$KEY" ]]; then
+    ssh -i "$KEY" -o IdentitiesOnly=yes -p "$PORT" -o StrictHostKeyChecking=accept-new "${USER}@${HOST}" "$@"
+  elif [[ -n "$PASS_FILE" && -f "$PASS_FILE" ]]; then
+    sshpass -f "$PASS_FILE" ssh -p "$PORT" -o PreferredAuthentications=password -o StrictHostKeyChecking=accept-new "${USER}@${HOST}" "$@"
+  else
+    echo "No primary SSH auth configured" >&2
+    exit 1
+  fi
+}
+
+rsync_from() {
+  local src="$1" dst="$2"
+  if [[ -n "$KEY" ]]; then
+    rsync -az --delete -e "ssh -i $KEY -o IdentitiesOnly=yes -p $PORT -o StrictHostKeyChecking=accept-new" \
+      "${USER}@${HOST}:$src" "$dst"
+  else
+    rsync -az --delete -e "sshpass -f $PASS_FILE ssh -p $PORT -o PreferredAuthentications=password -o StrictHostKeyChecking=accept-new" \
+      "${USER}@${HOST}:$src" "$dst"
+  fi
+}
+
+log "sync start"
+LOCK="$STATE_DIR/sync.lock"
+exec 9>"$LOCK"
+flock -n 9 || { log "another sync running"; exit 0; }
+
+# 1) Code (optional light sync — usually image rebuild on primary then pull)
+# Prefer DB + uploads for runtime parity; code synced less often.
+if [[ "${YP_SYNC_CODE:-0}" == "1" ]]; then
+  log "rsync code"
+  mkdir -p "$IDIR"
+  rsync_from "$PDIR/" "$IDIR/" \
+    --exclude node_modules --exclude .next --exclude data || true
+fi
+
+# 2) PostgreSQL logical dump from primary compose
+log "pg dump"
+DUMP="$STATE_DIR/portal-$(date +%Y%m%d%H%M%S).sql.gz"
+ssh_cmd "cd '$PDIR' && docker compose exec -T db pg_dump -U \${POSTGRES_USER:-portal} \${POSTGRES_DB:-portal} | gzip -c" > "$DUMP"
+ln -sfn "$DUMP" "$STATE_DIR/portal-latest.sql.gz"
+# keep last 12
+ls -1t "$STATE_DIR"/portal-*.sql.gz 2>/dev/null | tail -n +13 | xargs -r rm -f
+
+# 3) Restore into local db (standby must be up)
+log "pg restore"
+cd "$IDIR"
+# drop connections & restore
+docker compose exec -T db psql -U portal -d postgres -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='portal' AND pid <> pg_backend_pid();" || true
+docker compose exec -T db psql -U portal -d postgres -c "DROP DATABASE IF EXISTS portal;"
+docker compose exec -T db psql -U portal -d postgres -c "CREATE DATABASE portal OWNER portal;"
+gunzip -c "$STATE_DIR/portal-latest.sql.gz" | docker compose exec -T db psql -U portal -d portal
+# stamp replica metadata
+docker compose exec -T db psql -U portal -d portal -c \
+  "CREATE TABLE IF NOT EXISTS \"ReplicaMeta\" (key text PRIMARY KEY, value text, \"updatedAt\" timestamptz DEFAULT now());
+   INSERT INTO \"ReplicaMeta\"(key,value) VALUES ('lastSyncAt','$(ts)'),('role','standby'),('primaryHost','$HOST')
+   ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value, \"updatedAt\"=now();" || true
+
+# 4) Uploads
+if [[ "${YP_SYNC_UPLOADS:-y}" == "y" || "${YP_SYNC_UPLOADS:-y}" == "Y" ]]; then
+  log "rsync uploads"
+  mkdir -p "$IDIR/public/uploads"
+  rsync_from "$PDIR/public/uploads/" "$IDIR/public/uploads/"
+fi
+
+# 5) Restart web to pick up data volume consistency
+log "restart web"
+docker compose up -d web || docker-compose up -d web
+
+echo "$(ts)" > "$STATE_DIR/last-success"
+log "sync ok"
+# Optional callback to primary admin API
+if [[ -n "${YP_REPLICA_SHARED_SECRET:-}" && -n "${YP_PRIMARY_HOST:-}" ]]; then
+  curl -fsS -X POST "https://${YP_PRIMARY_HOST}/api/admin/replica/heartbeat" \
+    -H "Authorization: Bearer ${YP_REPLICA_SHARED_SECRET}" \
+    -H "Content-Type: application/json" \
+    -d "{\"role\":\"standby\",\"host\":\"$(hostname)\",\"syncedAt\":\"$(ts)\"}" \
+    >>"$LOG" 2>&1 || log "heartbeat failed (admin API may be absent yet)"
+fi

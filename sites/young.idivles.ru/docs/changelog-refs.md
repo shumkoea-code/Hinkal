@@ -1,3 +1,6 @@
+- 2026-08-09: VPS provisioner — greenfield + HA clone, админка репликации (`vps-provision-ha.md`, `tools/yp-provision/`)
+- 2026-08-09: навбар — анти-наложение иконок/бейджа (`code/navbar-overlap/`)
+- 2026-08-09: сообщения — фильтр членства, long-press меню, overflow (blocked on SSH; `messages-ux-overflow.md`)
 - 2026-08-09: публичный профиль `/u/…` — рейтинги в ряд, компактный гайд, navbar → publicCode (`public-profile-display.md`, tag `public-profile-display`)
 - 2026-08-09: профиль компактнее, фикс иконок рейтингов, тосты по порядку (`profile-ui-compact.md`, tag `profile-ui-compact`)
 - 2026-08-09: полный QA сайта + фикс contentView duplicates (`full-site-qa-2026-08-09.md`, tag `qa-contentview-fix`)

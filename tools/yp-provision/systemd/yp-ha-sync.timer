@@ -1,0 +1,12 @@
+[Unit]
+Description=Young Portal HA sync timer
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=15min
+AccuracySec=1min
+Persistent=true
+Unit=yp-ha-sync.service
+
+[Install]
+WantedBy=timers.target

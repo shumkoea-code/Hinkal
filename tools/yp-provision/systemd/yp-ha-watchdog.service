@@ -1,0 +1,7 @@
+[Unit]
+Description=Young Portal HA primary health check
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/yp-ha/yp-ha-health

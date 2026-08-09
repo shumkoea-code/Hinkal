@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+###############################################################################
+# yp-provision — интерактивный мастер развёртывания портала на новом VPS
+#
+# Вариант 1: чистый сайт для другой организации (другое имя/домен).
+# Вариант 2: резервный клон текущего сайта с синхронизацией (HA).
+#
+# Запуск с машины администратора (нужны ssh/sshpass/rsync/docker):
+#   ./tools/yp-provision/bin/yp-provision
+#
+# Или неинтерактивно:
+#   YP_MODE=greenfield|ha ./tools/yp-provision/bin/yp-provision --config ./site.env
+###############################################################################
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+if [[ ! -d "$ROOT_DIR/lib" ]]; then
+  echo "ERROR: не найден $ROOT_DIR/lib" >&2
+  exit 1
+fi
+
+# shellcheck disable=SC1091
+source "$ROOT_DIR/lib/common.sh"
+# shellcheck disable=SC1091
+source "$ROOT_DIR/lib/ssh.sh"
+# shellcheck disable=SC1091
+source "$ROOT_DIR/lib/greenfield.sh"
+# shellcheck disable=SC1091
+source "$ROOT_DIR/lib/ha.sh"
+
+usage() {
+  cat <<'EOF'
+Usage: yp-provision [--config FILE] [--mode greenfield|ha] [--yes]
+
+Interactive wizard for:
+  1) greenfield — new clean portal (other org/domain)
+  2) ha         — standby clone of current young.idivles.ru with sync + failover
+
+EOF
+}
+
+CONFIG=""
+MODE="${YP_MODE:-}"
+ASSUME_YES=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --config) CONFIG="$2"; shift 2 ;;
+    --mode) MODE="$2"; shift 2 ;;
+    --yes|-y) ASSUME_YES=1; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) die "Unknown arg: $1" ;;
+  esac
+done
+
+if [[ -n "$CONFIG" ]]; then
+  # shellcheck disable=SC1090
+  source "$CONFIG"
+  MODE="${YP_MODE:-$MODE}"
+fi
+
+banner "Young Portal — VPS provisioner"
+echo "Каталог тулкита: $ROOT_DIR"
+echo
+
+if [[ -z "$MODE" ]]; then
+  echo "Выберите режим:"
+  echo "  1) Новый чистый сайт (другая организация / домен)"
+  echo "  2) Резервный клон текущего сайта (HA + синхронизация)"
+  read -r -p "Вариант [1/2]: " choice
+  case "$choice" in
+    1) MODE=greenfield ;;
+    2) MODE=ha ;;
+    *) die "Нужно 1 или 2" ;;
+  esac
+fi
+
+ask_vps_connection
+verify_ssh
+
+case "$MODE" in
+  greenfield)
+    ask_greenfield_site
+    confirm_or_exit "$ASSUME_YES" "Развернуть чистый портал на ${YP_SSH_HOST}:${YP_SSH_PORT} для ${YP_SITE_DOMAIN}?"
+    run_greenfield
+    ;;
+  ha)
+    ask_ha_site
+    confirm_or_exit "$ASSUME_YES" "Развернуть HA-клон на ${YP_SSH_HOST}:${YP_SSH_PORT} (домен ${YP_SITE_DOMAIN})?"
+    run_ha_clone
+    ;;
+  *) die "Unknown mode: $MODE" ;;
+esac
+
+banner "Готово"
+echo "Документация: sites/young.idivles.ru/docs/ops/vps-provision-and-ha.md"
+echo "Проверьте HTTPS и /api/health на новом узле."
