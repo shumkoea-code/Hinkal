@@ -15,3 +15,8 @@
 | `code/` | Снапшоты ключевого кода |
 
 Код приложения: `/opt/sochi-portal` (не входит целиком в docs-архив без отдельного согласия — секреты и node_modules исключаются).
+
+## 2026-08-09 — Visual refresh
+
+- Hero JPG, brand templates, covers SVG, seed project/space photos updated on prod.
+- Doc: [visual-refresh.md](related/visual-refresh.md)
