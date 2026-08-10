@@ -1,0 +1,317 @@
+/* ===== bots-activity-log-029d ===== */
+
+.bots-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.85rem;
+}
+@media (min-width: 720px) {
+  .bots-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+.bots-stat {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.65rem 0.7rem;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  min-width: 0;
+}
+.bots-stat.is-ok {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+}
+.bots-stat.is-bad {
+  border-color: #fed7aa;
+  background: #fff7ed;
+}
+.bots-stat__icon {
+  color: #64748b;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.bots-stat__body {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.bots-stat__body span {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.bots-stat__body strong {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+.bots-quiet {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  margin-top: 0.45rem;
+}
+.bots-quiet label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+.bots-quiet .settings-input {
+  width: 5.5rem;
+}
+.bots-cap--block {
+  align-items: flex-start !important;
+}
+.bots-cap--block span {
+  display: grid;
+  gap: 0.1rem;
+}
+.bots-cap--block strong {
+  font-size: 0.88rem;
+}
+.bots-cap--block small {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+}
+.bots-recent__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.bots-recent__list li {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr auto;
+  gap: 0.45rem;
+  align-items: baseline;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.bots-recent__list li.is-fail {
+  background: #fff1f2;
+  color: #9f1239;
+}
+.bots-recent__list time {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+.bots-recent__list small {
+  color: #94a3b8;
+  font-size: 0.7rem;
+}
+@media (max-width: 560px) {
+  .bots-recent__list li {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}
+
+.activity-page__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+.activity-page__head h1 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.activity-page__head p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  max-width: 42rem;
+  line-height: 1.45;
+}
+.activity-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+.activity-stat {
+  appearance: none;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.55rem 0.65rem;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  display: grid;
+  gap: 0.1rem;
+}
+.activity-stat.is-on {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+.activity-stat strong {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.activity-stat span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748b;
+}
+.activity-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+}
+.activity-filters__search {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+.activity-filters__search input {
+  border: 0;
+  outline: none;
+  width: 100%;
+  font: inherit;
+  background: transparent;
+}
+.activity-filters select {
+  padding: 0.5rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font: inherit;
+  background: #fff;
+}
+.activity-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-bottom: 0.45rem;
+}
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.activity-row {
+  appearance: none;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: grid;
+  gap: 0.25rem;
+}
+.activity-row.is-fail {
+  border-color: #fecdd3;
+  background: #fff1f2;
+}
+.activity-row.is-open {
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+}
+.activity-row__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  align-items: baseline;
+}
+.activity-row__top time {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-weight: 650;
+}
+.activity-row__cat {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 0.12rem 0.4rem;
+  border-radius: 999px;
+}
+.activity-row__top strong {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.activity-row__who {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+  font-size: 0.8rem;
+  color: #475569;
+  align-items: center;
+}
+.activity-row__who code {
+  font-size: 0.72rem;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 6px;
+}
+.activity-row__who small {
+  color: #94a3b8;
+}
+.activity-row__detail {
+  margin-top: 0.35rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed #e2e8f0;
+  font-size: 0.8rem;
+  color: #334155;
+  display: grid;
+  gap: 0.3rem;
+}
+.activity-row__detail pre {
+  margin: 0;
+  padding: 0.5rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 8px;
+  overflow: auto;
+  max-height: 220px;
+  font-size: 0.72rem;
+}
+.activity-pager {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+@media (max-width: 768px) {
+  .activity-page__head h1 {
+    font-size: 1.2rem;
+  }
+  .bots-stats {
+    gap: 0.35rem;
+  }
+}
