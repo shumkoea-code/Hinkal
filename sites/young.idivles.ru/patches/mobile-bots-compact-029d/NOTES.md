@@ -18,3 +18,7 @@ Image tag: `sochi-portal_web:mobile-bots-compact`
 - `/admin/bots` MAX + Telegram tabs live; cert OK; webhook/recipients/test
 - Profile PATCH/PUT showcase badges OK
 - Image: `sochi-portal_web:mobile-bots-compact`
+
+## Follow-up
+- Hardened dashboard/profile JSON parsing to avoid Unexpected token toast when API returns HTML
+- Email label → «Электронная почта»
