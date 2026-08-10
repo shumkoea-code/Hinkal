@@ -15,5 +15,16 @@
 - Десктоп аккаунт-меню: те же подписи («Настройки аккаунта»)
 - Длинные имена в карточке профиля — до 2 строк
 
-## QA
-- (после прогона)
+## QA (прод)
+
+### Кабинет ≠ Настройки
+- Mobile: карточки с подзаголовками, разные маршруты: **PASS**
+- Desktop аккаунт-меню: **PASS**
+
+### HTTP smoke (guest + session)
+Все основные публичные, кабинетные и админ-маршруты отдают **200** (/, events, news, projects, clubs, spaces, places, gallery, vacancies, contests, grants, dobro, self-gov, documents, contacts, games, login, register, search, privacy, rules, terms, tickets, friends, messages, dashboard+tabs, admin/*).
+
+### GUI smoke
+- User routes (places…portfolio, messages, public profile, login/register): **PASS**
+- Admin (/admin, bots+howto, applications, bookings, moderation, security, users, settings): **PASS**
+- Критичных багов не найдено
