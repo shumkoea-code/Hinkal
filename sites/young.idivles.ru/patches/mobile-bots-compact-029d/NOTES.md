@@ -11,3 +11,10 @@
 
 ## Deploy
 Image tag: `sochi-portal_web:mobile-bots-compact`
+
+## Verified (2026-08-10)
+- Settings groups stack; СИСТЕМА labels fully visible (Эко-баллы, Репликация…)
+- Rating chips: Уровень / Авторитет / Социум / Эко with full values
+- `/admin/bots` MAX + Telegram tabs live; cert OK; webhook/recipients/test
+- Profile PATCH/PUT showcase badges OK
+- Image: `sochi-portal_web:mobile-bots-compact`

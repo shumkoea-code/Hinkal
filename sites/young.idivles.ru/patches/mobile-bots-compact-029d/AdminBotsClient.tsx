@@ -428,8 +428,7 @@ export default function AdminBotsClient({ initial }: { initial?: Partial<BotsSta
                       );
                     }}
                   />
-                  {t.label}
-                  <code>{t.id}</code>
+                  <span>{t.label}</span>
                 </label>
               ))}
             </div>

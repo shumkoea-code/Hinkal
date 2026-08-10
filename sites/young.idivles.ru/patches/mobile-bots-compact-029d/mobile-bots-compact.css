@@ -530,3 +530,35 @@
   color: #64748b;
   line-height: 1.4;
 }
+
+/* tighter full-bleed pass 2 */
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 0.35rem max(0.35rem, env(safe-area-inset-right)) 0.35rem max(0.35rem, env(safe-area-inset-left)) !important;
+  }
+  .bots-card {
+    padding: 0.7rem 0.7rem;
+    border-radius: 12px;
+  }
+  .bots-page__head h1 {
+    font-size: 1.2rem;
+  }
+  .admin-page-shell {
+    width: 100%;
+  }
+  .settings-tabs {
+    margin-bottom: 0.75rem;
+  }
+  .settings-tab {
+    padding: 0.32rem 0.55rem !important;
+    font-size: 0.78rem !important;
+  }
+  .dashboard-page {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .dashboard-page.container {
+    padding-left: max(0.4rem, env(safe-area-inset-left)) !important;
+    padding-right: max(0.4rem, env(safe-area-inset-right)) !important;
+  }
+}
