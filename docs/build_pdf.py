@@ -11,6 +11,8 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
+import time
 import unicodedata
 from pathlib import Path
 
@@ -151,6 +153,50 @@ def find_chrome() -> str | None:
     return None
 
 
+def print_to_pdf(chrome: str, source: Path, target: Path, deadline_s: float = 180.0) -> None:
+    """Print `source` to `target` with headless Chrome.
+
+    Chrome finishes writing the PDF in about a second but then refuses to exit in a
+    container, so instead of waiting on the process we wait for the output file to
+    stop growing and then shut Chrome down ourselves.
+    """
+    target.unlink(missing_ok=True)
+    with tempfile.TemporaryDirectory() as profile:
+        process = subprocess.Popen(
+            [
+                chrome,
+                "--headless=old",
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--no-first-run",
+                "--disable-extensions",
+                f"--user-data-dir={profile}",
+                "--no-pdf-header-footer",
+                f"--print-to-pdf={target}",
+                source.as_uri(),
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        try:
+            expires = time.monotonic() + deadline_s
+            previous = -1
+            while time.monotonic() < expires:
+                time.sleep(0.5)
+                size = target.stat().st_size if target.exists() else 0
+                if size and size == previous:
+                    return
+                previous = size
+            raise TimeoutError(f"Chrome did not finish printing within {deadline_s:.0f}s")
+        finally:
+            process.terminate()
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+
+
 def main() -> int:
     html = render_html(SOURCE.read_text(encoding="utf-8"))
     HTML_OUT.write_text(html, encoding="utf-8")
@@ -166,25 +212,7 @@ def main() -> int:
         print("no Chrome/Chromium found, skipping PDF", file=sys.stderr)
         return 0
 
-    subprocess.run(
-        [
-            chrome,
-            "--headless",
-            "--disable-gpu",
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--no-first-run",
-            "--disable-extensions",
-            "--disable-crash-reporter",
-            "--virtual-time-budget=10000",
-            "--no-pdf-header-footer",
-            f"--print-to-pdf={PDF_OUT}",
-            HTML_OUT.as_uri(),
-        ],
-        check=True,
-        capture_output=True,
-        timeout=900,
-    )
+    print_to_pdf(chrome, HTML_OUT, PDF_OUT)
     print(f"wrote {PDF_OUT.relative_to(DOCS.parent)} ({PDF_OUT.stat().st_size // 1024} KB)")
     return 0
 
