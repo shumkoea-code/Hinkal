@@ -1,6 +1,7 @@
 # Краткая инструкция (шпаргалка)
 
 **Подробно:** [DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)  
+**Keenetic:** [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md)  
 **Защита сервера:** [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md)
 
 **Подписка:** `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`  
@@ -18,12 +19,13 @@
 
 | Имя | Когда |
 | --- | --- |
-| **ТЕЛ+ПК · TLS-WS ★** | Телефон / LTE — **первый** |
+| **ТЕЛ+ПК · TLS-WS ★** | Телефон / LTE — **первый**; также XKeen на роутере |
 | **ТЕЛ+ПК · gRPC** (`tls`) | Запас на телефоне |
 | **ТЕЛ+ПК · gRPC** (`none`) | Старый рабочий |
 | **ПК·WiFi · Stealth Reality** | ПК основной |
-| **ПК·WiFi · Speed Vision** | ПК скорость |
+| **ПК·WiFi · Speed Vision** | ПК скорость; также XKeen |
 | **ПК·WiFi · Alt Samsung** | ПК запасной SNI |
+| **WireGuard :51820** | **Роутер Keenetic** (штатный клиент) |
 
 У первого профиля может быть хвост `-логин` — это нормально.
 
@@ -42,6 +44,17 @@
 
 **Stealth** → Speed → Alt → при необходимости TLS-WS.  
 Клиент с Xray ≥ 26.3.27.
+
+---
+
+## Роутер Keenetic
+
+1. **Проще всего:** WireGuard — скачать конфиг с VPS:  
+   `scp -P 4488 root@77.110.125.241:/root/keenetic-wg/keenetic-client.conf .`  
+   Импорт в **Интернет → Другие подключения → WireGuard**.  
+2. Если WG режут: Entware + **XKeen** → **TLS-WS ★** или **Speed Vision** из подписки.
+
+Подробно: [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md).
 
 ---
 

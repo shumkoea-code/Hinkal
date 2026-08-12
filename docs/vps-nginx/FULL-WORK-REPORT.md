@@ -221,6 +221,7 @@ map $ssl_preread_server_name $yp_backend {
 | Документ | Для кого | Ссылка |
 | --- | --- | --- |
 | **Подробная разъясняющая инструкция** | пользователи + админ | [DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md) |
+| **Keenetic / роутер** | владелец Keenetic | [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) |
 | **Краткая шпаргалка** | быстрый старт | [USER-GUIDE.md](./USER-GUIDE.md) |
 | **Защита и оптимизация** | админ | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) |
 | **Этот полный отчёт** | заказчик / админ | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) |
@@ -268,6 +269,22 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 5. Порядок sub: Mobile-TLS-WS → gRPC TLS/none → Stealth → Speed → Alt.
 
 **Проверка:** все 6 линков из sub shumkoea dial OK; сайты 200.
+
+---
+
+## 6.3. Keenetic / WireGuard (12.08.2026)
+
+**Вывод исследования:** штатный Keenetic ест **WireGuard / OpenVPN / IKEv2**; VLESS — только через **Entware + XKeen**.
+
+**Сделано на VPS:**
+
+1. Поднят/приведён в порядок `wg0` на **UDP 51820**, peer для Keenetic `10.0.8.2/32`.
+2. UFW: `51820/udp` разрешён; `wg-quick@wg0` в автозагрузке.
+3. Клиентский конфиг: `/root/keenetic-wg/keenetic-client.conf` (секреты не в git).
+4. Для XKeen: JSON outbounds TLS-WS и Speed Vision в `/root/keenetic-wg/`.
+5. Документ: [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md).
+
+**Проверка:** handshake WireGuard на публичный `77.110.125.241:51820` — OK.
 
 ---
 

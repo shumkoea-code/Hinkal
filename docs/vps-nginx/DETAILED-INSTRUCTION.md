@@ -9,6 +9,7 @@
 | Документ | Зачем |
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Роутер Keenetic: WireGuard и XKeen |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | Защита и оптимизация сервера |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах |
 
@@ -387,8 +388,20 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | --- | --- |
 | Телефон, LTE/5G | **ТЕЛ+ПК · TLS-WS ★** → gRPC `tls` → gRPC `none` |
 | Ноутбук дома (Wi‑Fi) | **ПК·WiFi · Stealth** → Speed → Alt → TLS-WS |
+| **Роутер Keenetic** | **WireGuard** UDP `51820` (см. [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md)); иначе XKeen + TLS-WS ★ / Speed Vision |
 | Нужна скорость на чистой сети | **ПК·WiFi · Speed Vision** |
 | Reality режут, свой домен жив | **ТЕЛ+ПК · TLS-WS ★** |
+
+---
+
+## 14.1. Роутер Keenetic (кратко)
+
+Штатный Keenetic **не открывает** VLESS из подписки. Нужен:
+
+1. **WireGuard** — конфиг на сервере `/root/keenetic-wg/keenetic-client.conf` (проверено handshake на `:51820`), или  
+2. **XKeen (Entware)** — тогда из подписки берите **ТЕЛ+ПК · TLS-WS ★** или **ПК·WiFi · Speed Vision**.
+
+Подробно: [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md).
 
 ---
 
@@ -397,6 +410,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | Файл | Содержание |
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Короткая шпаргалка |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Keenetic: WireGuard и XKeen |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | UFW, BBR, SSH, nginx headers, рекомендации |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах и тестах |
 | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) | Первичная диагностика «почему 10443» |

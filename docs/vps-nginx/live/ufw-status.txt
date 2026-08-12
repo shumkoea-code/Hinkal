@@ -16,6 +16,7 @@ To                         Action      From
 20000/tcp                  ALLOW IN    Anywhere                   # backup-reality-xhttp
 444/tcp                    ALLOW IN    Anywhere                   # x-ui-panel
 4488/tcp                   ALLOW IN    Anywhere                   # ssh
+51820/udp                  ALLOW IN    Anywhere                   # wireguard-keenetic
 80/tcp (v6)                ALLOW IN    Anywhere (v6)              # http-acme
 443 (v6)                   ALLOW IN    Anywhere (v6)             
 2096/tcp (v6)              ALLOW IN    Anywhere (v6)              # x-ui-sub
@@ -27,4 +28,5 @@ To                         Action      From
 20000/tcp (v6)             ALLOW IN    Anywhere (v6)              # backup-reality-xhttp
 444/tcp (v6)               ALLOW IN    Anywhere (v6)              # x-ui-panel
 4488/tcp (v6)              ALLOW IN    Anywhere (v6)              # ssh
+51820/udp (v6)             ALLOW IN    Anywhere (v6)              # wireguard-keenetic
 
