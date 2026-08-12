@@ -99,6 +99,11 @@ DOCKER_COMPOSE_FILES="${DOCKER_COMPOSE_FILES:-}"
 CUSTOM_PRE_HOOK="${CUSTOM_PRE_HOOK:-}"
 CUSTOM_POST_HOOK="${CUSTOM_POST_HOOK:-}"
 
+# Never recurse into backup output or packed junk (avoids self-inclusion / bloat)
+SKIP_PATHS="${SKIP_PATHS} ${OUT_ROOT} /var/backups/vps-backup /var/backups/junk"
+# de-dup whitespace
+SKIP_PATHS="$(echo "$SKIP_PATHS" | xargs)"
+
 mkdir -p "$OUT_ROOT"
 if [[ "$DRY_RUN" -eq 1 ]]; then
   log "DRY-RUN mode=$MODE out=$WORK archive=$ARCHIVE"

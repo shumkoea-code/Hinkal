@@ -65,7 +65,11 @@ scp -P 4488 root@VPS_IP:/var/backups/vps-backup/*.tar.gz* .
 
 ## Профиль (пример idivles)
 
-См. `examples/idivles.conf` — доп. пути, compose-файлы.
+См. `examples/idivles.conf` — доп. пути, `SKIP_PATHS`, compose-файлы.
+
+`SKIP_PATHS` и каталог `--out` **всегда исключаются** из копий (чтобы бэкап не засосал сам себя и архивы мусора в `/var/backups/junk`).
+
+Типичный **smart**-архив этого VPS ≈ **240–250 МБ**. Режим `disk` — десятки ГБ (весь диск). Мусор (`/tmp` build-артефакты) лучше сжимать отдельно в `/var/backups/junk/` и не включать в smart.
 
 ---
 

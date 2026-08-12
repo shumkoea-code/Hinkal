@@ -52,11 +52,58 @@ path_slug() {
   echo "$1" | sed 's#^/##' | tr '/' '_'
 }
 
+# Returns 0 if path should be skipped (exact match or under a SKIP_PATHS prefix).
+should_skip_path() {
+  local target="$1"
+  local s
+  [[ -z "${SKIP_PATHS:-}" ]] && return 1
+  # Always skip backup output and junk archives when set later
+  for s in $SKIP_PATHS; do
+    [[ -z "$s" ]] && continue
+    if [[ "$target" == "$s" || "$target" == "$s"/* || "$target" == "$s"/ ]]; then
+      return 0
+    fi
+    # also skip if src is parent and would pull skipped child via rsync of dir —
+    # handled by rsync --exclude when copying directories
+  done
+  return 1
+}
+
 safe_copy() {
   local src="$1" dst="$2"
+  if should_skip_path "$src"; then
+    warn "skip (SKIP_PATHS): $src"
+    return 0
+  fi
   mkdir -p "$(dirname "$dst")"
   if command -v rsync >/dev/null 2>&1; then
-    rsync -aHAX --numeric-ids "$src" "$dst"
+    local -a ex=()
+    local s
+    for s in ${SKIP_PATHS:-}; do
+      [[ -z "$s" ]] && continue
+      # If copying a tree that contains skipped paths, exclude them
+      if [[ "$s" == "$src" || "$s" == "$src"/* ]]; then
+        local rel="${s#"$src"/}"
+        if [[ "$rel" == "$s" ]]; then
+          ex+=(--exclude="$(basename "$s")")
+        else
+          ex+=(--exclude="/$rel" --exclude="/$rel/**")
+        fi
+      elif [[ "$src" == "$s" || "$src" == "$s"/* ]]; then
+        warn "skip (SKIP_PATHS): $src"
+        return 0
+      else
+        # basename patterns for known junk archives
+        case "$s" in
+          *.tar.gz|*.tgz|*.img.gz)
+            ex+=(--exclude="$(basename "$s")")
+            ;;
+        esac
+      fi
+    done
+    # Always exclude backup out dir name patterns inside trees
+    ex+=(--exclude='vps-backup/' --exclude='**/vps-backup/**' --exclude='junk/' --exclude='**/junk/**')
+    rsync -aHAX --numeric-ids "${ex[@]}" "$src" "$dst"
   else
     cp -a "$src" "$dst"
   fi

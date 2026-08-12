@@ -43,6 +43,11 @@ cd tools\system-backup\windows
 .\Backup-SystemState.ps1 -BackupTarget "E:\Backups\AD"
 ```
 
+Дополнительно — лёгкий экспорт учёток (мало трафика, без паролей), см. [06-AD-ACCOUNTS.md](06-AD-ACCOUNTS.md):
+```powershell
+.\Backup-ADAccounts.ps1 -OutDir "E:\Backups\AD-light" -IncludeGroups
+```
+
 ### SQL Server
 Дополнительно (не заменяет image):
 ```powershell
