@@ -10,6 +10,7 @@
 | Репозиторий | https://github.com/shumkoea-code/Hinkal |
 | Ветка с панелью и доками | https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1 |
 | Только WG Panel | https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1/tools/wg-panel |
+| **Universal VPS backup** | https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1/tools/vps-backup |
 | PR | https://github.com/shumkoea-code/Hinkal/pull/12 |
 
 ```bash
