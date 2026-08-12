@@ -220,7 +220,8 @@ map $ssl_preread_server_name $yp_backend {
 
 | Документ | Для кого | Ссылка |
 | --- | --- | --- |
-| **Инструкция пользователям** | клиенты / админ «как подключить» | [USER-GUIDE.md](./USER-GUIDE.md) |
+| **Подробная разъясняющая инструкция** | пользователи + админ | [DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md) |
+| **Краткая шпаргалка** | быстрый старт | [USER-GUIDE.md](./USER-GUIDE.md) |
 | **Этот полный отчёт** | заказчик / админ | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) |
 | **Первичная диагностика** | техдетали этапа A | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) |
 | **Оглавление папки** | навигация | [README.md](./README.md) |
@@ -232,7 +233,8 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 
 Прямые ссылки:
 
-- Инструкция: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/USER-GUIDE.md  
+- Подробная инструкция: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/DETAILED-INSTRUCTION.md  
+- Шпаргалка: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/USER-GUIDE.md  
 - Полный отчёт: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/FULL-WORK-REPORT.md  
 
 ---
