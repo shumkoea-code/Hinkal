@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Пиры · WG Panel{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Создать пир (1 клик)</h1>
+  <p class="muted">Сервер: <code>{{ endpoint }}</code> · бан после {{ ban_after }} ошибок на {{ ban_seconds // 60 }} мин</p>
+  <form method="post" action="{{ url_for('peers_create') }}">
+    <div class="row">
+      <div><label class="muted">Имя (keenetic-home, phone1…)</label><input name="name" pattern="[A-Za-z0-9_\-]{2,32}" required placeholder="router-home"></div>
+      <div><label class="muted">Заметка</label><input name="note" placeholder="Keenetic гостиная"></div>
+    </div>
+    <p style="margin-top:12px">
+      <button type="submit">Создать WireGuard-конфиг</button>
+    </p>
+  </form>
+  <form method="post" action="{{ url_for('peers_sync') }}" style="margin-top:8px">
+    <button class="secondary" type="submit">Синхронизировать wg0</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Пиры</h2>
+  {% if not peers %}<p class="muted">Пока пусто — создайте первый.</p>{% else %}
+  <table>
+    <thead><tr><th>Имя</th><th>IP</th><th>Статус</th><th>Handshake</th><th>Трафик</th><th></th></tr></thead>
+    <tbody>
+    {% for p in peers %}
+      <tr>
+        <td><a href="{{ url_for('peer_detail', peer_id=p.id) }}"><strong>{{ p.name }}</strong></a><div class="muted">{{ p.note or '' }}</div></td>
+        <td><code>{{ p.vpn_ip }}</code></td>
+        <td>{% if p.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}</td>
+        <td class="muted">{% if p.handshake_ago is not none %}{{ p.handshake_ago }}s ago{% else %}—{% endif %}</td>
+        <td class="muted">↓{{ p.rx }} ↑{{ p.tx }}</td>
+        <td style="white-space:nowrap">
+          <form style="display:inline" method="post" action="{{ url_for('peer_toggle', peer_id=p.id) }}"><button class="secondary" type="submit">{% if p.enabled %}Выкл{% else %}Вкл{% endif %}</button></form>
+          <form style="display:inline" method="post" action="{{ url_for('peer_delete', peer_id=p.id) }}" onsubmit="return confirm('Удалить {{ p.name }}?')"><button class="danger" type="submit">Удал.</button></form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+
+<div class="row">
+  <div class="card">
+    <h2>DNS-аудит (топ)</h2>
+    {% if not audit %}<p class="muted">Пока нет данных. DNS клиентов должен быть 10.0.8.1</p>
+    {% else %}<table><thead><tr><th>ID</th><th>Домен</th><th>hits</th></tr></thead><tbody>
+    {% for a in audit %}<tr><td>{{ a.rid }}</td><td>{{ a.value }}</td><td>{{ a.hits }}</td></tr>{% endfor %}
+    </tbody></table>{% endif %}
+  </div>
+  <div class="card">
+    <h2>Блокировки IP</h2>
+    {% if not bans %}<p class="muted">Пусто</p>{% else %}
+    <table><thead><tr><th>IP</th><th>До</th><th></th></tr></thead><tbody>
+    {% for b in bans %}
+      <tr><td><code>{{ b.ip }}</code></td><td class="muted">{{ b.until_ts }}</td>
+      <td><form method="post" action="{{ url_for('unban', ip=b.ip) }}"><button class="secondary" type="submit">Снять</button></form></td></tr>
+    {% endfor %}
+    </tbody></table>{% endif %}
+  </div>
+</div>
+{% endblock %}

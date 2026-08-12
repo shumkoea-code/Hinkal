@@ -19,6 +19,7 @@ python3 docs/build_pdf.py
 
 - Подробная разъясняющая инструкция: [docs/vps-nginx/DETAILED-INSTRUCTION.md](docs/vps-nginx/DETAILED-INSTRUCTION.md)
 - Keenetic / MikroTik WireGuard: [docs/vps-nginx/WIREGUARD-ROUTERS.md](docs/vps-nginx/WIREGUARD-ROUTERS.md)
+- WG Panel (1 клик, HTTPS): [docs/vps-nginx/WG-PANEL.md](docs/vps-nginx/WG-PANEL.md)
 - Учёт WG (куда ходят, ID): [docs/vps-nginx/WG-AUDIT.md](docs/vps-nginx/WG-AUDIT.md)
 - Keenetic (кратко): [docs/vps-nginx/KEENETIC-ROUTER.md](docs/vps-nginx/KEENETIC-ROUTER.md)
 - Краткая шпаргалка: [docs/vps-nginx/USER-GUIDE.md](docs/vps-nginx/USER-GUIDE.md)

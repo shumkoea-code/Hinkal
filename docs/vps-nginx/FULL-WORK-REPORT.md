@@ -297,6 +297,15 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 
 ---
 
+## 6.5. WG Panel — веб UI (12.08.2026)
+
+1. Flask/waitress панель в `/opt/wg-panel`, код в `tools/wg-panel/`.
+2. HTTPS nginx `:8447` + rate-limit; бан IP после **2** ошибок входа на **1 час**.
+3. Создание пиров в `wg0`, `.conf` / QR / share-ссылки с TTL и лимитом скачиваний.
+4. Документ: [WG-PANEL.md](./WG-PANEL.md).
+
+---
+
 ## 7. Рекомендации дальше
 
 1. Когда все обновят подписку — отключить Host/inbound **LEGACY**.
@@ -305,6 +314,7 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 4. Обновлять Xray/3X-UI; клиентам минимум **v26.3.27**.
 5. Не светить UUID/pbk/shortId в открытых чатах.
 6. Если понадобится ещё один отдельный канал — брать Reality-dest с низким TLS RTT с этой VPS (не Microsoft: здесь давал EOF).
+7. Хранить пароль WG Panel только на сервере; после сохранения удалить `admin.bootstrap`.
 
 ---
 
@@ -320,5 +330,6 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 - [x] Backup TCP/XHTTP  
 - [x] 10443 не публичный в UFW  
 - [x] Документация обновлена  
+- [x] WG Panel на `:8447` (auth + ban + create peers)  
 
-**Итог:** сайт и VPN на одном 443; три актуальных Reality-профиля + legacy; все ссылки и варианты подключения проверены live.
+**Итог:** сайт и VPN на одном 443; три актуальных Reality-профиля + legacy; WireGuard для роутеров с веб-панелью; все ссылки и варианты подключения проверены live.

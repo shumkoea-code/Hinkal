@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ peer.name }} · WG Panel{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>{{ peer.name }} <span class="pill">{{ peer.vpn_ip }}</span></h1>
+  <p class="muted">Скачайте конфиг, покажите QR или создайте ссылку для пользователя (без пароля админа).</p>
+  <p>
+    <a class="btn" href="{{ url_for('peer_download', peer_id=peer.id) }}">Скачать .conf</a>
+    <a class="btn secondary" href="{{ url_for('dashboard') }}">Назад</a>
+  </p>
+  <p><img alt="QR" src="{{ url_for('peer_qr', peer_id=peer.id) }}" style="background:#fff;padding:8px;border-radius:8px;max-width:240px"/></p>
+  <pre>{{ conf }}</pre>
+</div>
+<div class="card">
+  <h2>Ссылка для раздачи</h2>
+  <form method="post" action="{{ url_for('peer_share', peer_id=peer.id) }}" class="row">
+    <div><label class="muted">Часов жизни</label><input type="number" name="hours" value="24" min="1" max="168"></div>
+    <div><label class="muted">Макс. скачиваний</label><input type="number" name="uses" value="3" min="1" max="20"></div>
+    <div style="align-self:end"><button type="submit">Создать ссылку</button></div>
+  </form>
+  {% if share and share_url %}
+  <p class="flash ok">Готово — отправьте пользователю:<br>
+    <a href="{{ share_url }}"><code>{{ share_url }}</code></a>
+  </p>
+  {% endif %}
+  {% if tokens %}
+  <table><thead><tr><th>Токен</th><th>Истекает</th><th>Использовано</th></tr></thead><tbody>
+  {% for t in tokens %}
+    <tr>
+      <td><a href="{{ public_base }}/s/{{ t.token }}/page"><code>{{ t.token[:12] }}…</code></a></td>
+      <td class="muted">{{ t.expires_at }}</td>
+      <td>{{ t.uses }}/{{ t.max_uses }} {% if t.expires_at < now or t.uses >= t.max_uses %}<span class="pill off">expired</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody></table>
+  {% endif %}
+</div>
+{% endblock %}

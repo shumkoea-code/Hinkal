@@ -10,6 +10,7 @@
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
 | [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md) | **Keenetic + MikroTik: установка WG** |
+| [WG-PANEL.md](./WG-PANEL.md) | **Веб-панель WG** (1 клик, HTTPS :8447, бан IP) |
 | [WG-AUDIT.md](./WG-AUDIT.md) | Контроль WG: куда ходят, лог с ID |
 | [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | Защита и оптимизация сервера |
@@ -390,7 +391,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | --- | --- |
 | Телефон, LTE/5G | **ТЕЛ+ПК · TLS-WS ★** → gRPC `tls` → gRPC `none` |
 | Ноутбук дома (Wi‑Fi) | **ПК·WiFi · Stealth** → Speed → Alt → TLS-WS |
-| **Роутер Keenetic / MikroTik** | **WireGuard** — [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md); учёт — [WG-AUDIT.md](./WG-AUDIT.md) |
+| **Роутер Keenetic / MikroTik** | **WireGuard** — панель [WG-PANEL.md](./WG-PANEL.md) (`https://v1.idivles.ru:8447/`); импорт — [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md); учёт — [WG-AUDIT.md](./WG-AUDIT.md) |
 | Нужна скорость на чистой сети | **ПК·WiFi · Speed Vision** |
 | Reality режут, свой домен жив | **ТЕЛ+ПК · TLS-WS ★** |
 
@@ -400,7 +401,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 
 Штатный Keenetic **не открывает** VLESS из подписки. Нужен:
 
-1. **WireGuard** — конфиг на сервере `/root/keenetic-wg/keenetic-client.conf` (проверено handshake на `:51820`), или  
+1. **WireGuard** — создать в панели `https://v1.idivles.ru:8447/` ([WG-PANEL.md](./WG-PANEL.md)) или взять `/root/keenetic-wg/keenetic-client.conf` (проверено handshake на `:51820`), или  
 2. **XKeen (Entware)** — тогда из подписки берите **ТЕЛ+ПК · TLS-WS ★** или **ПК·WiFi · Speed Vision**.
 
 Подробно: [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md).
@@ -413,6 +414,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Короткая шпаргалка |
 | [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md) | Keenetic + MikroTik WG |
+| [WG-PANEL.md](./WG-PANEL.md) | Веб-панель создания/раздачи пиров |
 | [WG-AUDIT.md](./WG-AUDIT.md) | DNS-учёт WG с ID |
 | [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | UFW, BBR, SSH, nginx headers, рекомендации |

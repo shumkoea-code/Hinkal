@@ -1,0 +1,4 @@
+flask>=2.2
+qrcode>=7.4
+Pillow>=9.0
+waitress>=2.1

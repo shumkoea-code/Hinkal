@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Вход · WG Panel{% endblock %}
+{% block body %}
+<div class="login-box card">
+  <h1>Вход администратора</h1>
+  <p class="muted">После {{ 2 }} ошибок IP блокируется на 1 час.</p>
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <p><label class="muted">Логин</label><input name="username" autocomplete="username" required autofocus></p>
+    <p><label class="muted">Пароль</label><input type="password" name="password" autocomplete="current-password" required></p>
+    <button type="submit">Войти</button>
+  </form>
+</div>
+{% endblock %}

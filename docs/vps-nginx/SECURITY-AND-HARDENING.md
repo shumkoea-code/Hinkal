@@ -36,6 +36,7 @@
 | 2096/tcp | Подписки |
 | 4488/tcp | SSH |
 | 51820/udp | **WireGuard** (Keenetic / MikroTik) |
+| 8447/tcp | **WG Panel** (админка WireGuard, TLS) |
 | 10000/tcp | Backup Reality TCP |
 | 20000/tcp | Backup Reality XHTTP |
 
@@ -68,9 +69,10 @@ Xray template уже:
 
 1. **2FA в панели 3X-UI** — включить (`twoFactorEnable`), сейчас false.  
 2. **SSH по ключу** — завести ключ, затем `PasswordAuthentication no` (сейчас пароль ещё нужен для аварийного доступа).  
-3. При желании спрятать панель за VPN/whitelist IP (`webListen` / UFW from).  
-4. Backup Reality `:10000`/`:20000` — держать только если реально нужны; иначе закрыть в UFW.  
-5. Следить, чтобы деплой sochi-portal не затирал `stream.d/tyoung-sni.conf`.
+3. При желании спрятать 3X-UI за VPN/whitelist IP (`webListen` / UFW from).  
+4. **WG Panel** (`:8447`) — уже с rate-limit и баном после 2 ошибок входа; пароль только в `/opt/wg-panel/admin.bootstrap` / смене на сервере ([WG-PANEL.md](./WG-PANEL.md)).  
+5. Backup Reality `:10000`/`:20000` — держать только если реально нужны; иначе закрыть в UFW.  
+6. Следить, чтобы деплой sochi-portal не затирал `stream.d/tyoung-sni.conf`.
 
 ---
 

@@ -5,6 +5,7 @@
 | Документ | Для кого |
 | --- | --- |
 | **[DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)** | Подробная инструкция: имена профилей, телефон/ПК, FAQ |
+| **[WG-PANEL.md](./WG-PANEL.md)** | **1-клик веб-панель WireGuard** (HTTPS, бан IP, ссылки) |
 | **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)** | Keenetic + MikroTik: установка WireGuard |
 | [WG-AUDIT.md](./WG-AUDIT.md) | Контроль WG / лог с ID ресурсов |
 | [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
@@ -20,7 +21,7 @@
 - **ТЕЛ+ПК · TLS-WS ★** — телефон (рекомендуется) и ПК  
 - **ТЕЛ+ПК · gRPC** — телефон/ПК (`tls` или `none`)  
 - **ПК·WiFi · Stealth / Speed / Alt** — ПК и Wi‑Fi  
-- **WireGuard UDP 51820** — роутер Keenetic ([KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md))  
+- **WireGuard UDP 51820** — роутер Keenetic / MikroTik ([WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)); создание пиров — **[WG-PANEL.md](./WG-PANEL.md)** (`https://v1.idivles.ru:8447/`)  
 
 Подписка: `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`
 

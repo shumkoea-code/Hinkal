@@ -49,10 +49,14 @@
 
 ## Роутер (Keenetic / MikroTik)
 
-Полная проверенная инструкция: **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)**  
+**Предпочтительно:** создать пир в веб-панели → скачать `.conf` или отправить share-ссылку.  
+Панель: `https://v1.idivles.ru:8447/` · документ: **[WG-PANEL.md](./WG-PANEL.md)**
+
+Полная проверенная инструкция по роутерам: **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)**  
 Учёт «куда ходили» (DNS + ID): **[WG-AUDIT.md](./WG-AUDIT.md)**
 
 ```bash
+# Альтернатива без панели (старые файлы на сервере)
 # Keenetic
 scp -P 4488 root@77.110.125.241:/root/keenetic-wg/keenetic-client.conf .
 # MikroTik
