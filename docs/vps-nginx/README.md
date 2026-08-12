@@ -1,23 +1,27 @@
 # VPS idivles — сайт + скрытый VPN на 443
 
-## Документы (читать отсюда)
+## Документы
 
 | Документ | Описание |
 | --- | --- |
-| **[USER-GUIDE.md](./USER-GUIDE.md)** | Инструкция: как подключаться после апгрейда |
-| **[FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)** | Полный отчёт о всей проделанной работе |
+| **[USER-GUIDE.md](./USER-GUIDE.md)** | Как подключаться (4 профиля на 443) |
+| **[FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)** | Полный отчёт + верификация |
 | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) | Первичная диагностика (этап A) |
 | [live/](./live/) | Актуальные nginx-конфиги с сервера |
 | [logs/](./logs/) | Сырые логи диагностики и тестов |
 
 ## Сейчас на сервере
 
-- **Сайт:** https://tyoung.idivles.ru/
-- **Маска:** https://v1.idivles.ru/
-- **Основной VPN:** VLESS + REALITY + XHTTP на `:443` (SNI `www.cloudflare.com`)
-- **Legacy:** VLESS + gRPC + none на `:443` (временно)
-- **Панель:** https://v1.idivles.ru:444/…  
-- **Подписка:** `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`
+| Что | URL / профиль |
+| --- | --- |
+| Сайт | https://tyoung.idivles.ru/ |
+| Маска | https://v1.idivles.ru/ |
+| VPN основной | Reality + XHTTP, SNI Cloudflare (`:443`) |
+| VPN скорость | Reality + TCP Vision, SNI Apple (`:443`) |
+| VPN Alt | Reality + XHTTP, SNI Samsung (`:443`) |
+| VPN legacy | gRPC none (`:443`) |
+| Панель | https://v1.idivles.ru:444/… |
+| Подписка | `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>` |
 
 ## GitHub
 

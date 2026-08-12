@@ -2,94 +2,97 @@
 
 **Сервер:** `v1.idivles.ru` (`77.110.125.241`)  
 **Панель:** https://v1.idivles.ru:444/t0HAtL75Ph0mDWoZPq/  
-**Дата:** 12 августа 2026
+**Дата:** 12 августа 2026 (обновлено)
 
 ---
 
 ## Что изменилось для пользователей
 
-Раньше основной профиль был **VLESS + gRPC без TLS** на порту 443 (устаревший и заметный транспорт).
+Раньше основной профиль был **VLESS + gRPC без TLS** на порту 443.
 
-Теперь основной профиль:
+Сейчас в одной подписке **четыре** рабочих линка на `:443` (в таком порядке):
 
-| Параметр | Значение |
-| --- | --- |
-| Протокол | **VLESS** |
-| Транспорт | **XHTTP** (вместо gRPC) |
-| Защита | **REALITY** |
-| Адрес | `v1.idivles.ru` |
-| Порт | **443** |
-| SNI | `www.cloudflare.com` |
-| Fingerprint | `chrome` |
+| # | Профиль в подписке | Тип | SNI | Когда брать |
+| --- | --- | --- | --- | --- |
+| 1 | **Stealth-Reality-XHTTP** | Reality + **XHTTP** | `www.cloudflare.com` | **Основной** — скрытнее всего |
+| 2 | **Speed-Reality-TCP-Vision** | Reality + **TCP + Vision** | `www.apple.com` | Если нужен максимум скорости / XHTTP тупит |
+| 3 | **Alt-Reality-XHTTP-Samsung** | Reality + **XHTTP** | `www.samsung.com` | Если режут Cloudflare/Apple SNI |
+| 4 | **LEGACY-gRPC-none** | gRPC + `none` (+ PQ) | — | Временный запас, пока не обновились клиенты |
 
-Трафик выглядит как обычный HTTPS к Cloudflare, идёт через тот же порт, что и сайт.
-
-Старый gRPC-профиль **пока сохранён** (legacy) — чтобы никто не отвалился сразу. В подписке будут **два** рабочих линка на 443: сначала stealth, потом legacy.
+Все идут на `v1.idivles.ru:443` вместе с сайтами — **не** на порты `10443–10446` (это только localhost).
 
 ---
 
-## Что сделать клиентам (обязательно)
+## Что сделать клиентам
 
 1. Обновить подписку / заново импортировать:
    ```text
    https://v1.idivles.ru:2096/sub/pepewtfa/<ваш_subId>
    ```
-2. В списке серверов выбрать профиль с **`security=reality`** и **`type=xhttp`** (не grpc).
-3. Нужен клиент на базе **Xray-core ≥ 26.3.27** (v2rayN свежий, Hiddify, Streisand, Happ, и т.п.).
-4. **Не** подключаться на порт `10443` — это внутренний backend.
+   JSON: `https://v1.idivles.ru:2096/json/pepefa/<subId>`  
+   Clash: `https://v1.idivles.ru:2096/clash/<subId>`
+2. Выбрать **Stealth** (`type=xhttp`, `security=reality`, SNI Cloudflare). Если не коннектится — **Speed**, потом **Alt**.
+3. Клиент на **Xray-core ≥ 26.3.27** (свежий v2rayN / Hiddify / Streisand / Happ).
+4. Не указывать порт `10443` / `10444` / `10445` / `10446` вручную.
 
-### Как отличить правильный линк
-
-В URI должно быть примерно так:
+### Как выглядят правильные URI
 
 ```text
+# основной
 vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=…&sid=…&path=/…
+
+# скорость
+vless://…@v1.idivles.ru:443?type=tcp&security=reality&flow=xtls-rprx-vision&sni=www.apple.com&fp=chrome&pbk=…&sid=…
+
+# запасной SNI
+vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.samsung.com&fp=chrome&pbk=…&sid=…&path=/…
 ```
 
-Если видите `type=grpc` и `security=none` — это старый legacy. Работает, но лучше перейти на Reality.
+`type=grpc` + `security=none` — это legacy. Работает, но лучше Reality.
 
 ---
 
-## Сайты (не трогали бизнес-логику)
+## Сайты
 
 | URL | Назначение |
 | --- | --- |
 | https://tyoung.idivles.ru/ | Портал «Центр развития молодежи Сочи» |
 | https://v1.idivles.ru/ | Маскировочная страница инфраструктуры |
 
-Оба открываются по HTTPS на порту 443 одновременно с VPN.
+Оба на том же `:443`, что и VPN.
 
 ---
 
-## Запасные профили (если Reality на 443 режут)
+## Запасные порты (не 443)
 
-В панели есть backup-inbound’ы (для тестов/особых случаев):
+| Remark | Порт | Тип | Кому |
+| --- | --- | --- | --- |
+| BACKUP-Reality-TCP-10000 | 10000 | Reality + TCP + Vision | тестовые клиенты в панели |
+| BACKUP-Reality-XHTTP-20000 | 20000 | Reality + XHTTP | тестовые клиенты в панели |
 
-| Remark | Порт | Тип |
-| --- | --- | --- |
-| BACKUP-Reality-TCP-10000 | 10000 | Reality + TCP + Vision (быстрый) |
-| BACKUP-Reality-XHTTP-20000 | 20000 | Reality + XHTTP |
-
-Они менее скрытные, чем порт 443 (Xray сам предупреждает про non-443 Reality).
+Менее скрытные (non-443 Reality). В обычной пользовательской подписке их нет.
 
 ---
 
-## Админу: где смотреть
+## Админу
 
-- Панель inbounds: `Stealth-Reality-XHTTP` (id 15) — основной  
-- Hosts: `stealth-reality-443` (первый в списке)  
-- Legacy: `LEGACY-gRPC-none` + host `LEGACY-grpc-none-443`  
-- Полный технический отчёт: [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)
+| Inbound | id | listen | Назначение |
+| --- | --- | --- | --- |
+| Stealth-Reality-XHTTP | 15 | `127.0.0.1:10444` | основной |
+| Speed-Reality-TCP-Vision | 16 | `127.0.0.1:10445` | скорость |
+| Alt-Reality-XHTTP-Samsung | 17 | `127.0.0.1:10446` | отдельный Alt-SNI |
+| LEGACY-gRPC-none | 1 | `127.0.0.1:10443` | legacy |
+
+Порядок в подписке задаётся `inbounds.sub_sort_index` (10 / 20 / 30 / 90).
+
+Полный отчёт: [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)
 
 ---
 
 ## Быстрая самопроверка
 
 ```bash
-# сайты
 curl -I https://tyoung.idivles.ru/
 curl -I https://v1.idivles.ru/
-
-# подписка отдаёт reality+xhttp
-curl -sk https://v1.idivles.ru:2096/sub/pepewtfa/<subId> | base64 -d | head -3
+curl -sk https://v1.idivles.ru:2096/sub/pepewtfa/<subId> | base64 -d
 ```
