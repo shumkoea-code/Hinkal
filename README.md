@@ -17,5 +17,6 @@ python3 docs/build_pdf.py
 
 ### Быстрые ссылки VPS
 
-- Инструкция: [docs/vps-nginx/USER-GUIDE.md](docs/vps-nginx/USER-GUIDE.md)
+- Подробная разъясняющая инструкция: [docs/vps-nginx/DETAILED-INSTRUCTION.md](docs/vps-nginx/DETAILED-INSTRUCTION.md)
+- Краткая шпаргалка: [docs/vps-nginx/USER-GUIDE.md](docs/vps-nginx/USER-GUIDE.md)
 - Полный отчёт: [docs/vps-nginx/FULL-WORK-REPORT.md](docs/vps-nginx/FULL-WORK-REPORT.md)
