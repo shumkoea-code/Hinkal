@@ -160,12 +160,25 @@ fi
 if [[ "$MODE" == "full" ]]; then
   log "full mode: copying large trees (may take time)"
   mkdir -p "$WORK/full"
-  # Prefer dumps already done; still copy selected stateful dirs if present
-  for p in /var/lib/misc /var/lib/wg-audit /opt; do
+  # Prefer dumps already done; still copy selected stateful dirs if present.
+  # Docker data root is optional via --include-docker-volumes / --include-docker-images
+  # (raw /var/lib/docker is huge and inconsistent — prefer dumps/save).
+  for p in \
+    /opt \
+    /var/lib/misc \
+    /var/lib/wg-audit \
+    /usr/local/x-ui \
+    /etc/x-ui \
+    /etc/wireguard \
+    /etc/nginx \
+    /etc/letsencrypt \
+    /root/cert \
+    /root/keenetic-wg \
+    /home
+  do
     [[ -e "$p" ]] || continue
-    # skip huge package caches
     case "$p" in
-      /var/cache|/*) continue ;;
+      /var/cache|/*|/tmp|/*|/var/backups/*) continue ;;
     esac
     safe_copy "$p" "$WORK/full/$(path_slug "$p")" || warn "copy failed: $p"
   done

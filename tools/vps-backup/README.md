@@ -39,8 +39,16 @@ scp -P 4488 root@VPS_IP:/var/backups/vps-backup/*.tar.gz* .
 | Mode | Что делает |
 | --- | --- |
 | `smart` (по умолчанию) | Конфиги + сервисы + **consistent DB dumps** + docker compose/dumps |
-| `full` | smart + крупные деревья (`/opt`, audit и т.п.) |
+| `full` | smart + крупные деревья (`/opt`, x-ui, nginx, wireguard, `/home`, …) |
 | `disk` | образ блочного устройства (`dd \| gzip`) — «полный сервер» |
+
+Удобный полный прогон (idivles + docker volumes/images):
+
+```bash
+sudo bash /opt/vps-backup/run-full-idivles.sh
+# или из репозитория:
+sudo bash tools/vps-backup/run-full-idivles.sh
+```
 
 Флаги:
 - `--include-docker-volumes` — tar всех named volumes
