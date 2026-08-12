@@ -5,7 +5,9 @@
 | Документ | Для кого |
 | --- | --- |
 | **[DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)** | Подробная инструкция: имена профилей, телефон/ПК, FAQ |
-| **[KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md)** | Роутер Keenetic: WireGuard и XKeen |
+| **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)** | Keenetic + MikroTik: установка WireGuard |
+| [WG-AUDIT.md](./WG-AUDIT.md) | Контроль WG / лог с ID ресурсов |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
 | **[SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md)** | Проверка защиты и оптимизация (UFW, BBR, SSH) |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах |

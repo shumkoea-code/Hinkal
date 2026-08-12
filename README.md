@@ -18,7 +18,9 @@ python3 docs/build_pdf.py
 ### Быстрые ссылки VPS
 
 - Подробная разъясняющая инструкция: [docs/vps-nginx/DETAILED-INSTRUCTION.md](docs/vps-nginx/DETAILED-INSTRUCTION.md)
-- Keenetic / роутер: [docs/vps-nginx/KEENETIC-ROUTER.md](docs/vps-nginx/KEENETIC-ROUTER.md)
+- Keenetic / MikroTik WireGuard: [docs/vps-nginx/WIREGUARD-ROUTERS.md](docs/vps-nginx/WIREGUARD-ROUTERS.md)
+- Учёт WG (куда ходят, ID): [docs/vps-nginx/WG-AUDIT.md](docs/vps-nginx/WG-AUDIT.md)
+- Keenetic (кратко): [docs/vps-nginx/KEENETIC-ROUTER.md](docs/vps-nginx/KEENETIC-ROUTER.md)
 - Краткая шпаргалка: [docs/vps-nginx/USER-GUIDE.md](docs/vps-nginx/USER-GUIDE.md)
 - Защита и оптимизация: [docs/vps-nginx/SECURITY-AND-HARDENING.md](docs/vps-nginx/SECURITY-AND-HARDENING.md)
 - Полный отчёт: [docs/vps-nginx/FULL-WORK-REPORT.md](docs/vps-nginx/FULL-WORK-REPORT.md)

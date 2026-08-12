@@ -9,7 +9,9 @@
 | Документ | Зачем |
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
-| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Роутер Keenetic: WireGuard и XKeen |
+| [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md) | **Keenetic + MikroTik: установка WG** |
+| [WG-AUDIT.md](./WG-AUDIT.md) | Контроль WG: куда ходят, лог с ID |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | Защита и оптимизация сервера |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах |
 
@@ -388,7 +390,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | --- | --- |
 | Телефон, LTE/5G | **ТЕЛ+ПК · TLS-WS ★** → gRPC `tls` → gRPC `none` |
 | Ноутбук дома (Wi‑Fi) | **ПК·WiFi · Stealth** → Speed → Alt → TLS-WS |
-| **Роутер Keenetic** | **WireGuard** UDP `51820` (см. [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md)); иначе XKeen + TLS-WS ★ / Speed Vision |
+| **Роутер Keenetic / MikroTik** | **WireGuard** — [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md); учёт — [WG-AUDIT.md](./WG-AUDIT.md) |
 | Нужна скорость на чистой сети | **ПК·WiFi · Speed Vision** |
 | Reality режут, свой домен жив | **ТЕЛ+ПК · TLS-WS ★** |
 
@@ -410,7 +412,9 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | Файл | Содержание |
 | --- | --- |
 | [USER-GUIDE.md](./USER-GUIDE.md) | Короткая шпаргалка |
-| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Keenetic: WireGuard и XKeen |
+| [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md) | Keenetic + MikroTik WG |
+| [WG-AUDIT.md](./WG-AUDIT.md) | DNS-учёт WG с ID |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
 | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | UFW, BBR, SSH, nginx headers, рекомендации |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах и тестах |
 | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) | Первичная диагностика «почему 10443» |

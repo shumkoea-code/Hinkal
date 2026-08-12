@@ -288,6 +288,15 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 
 ---
 
+## 6.4. MikroTik peer + DNS-аудит WG (12.08.2026)
+
+1. Peer MikroTik `10.0.8.3` + `mikrotik-setup.rsc` / `mikrotik-client.conf`.
+2. DNS на `10.0.8.1` (dnsmasq) + SQLite-аудит с дедупом доменов в `resources.id`.
+3. Инструкции: [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md), [WG-AUDIT.md](./WG-AUDIT.md).
+4. Проверено: handshake WG; повтор DNS → один resource id, `hits++`.
+
+---
+
 ## 7. Рекомендации дальше
 
 1. Когда все обновят подписку — отключить Host/inbound **LEGACY**.

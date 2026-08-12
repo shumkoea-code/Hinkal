@@ -35,7 +35,7 @@
 | 444/tcp | Панель 3X-UI (скрытый path) |
 | 2096/tcp | Подписки |
 | 4488/tcp | SSH |
-| 51820/udp | **WireGuard (Keenetic)** |
+| 51820/udp | **WireGuard** (Keenetic / MikroTik) |
 | 10000/tcp | Backup Reality TCP |
 | 20000/tcp | Backup Reality XHTTP |
 

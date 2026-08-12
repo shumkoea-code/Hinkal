@@ -47,14 +47,19 @@
 
 ---
 
-## Роутер Keenetic
+## Роутер (Keenetic / MikroTik)
 
-1. **Проще всего:** WireGuard — скачать конфиг с VPS:  
-   `scp -P 4488 root@77.110.125.241:/root/keenetic-wg/keenetic-client.conf .`  
-   Импорт в **Интернет → Другие подключения → WireGuard**.  
-2. Если WG режут: Entware + **XKeen** → **TLS-WS ★** или **Speed Vision** из подписки.
+Полная проверенная инструкция: **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)**  
+Учёт «куда ходили» (DNS + ID): **[WG-AUDIT.md](./WG-AUDIT.md)**
 
-Подробно: [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md).
+```bash
+# Keenetic
+scp -P 4488 root@77.110.125.241:/root/keenetic-wg/keenetic-client.conf .
+# MikroTik
+scp -P 4488 root@77.110.125.241:/root/keenetic-wg/mikrotik-setup.rsc .
+```
+
+DNS в конфиге: `10.0.8.1` (нужен для учёта на сервере).
 
 ---
 
