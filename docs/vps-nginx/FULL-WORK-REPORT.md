@@ -302,7 +302,8 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 1. Flask/waitress панель в `/opt/wg-panel`, код в `tools/wg-panel/`.
 2. HTTPS nginx `:8447` + rate-limit; бан IP после **2** ошибок входа на **1 час**.
 3. Создание пиров в `wg0`, `.conf` / QR / share-ссылки с TTL и лимитом скачиваний.
-4. Документ: [WG-PANEL.md](./WG-PANEL.md).
+4. Секретный длинный URL админки, смена пароля, TOTP 2FA, лимиты трафика/срока, статистика.
+5. Документ: [WG-PANEL.md](./WG-PANEL.md).
 
 ---
 

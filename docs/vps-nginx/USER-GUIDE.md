@@ -50,7 +50,8 @@
 ## Роутер (Keenetic / MikroTik)
 
 **Предпочтительно:** создать пир в веб-панели → скачать `.conf` или отправить share-ссылку.  
-Панель: `https://v1.idivles.ru:8447/` · документ: **[WG-PANEL.md](./WG-PANEL.md)**
+Панель: секретный URL из `cat /opt/wg-panel/admin.bootstrap` (`admin_url=`) · документ: **[WG-PANEL.md](./WG-PANEL.md)**  
+(Корень `https://v1.idivles.ru:8447/` без секрета отвечает 404.)
 
 Полная проверенная инструкция по роутерам: **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)**  
 Учёт «куда ходили» (DNS + ID): **[WG-AUDIT.md](./WG-AUDIT.md)**
