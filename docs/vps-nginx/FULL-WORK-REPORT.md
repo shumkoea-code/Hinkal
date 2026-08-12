@@ -237,6 +237,24 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 
 ---
 
+## 6.1. Фикс для телефона (12.08.2026, вечер)
+
+**Симптом:** на телефоне работает только gRPC, три Reality — нет.
+
+**Причина:** мобильный DPI часто режет Reality (SNI Cloudflare/Apple/Samsung ≠ IP VPS). gRPC `security=none` идёт в stream `default` без «поддельного» TLS — поэтому жил.
+
+**Сделано:**
+
+1. Inbound **18 `Mobile-TLS-WS`**: VLESS+WS на `127.0.0.1:10447`, снаружи `v1.idivles.ru:443` + настоящий TLS (nginx 8445).
+2. В `externalProxy` у gRPC inbound добавлен вариант **`security=tls`** (путь `/gun`) — тоже «как сайт».
+3. У Reality убраны слишком короткие `shortId` (вроде `15`) — часть клиентов их плохо ест.
+4. `share_addr_strategy=node` + `externalProxy` для non-Reality, чтобы в sub не утекал `localhost:10447`.
+5. Порядок sub: Mobile-TLS-WS → gRPC TLS/none → Stealth → Speed → Alt.
+
+**Проверка:** все 6 линков из sub shumkoea dial OK; сайты 200.
+
+---
+
 ## 7. Рекомендации дальше
 
 1. Когда все обновят подписку — отключить Host/inbound **LEGACY**.

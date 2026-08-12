@@ -2,53 +2,64 @@
 
 **Сервер:** `v1.idivles.ru` (`77.110.125.241`)  
 **Панель:** https://v1.idivles.ru:444/t0HAtL75Ph0mDWoZPq/  
-**Дата:** 12 августа 2026 (обновлено)
+**Дата:** 12 августа 2026 (обновлено — фикс для телефона)
 
 ---
 
-## Что изменилось для пользователей
+## Важно для телефона
 
-Раньше основной профиль был **VLESS + gRPC без TLS** на порту 443.
+На мобильных сетях операторы часто **режут Reality** (чужой SNI Cloudflare/Apple/Samsung при IP нашего VPS).  
+Поэтому **gRPC без TLS** у вас работал, а три Reality — нет.
 
-Сейчас в одной подписке **четыре** рабочих линка на `:443` (в таком порядке):
+Для телефона в подписке теперь **первые** профили — обычный HTTPS на свой домен:
 
-| # | Профиль в подписке | Тип | SNI | Когда брать |
-| --- | --- | --- | --- | --- |
-| 1 | **Stealth-Reality-XHTTP** | Reality + **XHTTP** | `www.cloudflare.com` | **Основной** — скрытнее всего |
-| 2 | **Speed-Reality-TCP-Vision** | Reality + **TCP + Vision** | `www.apple.com` | Если нужен максимум скорости / XHTTP тупит |
-| 3 | **Alt-Reality-XHTTP-Samsung** | Reality + **XHTTP** | `www.samsung.com` | Если режут Cloudflare/Apple SNI |
-| 4 | **LEGACY-gRPC-none** | gRPC + `none` (+ PQ) | — | Временный запас, пока не обновились клиенты |
+| Порядок | Имя в подписке | Тип | Что это |
+| --- | --- | --- | --- |
+| 1 | **Mobile-TLS-WS** | WS + **TLS** на `v1.idivles.ru` | **Берите на телефоне в первую очередь** |
+| 2 | **gRPC-443** (`security=tls`) | gRPC + **TLS** через `/gun` | Запасной мобильный |
+| 3 | **gRPC-443** (`security=none`) | gRPC без TLS | Старый рабочий вариант |
+| 4+ | Stealth / Speed / Alt | Reality… | Чаще для Wi‑Fi / ПК; на LTE могут не идти |
 
-Все идут на `v1.idivles.ru:443` вместе с сайтами — **не** на порты `10443–10446` (это только localhost).
+Трафик Mobile-TLS выглядит как обычный заход на сайт `https://v1.idivles.ru/…` — DPI это переваривает лучше, чем Reality.
 
 ---
 
-## Что сделать клиентам
+## Что сделать на телефоне
 
-1. Обновить подписку / заново импортировать:
+1. **Обновить подписку** (удалить старую и добавить заново):
    ```text
    https://v1.idivles.ru:2096/sub/pepewtfa/<ваш_subId>
    ```
-   JSON: `https://v1.idivles.ru:2096/json/pepefa/<subId>`  
-   Clash: `https://v1.idivles.ru:2096/clash/<subId>`
-2. Выбрать **Stealth** (`type=xhttp`, `security=reality`, SNI Cloudflare). Если не коннектится — **Speed**, потом **Alt**.
-3. Клиент на **Xray-core ≥ 26.3.27** (свежий v2rayN / Hiddify / Streisand / Happ).
-4. Не указывать порт `10443` / `10444` / `10445` / `10446` вручную.
+2. Включить **Mobile-TLS-WS** (первый в списке).
+3. Если не взлетело — второй **gRPC-443** с `security=tls` (не `none`).
+4. Клиент свежий: **Hiddify / Happ / v2rayNG / Streisand** с актуальным ядром.
+5. Не используйте порты `10443–10447` — только **443**.
 
-### Как выглядят правильные URI
+### Как отличить мобильный линк
 
 ```text
-# основной
-vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=…&sid=…&path=/…
-
-# скорость
-vless://…@v1.idivles.ru:443?type=tcp&security=reality&flow=xtls-rprx-vision&sni=www.apple.com&fp=chrome&pbk=…&sid=…
-
-# запасной SNI
-vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.samsung.com&fp=chrome&pbk=…&sid=…&path=/…
+vless://…@v1.idivles.ru:443?type=ws&security=tls&path=/c410aeaf855fdf46bb88…
 ```
 
-`type=grpc` + `security=none` — это legacy. Работает, но лучше Reality.
+или
+
+```text
+vless://…@v1.idivles.ru:443?type=grpc&security=tls&serviceName=gun…
+```
+
+Если в URI `localhost` / `127.0.0.1` / порт `10447` — подписка старая или битая, обновите.
+
+---
+
+## Reality-профили (ПК / Wi‑Fi)
+
+| Профиль | Тип | SNI |
+| --- | --- | --- |
+| Stealth-Reality-XHTTP | Reality + XHTTP | `www.cloudflare.com` |
+| Speed-Reality-TCP-Vision | Reality + TCP + Vision | `www.apple.com` |
+| Alt-Reality-XHTTP-Samsung | Reality + XHTTP | `www.samsung.com` |
+
+Нужен Xray ≥ 26.3.27. На LTE, если не коннектятся — это ожидаемо при DPI; сидите на **Mobile-TLS-WS**.
 
 ---
 
@@ -56,43 +67,29 @@ vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.samsung.com&fp
 
 | URL | Назначение |
 | --- | --- |
-| https://tyoung.idivles.ru/ | Портал «Центр развития молодежи Сочи» |
-| https://v1.idivles.ru/ | Маскировочная страница инфраструктуры |
-
-Оба на том же `:443`, что и VPN.
+| https://tyoung.idivles.ru/ | Портал |
+| https://v1.idivles.ru/ | Маска (+ пути VPN) |
 
 ---
 
-## Запасные порты (не 443)
+## Запасные порты
 
-| Remark | Порт | Тип | Кому |
-| --- | --- | --- | --- |
-| BACKUP-Reality-TCP-10000 | 10000 | Reality + TCP + Vision | тестовые клиенты в панели |
-| BACKUP-Reality-XHTTP-20000 | 20000 | Reality + XHTTP | тестовые клиенты в панели |
-
-Менее скрытные (non-443 Reality). В обычной пользовательской подписке их нет.
+| Remark | Порт | Тип |
+| --- | --- | --- |
+| BACKUP-Reality-TCP-10000 | 10000 | Reality + TCP + Vision |
+| BACKUP-Reality-XHTTP-20000 | 20000 | Reality + XHTTP |
 
 ---
 
 ## Админу
 
-| Inbound | id | listen | Назначение |
-| --- | --- | --- | --- |
-| Stealth-Reality-XHTTP | 15 | `127.0.0.1:10444` | основной |
-| Speed-Reality-TCP-Vision | 16 | `127.0.0.1:10445` | скорость |
-| Alt-Reality-XHTTP-Samsung | 17 | `127.0.0.1:10446` | отдельный Alt-SNI |
-| LEGACY-gRPC-none | 1 | `127.0.0.1:10443` | legacy |
+| Inbound | listen | Назначение |
+| --- | --- | --- |
+| Mobile-TLS-WS (18) | `127.0.0.1:10447` | телефон, WS за nginx TLS |
+| gRPC-443 (1) | `127.0.0.1:10443` | gRPC none + gRPC TLS через `/gun` |
+| Stealth (15) | `:10444` | Reality XHTTP |
+| Speed (16) | `:10445` | Reality TCP Vision |
+| Alt (17) | `:10446` | Reality XHTTP Samsung |
 
-Порядок в подписке задаётся `inbounds.sub_sort_index` (10 / 20 / 30 / 90).
-
-Полный отчёт: [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)
-
----
-
-## Быстрая самопроверка
-
-```bash
-curl -I https://tyoung.idivles.ru/
-curl -I https://v1.idivles.ru/
-curl -sk https://v1.idivles.ru:2096/sub/pepewtfa/<subId> | base64 -d
-```
+SNI-карта: `docs/vps-nginx/live/tyoung-sni.conf`  
+Отчёт: [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)

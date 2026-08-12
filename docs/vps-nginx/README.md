@@ -16,9 +16,10 @@
 | --- | --- |
 | Сайт | https://tyoung.idivles.ru/ |
 | Маска | https://v1.idivles.ru/ |
-| VPN основной | Reality + XHTTP, SNI Cloudflare (`:443`) |
-| VPN скорость | Reality + TCP Vision, SNI Apple (`:443`) |
-| VPN Alt | Reality + XHTTP, SNI Samsung (`:443`) |
+| VPN **телефон** | **Mobile-TLS-WS** (TLS+WS на `v1.idivles.ru`) + gRPC TLS |
+| VPN основной (ПК) | Reality + XHTTP, SNI Cloudflare |
+| VPN скорость | Reality + TCP Vision, SNI Apple |
+| VPN Alt | Reality + XHTTP, SNI Samsung |
 | VPN legacy | gRPC none (`:443`) |
 | Панель | https://v1.idivles.ru:444/… |
 | Подписка | `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>` |
