@@ -1,0 +1,32 @@
+=== HOST IDENTITY ===
+v1.idivles.ru
+Linux v1.idivles.ru 6.1.0-48-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.172-1 (2026-05-15) x86_64 GNU/Linux
+Wed Aug 12 01:23:14 PM UTC 2026
+
+=== OS ===
+PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+NAME="Debian GNU/Linux"
+VERSION_ID="12"
+VERSION="12 (bookworm)"
+VERSION_CODENAME=bookworm
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+
+=== UPTIME / LOAD ===
+ 16:23:14 up 9 days,  4:29,  0 user,  load average: 0.43, 0.20, 0.13
+
+=== LISTENING PORTS (key) ===
+LISTEN 0      65535      127.0.0.1:10443      0.0.0.0:*    users:(("xray-linux-amd6",pid=1414441,fd=11))                  
+LISTEN 0      511        127.0.0.1:8443       0.0.0.0:*    users:(("nginx",pid=1382878,fd=8),("nginx",pid=1382876,fd=8))  
+LISTEN 0      511          0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=1382878,fd=6),("nginx",pid=1382876,fd=6))  
+LISTEN 0      511          0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=1382878,fd=9),("nginx",pid=1382876,fd=9))  
+LISTEN 0      128          0.0.0.0:4488       0.0.0.0:*    users:(("sshd",pid=656,fd=3))                                  
+LISTEN 0      65535              *:20000            *:*    users:(("xray-linux-amd6",pid=1414441,fd=8))                   
+LISTEN 0      65535              *:10000            *:*    users:(("xray-linux-amd6",pid=1414441,fd=7))                   
+LISTEN 0      511             [::]:80            [::]:*    users:(("nginx",pid=1382878,fd=7),("nginx",pid=1382876,fd=7))  
+LISTEN 0      65535              *:2096             *:*    users:(("x-ui",pid=1382650,fd=14))                             
+LISTEN 0      65535              *:444              *:*    users:(("x-ui",pid=1382650,fd=11))                             
+LISTEN 0      511             [::]:443           [::]:*    users:(("nginx",pid=1382878,fd=10),("nginx",pid=1382876,fd=10))
+LISTEN 0      128             [::]:4488          [::]:*    users:(("sshd",pid=656,fd=4))                                  
+LISTEN 0      65535              *:30001            *:*    users:(("xray-linux-amd6",pid=1414441,fd=9))                   

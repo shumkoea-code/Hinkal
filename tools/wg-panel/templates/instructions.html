@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Инструкция · WG Panel{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Как пользоваться</h1>
+  <div class="list" style="margin-top:8px">
+    <div class="list-row"><div>1. Заходите только по секретному URL (Настройки).</div></div>
+    <div class="list-row"><div>2. Создайте пир: срок 1–24 мес или свой.</div></div>
+    <div class="list-row"><div>3. Срок вышел → на сервере выкл. Тот же .conf у клиента.</div></div>
+    <div class="list-row"><div>4. Кнопка +N мес → снова работает без смены файла.</div></div>
+    <div class="list-row"><div>5. Share-ссылка для пользователя без пароля админа.</div></div>
+  </div>
+  <p class="muted tiny" style="margin-top:12px">Endpoint: <code>{{ endpoint }}</code></p>
+</div>
+<div class="card">
+  <h2>Безопасность</h2>
+  <div class="list">
+    <div class="list-row"><div>Секретный путь + HTTPS :8447</div></div>
+    <div class="list-row"><div>2 ошибки входа → бан IP на час</div></div>
+    <div class="list-row"><div>Опционально TOTP 2FA</div></div>
+    <div class="list-row"><div>Лимит трафика и срок на сервере</div></div>
+  </div>
+</div>
+{% endblock %}

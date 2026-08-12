@@ -1,0 +1,51 @@
+=== xray error log tail ===
+/usr/local/x-ui/bin/xray-linux-amd64
+/etc/sysctl.d/99-xray-net.conf
+/etc/sysctl.d/99-xray-tuning.conf
+total 67648
+drwxr-xr-x  3 root root     4096 Jul 30 04:19 .
+drwxr-xr-x 11 root root     4096 Aug  3 11:51 ..
+-rw-------  1 root root     1650 Jul 29 08:00 access.log
+drwxr-xr-x  2 root root     4096 Aug 12 16:00 bin
+-rw-------  1 root root   255143 Jul 29 08:00 error.log
+-rwxr-xr-x  1 root root 68841232 Jul 30 04:19 x-ui
+-rw-r--r--  1 root root      391 Jul 30 04:19 x-ui.service.arch
+-rw-r--r--  1 root root      392 Jul 30 04:19 x-ui.service.debian
+-rw-r--r--  1 root root      394 Jul 30 04:19 x-ui.service.rhel
+Aug 12 16:00:06 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:00:06.651549 [Warning] infra/conf: REALITY: Listening on non-443 ports will increase the likelihood of your server's IP being blocked by the GFW
+Aug 12 16:00:06 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:00:06.843269 [Warning] common/errors: The feature WebSocket transport (with ALPN http/1.1, etc.) is deprecated, not recommended for using and might be removed. Please migrate to XHTTP H2 & H3 as soon as possible.
+Aug 12 16:00:06 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: INFO - Remove Inbound User sadovod-anna due to expiration or traffic limit
+Aug 12 16:00:06 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: INFO - Remove Inbound User NI due to expiration or traffic limit
+Aug 12 16:00:06 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: INFO - Remove Inbound User natalia-az due to expiration or traffic limit
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: INFO - XRAY: infra/conf/serial: Reading config: &{Name:bin/config.json Format:json}
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: common/errors: The feature gRPC transport (with unnecessary costs, etc.) is deprecated, not recommended for using and might be removed. Please migrate to XHTTP stream-up H2 as soon as possible.
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: The default minimal client version is Xray-core v26.3.27, other clients may be refused to connect
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: Listening on non-443 ports will increase the likelihood of your server's IP being blocked by the GFW
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: The default minimal client version is Xray-core v26.3.27, other clients may be refused to connect
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: Choosing "www.microsoft.com" as the target will increase the likelihood of your server's IP being blocked by the GFW
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: Choosing "microsoft.com" as the target will increase the likelihood of your server's IP being blocked by the GFW
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: infra/conf: REALITY: Listening on non-443 ports will increase the likelihood of your server's IP being blocked by the GFW
+Aug 12 16:00:07 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: WARNING - XRAY: common/errors: The feature WebSocket transport (with ALPN http/1.1, etc.) is deprecated, not recommended for using and might be removed. Please migrate to XHTTP H2 & H3 as soon as possible.
+Aug 12 16:00:10 v1.idivles.ru /usr/local/x-ui/x-ui[1382650]: INFO - xray core supports the online-stats API; using connection-based onlines and access-log-free IP limit
+Aug 12 16:05:11 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:11 http: TLS handshake error from 66.132.224.234:24526: read tcp 77.110.125.241:2096->66.132.224.234:24526: read: connection reset by peer
+Aug 12 16:05:13 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:13 http: TLS handshake error from 66.132.224.234:24534: read tcp 77.110.125.241:2096->66.132.224.234:24534: read: connection reset by peer
+Aug 12 16:05:15 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:15 http: TLS handshake error from 66.132.224.234:35156: read tcp 77.110.125.241:2096->66.132.224.234:35156: read: connection reset by peer
+Aug 12 16:05:18 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:18 http: TLS handshake error from 66.132.224.234:35204: tls: no cipher suite supported by both client and server; client offered: [c013 c027 c02f c014 c028 c030 c060 c061 c076 c077 cca8 1305 1304 1303 cc13 c011 a 2f 3c c09c c0a0 9c 35 3d c09d c0a1 9d 41 ba 84 c0 7 4 5]
+Aug 12 16:05:23 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:23 http: TLS handshake error from 66.132.224.234:35226: read tcp 77.110.125.241:2096->66.132.224.234:35226: read: connection reset by peer
+Aug 12 16:05:25 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:25 http: TLS handshake error from 66.132.224.234:59616: tls: client offered only unsupported versions: [302 301]
+Aug 12 16:05:29 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:29 http: TLS handshake error from 66.132.224.234:59624: read tcp 77.110.125.241:2096->66.132.224.234:59624: read: connection reset by peer
+Aug 12 16:05:31 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:31 http: TLS handshake error from 66.132.224.234:59636: read tcp 77.110.125.241:2096->66.132.224.234:59636: read: connection reset by peer
+Aug 12 16:05:34 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:34 http: TLS handshake error from 66.132.224.234:59650: tls: no cipher suite supported by both client and server; client offered: [16 33 67 c09e c0a2 9e 39 6b c09f c0a3 9f 45 be 88 c4 9a c008 c009 c023 c0ac c0ae c02b c00a c024 c0ad c0af c02c c072 c073 cca9 cc14 c007 c012 c013 c027 c02f c014 c028 c030 c060 c061 c076 c077 cca8 cc13 c011 a 2f 3c c09c c0a0 9c 35 3d c09d c0a1 9d 41 ba 84 c0 7 4 5]
+Aug 12 16:05:40 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:05:40 http: TLS handshake error from 66.132.224.234:28008: read tcp 77.110.125.241:2096->66.132.224.234:28008: read: connection reset by peer
+Aug 12 16:14:29 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:14:29 http: TLS handshake error from 91.197.106.55:47106: EOF
+Aug 12 16:14:30 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:14:30 http: TLS handshake error from 91.197.106.55:47107: EOF
+Aug 12 16:14:32 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:14:32 http: TLS handshake error from 91.197.106.55:47117: EOF
+Aug 12 16:14:36 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:14:36 http: TLS handshake error from 91.197.106.55:47122: EOF
+Aug 12 16:22:04 v1.idivles.ru x-ui[1382650]: 2026/08/12 16:22:04 http: TLS handshake error from 138.124.32.230:39802: EOF
+
+=== inbound 13 from x-ui db? / live config snippet ===
+/usr/local/x-ui/bin/config.json
+in-10443-tcp 10443 grpc none {'authority': 'max.ru', 'multiMode': True, 'serviceName': 'gun'}
+in-10000-tcp 10000 tcp reality {}
+in-20000-tcp 20000 xhttp reality {'extra': {}, 'host': '', 'mode': 'auto', 'path': '/bad16a45'}
+in-30001-tcp 30001 ws tls {}

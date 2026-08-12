@@ -1,0 +1,32 @@
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+80/tcp                     ALLOW IN    Anywhere                   # http-acme
+443                        ALLOW IN    Anywhere                  
+2096/tcp                   ALLOW IN    Anywhere                   # x-ui-sub
+444                        ALLOW IN    Anywhere                  
+4488                       ALLOW IN    Anywhere                  
+443/tcp                    ALLOW IN    Anywhere                   # https-sni-vpn
+80                         ALLOW IN    Anywhere                  
+10000/tcp                  ALLOW IN    Anywhere                   # backup-reality-tcp
+20000/tcp                  ALLOW IN    Anywhere                   # backup-reality-xhttp
+444/tcp                    ALLOW IN    Anywhere                   # x-ui-panel
+4488/tcp                   ALLOW IN    Anywhere                   # ssh
+51820/udp                  ALLOW IN    Anywhere                   # wireguard-keenetic
+80/tcp (v6)                ALLOW IN    Anywhere (v6)              # http-acme
+443 (v6)                   ALLOW IN    Anywhere (v6)             
+2096/tcp (v6)              ALLOW IN    Anywhere (v6)              # x-ui-sub
+444 (v6)                   ALLOW IN    Anywhere (v6)             
+4488 (v6)                  ALLOW IN    Anywhere (v6)             
+443/tcp (v6)               ALLOW IN    Anywhere (v6)              # https-sni-vpn
+80 (v6)                    ALLOW IN    Anywhere (v6)             
+10000/tcp (v6)             ALLOW IN    Anywhere (v6)              # backup-reality-tcp
+20000/tcp (v6)             ALLOW IN    Anywhere (v6)              # backup-reality-xhttp
+444/tcp (v6)               ALLOW IN    Anywhere (v6)              # x-ui-panel
+4488/tcp (v6)              ALLOW IN    Anywhere (v6)              # ssh
+51820/udp (v6)             ALLOW IN    Anywhere (v6)              # wireguard-keenetic
+

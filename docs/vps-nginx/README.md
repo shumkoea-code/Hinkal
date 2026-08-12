@@ -1,0 +1,33 @@
+# VPS idivles — сайт + скрытый VPN на 443
+
+## Документы
+
+| Документ | Для кого |
+| --- | --- |
+| **[DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)** | Подробная инструкция: имена профилей, телефон/ПК, FAQ |
+| **[WG-PANEL.md](./WG-PANEL.md)** | **1-клик веб-панель WireGuard** (HTTPS, бан IP, ссылки) |
+| **[WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)** | Keenetic + MikroTik: установка WireGuard |
+| [WG-AUDIT.md](./WG-AUDIT.md) | Контроль WG / лог с ID ресурсов |
+| [KEENETIC-ROUTER.md](./KEENETIC-ROUTER.md) | Краткая карточка Keenetic |
+| [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
+| **[SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md)** | Проверка защиты и оптимизация (UFW, BBR, SSH) |
+| [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах |
+| [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) | Первичная диагностика |
+| [live/](./live/) | Снимки nginx / sysctl / ufw |
+| [logs/](./logs/) | Журналы проверок |
+
+## Имена в подписке
+
+- **ТЕЛ+ПК · TLS-WS ★** — телефон (рекомендуется) и ПК  
+- **ТЕЛ+ПК · gRPC** — телефон/ПК (`tls` или `none`)  
+- **ПК·WiFi · Stealth / Speed / Alt** — ПК и Wi‑Fi  
+- **WireGuard UDP 51820** — роутер Keenetic / MikroTik ([WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md)); создание пиров — **[WG-PANEL.md](./WG-PANEL.md)** (`https://v1.idivles.ru:8447/`)  
+
+Подписка: `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`
+
+## GitHub
+
+https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx  
+
+Инструкция:  
+https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/DETAILED-INSTRUCTION.md

@@ -1,0 +1,20 @@
+=== sochi-portal nginx / deploy mentions of 443 / sni ===
+
+=== backup of current stream conf ===
+total 16
+drwxr-xr-x 2 root root 4096 Aug 12 16:24 .
+drwxr-xr-x 9 root root 4096 Aug 11 09:04 ..
+-rw-r--r-- 1 root root  294 Aug 11 09:05 tyoung-sni.conf
+-rw-r--r-- 1 root root  294 Aug 11 09:05 tyoung-sni.conf.bak.20260812162435
+
+=== xray listening confirmation ===
+LISTEN 0      65535      127.0.0.1:11111      0.0.0.0:*    users:(("xray-linux-amd6",pid=1414441,fd=10))                  
+LISTEN 0      65535      127.0.0.1:10443      0.0.0.0:*    users:(("xray-linux-amd6",pid=1414441,fd=11))                  
+LISTEN 0      65535      127.0.0.1:62789      0.0.0.0:*    users:(("xray-linux-amd6",pid=1414441,fd=4))                   
+LISTEN 0      65535              *:20000            *:*    users:(("xray-linux-amd6",pid=1414441,fd=8))                   
+LISTEN 0      65535              *:10000            *:*    users:(("xray-linux-amd6",pid=1414441,fd=7))                   
+LISTEN 0      65535              *:30001            *:*    users:(("xray-linux-amd6",pid=1414441,fd=9))                   
+
+=== test current VPN path from localhost (h2c to 10443) ===
+0000000  \0  \0 006 004  \0  \0  \0  \0  \0  \0 005  \0  \0   @  \0
+0000017

@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#0b1220"/>
+  <title>{% block title %}WG Panel{% endblock %}</title>
+  <style>
+    :root {
+      --bg:#0b1220; --card:#141c2a; --text:#eef3fa; --muted:#92a2b8;
+      --acc:#3aa0f0; --acc2:#1f6fad; --ok:#3ecf8e; --warn:#e6b35a; --err:#f07178;
+      --line:#2a3648; --tap:48px; --radius:16px;
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-t: env(safe-area-inset-top, 0px);
+      --nav-h: 64px;
+    }
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%}
+    body{
+      margin:0;
+      font:16px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+      color:var(--text); min-height:100dvh;
+      background: #0b1220 linear-gradient(180deg,#122033 0%,#0b1220 40%);
+      padding-bottom: calc(var(--nav-h) + 12px + var(--safe-b));
+    }
+    a{color:var(--acc);text-decoration:none}
+    .wrap{max-width:720px;margin:0 auto;padding:12px 14px 20px;padding-top:calc(12px + var(--safe-t))}
+    .topbar{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      margin-bottom:14px;
+    }
+    .topbar .brand{font-weight:750;font-size:17px;letter-spacing:.01em}
+    .topbar .user{color:var(--muted);font-size:13px}
+    .card{
+      background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+      padding:16px; margin-bottom:12px;
+    }
+    h1{margin:0 0 8px;font-size:1.28rem;line-height:1.25}
+    h2{margin:0 0 10px;font-size:1.05rem}
+    .muted{color:var(--muted)} .tiny{font-size:12px;line-height:1.35}
+    label.muted{display:block;margin:0 0 6px;font-size:12px}
+    input,button,select,textarea{font:inherit;touch-action:manipulation}
+    input,select,textarea{
+      width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--line);
+      background:#0a111b; color:var(--text); min-height:var(--tap); font-size:16px;
+    }
+    button,.btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      min-height:var(--tap); padding:12px 14px; border:0; border-radius:12px;
+      background:linear-gradient(180deg,var(--acc),var(--acc2)); color:#031018;
+      font-weight:700; font-size:15px; cursor:pointer; text-align:center;
+    }
+    button.secondary,.btn.secondary{background:#243247;color:var(--text);font-weight:600}
+    button.danger{background:#c94b55;color:#fff}
+    button.ghost,.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--muted);font-weight:600}
+    button.block,.btn.block{width:100%}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .stack{display:grid;gap:10px}
+    .flash{padding:12px 14px;border-radius:12px;margin-bottom:12px;word-break:break-word}
+    .flash.ok{background:#123226;color:var(--ok)}
+    .flash.error{background:#3a1518;color:var(--err)}
+    .pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:999px;background:#243041;font-size:12px;margin:0 4px 0 0}
+    .pill.on{background:#143526;color:var(--ok)}
+    .pill.off{background:#3a1518;color:var(--err)}
+    .pill.warn{background:#3a2e12;color:var(--warn)}
+    code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+    pre,.mono-box{
+      background:#0a111b;padding:12px;border-radius:12px;overflow:auto;
+      border:1px solid var(--line); max-width:100%; word-break:break-all; white-space:pre-wrap;
+    }
+    .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+    .stat{padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(20,28,42,.9)}
+    .stat .v{font-size:1.15rem;font-weight:750;margin-top:2px}
+    .bar{height:7px;background:#0a111b;border-radius:99px;overflow:hidden;margin-top:8px}
+    .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--acc),var(--ok))}
+    .peer-card{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px;background:#0e1622}
+    .peer-card .head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .peer-card .title{font-weight:700;font-size:17px}
+    .peer-card .meta{margin-top:8px;display:grid;gap:4px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+    .grid2 form,.grid2 a{display:block}
+    .grid2 button,.grid2 .btn{width:100%}
+    .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    .seg label{
+      display:flex;align-items:center;justify-content:center;text-align:center;
+      min-height:42px;padding:8px 4px;border-radius:12px;border:1px solid var(--line);
+      background:#0a111b;color:var(--muted);font-size:13px;cursor:pointer;position:relative;
+    }
+    .seg input{position:absolute;opacity:0;inset:0}
+    .seg label:has(input:checked){border-color:var(--acc);color:var(--text);background:#152536;font-weight:650}
+    .list{display:grid;gap:0}
+    .list-row{
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      padding:12px 0;border-bottom:1px solid var(--line);
+    }
+    .list-row:last-child{border-bottom:0;padding-bottom:0}
+    .list-row:first-child{padding-top:0}
+    .qr-wrap{text-align:center;margin:12px 0}
+    .qr-wrap img{max-width:min(200px,65vw);background:#fff;padding:8px;border-radius:10px}
+    .login-box{max-width:420px;margin:10vh auto 0}
+    .desktop-table{display:none}
+    .bottom-nav{
+      position:fixed;left:0;right:0;bottom:0;z-index:50;
+      display:grid;grid-template-columns:repeat(4,1fr);
+      background:rgba(12,18,28,.94); backdrop-filter:blur(14px);
+      border-top:1px solid var(--line);
+      padding:6px 6px calc(6px + var(--safe-b));
+    }
+    .bottom-nav a{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:2px; min-height:52px; color:var(--muted); font-size:11px; font-weight:600;
+      border-radius:12px; text-decoration:none;
+    }
+    .bottom-nav a .ico{font-size:18px;line-height:1}
+    .bottom-nav a.active{color:var(--text);background:#1a2536}
+    .hide-mobile{display:none}
+    @media(min-width:860px){
+      body{padding-bottom:24px}
+      .wrap{max-width:980px;padding:22px}
+      .stats{grid-template-columns:repeat(4,1fr)}
+      .bottom-nav{display:none}
+      .hide-mobile{display:inline-flex}
+      .top-nav{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+      .top-nav a{color:var(--muted);padding:10px 12px;border-radius:10px}
+      .top-nav a.active,.top-nav a:hover{background:#1a2536;color:var(--text);text-decoration:none}
+      .desktop-table{display:block;overflow-x:auto}
+      .mobile-list{display:none}
+      table{width:100%;border-collapse:collapse}
+      th,td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;font-size:14px}
+      th{color:var(--muted);font-size:12px}
+      .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+    }
+    @media(max-width:859px){
+      .row,.row3{grid-template-columns:1fr}
+      .seg{grid-template-columns:repeat(2,1fr)}
+      .top-nav{display:none}
+    }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="wrap">
+    {% if session.get('admin') %}
+    <div class="topbar">
+      <div class="brand">WG Panel</div>
+      <div class="user">{{ session.get('user') }}</div>
+    </div>
+    <div class="top-nav">
+      <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Пиры</a>
+      <a href="{{ url_for('settings_page') }}" class="{% if request.endpoint == 'settings_page' %}active{% endif %}">Настройки</a>
+      <a href="{{ url_for('instructions') }}" class="{% if request.endpoint == 'instructions' %}active{% endif %}">Инструкция</a>
+      <span style="flex:1"></span>
+      <a href="{{ url_for('logout') }}">Выход</a>
+    </div>
+    {% endif %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    {% block body %}{% endblock %}
+  </div>
+  {% if session.get('admin') %}
+  <nav class="bottom-nav" aria-label="Меню">
+    <a href="{{ url_for('dashboard') }}" class="{% if request.endpoint in ('dashboard','peer_detail') %}active{% endif %}">
+      <span class="ico">◎</span>Пиры
+    </a>
+    <a href="{{ url_for('settings_page') }}" class="{% if request.endpoint == 'settings_page' %}active{% endif %}">
+      <span class="ico">⚙</span>Настройки
+    </a>
+    <a href="{{ url_for('instructions') }}" class="{% if request.endpoint == 'instructions' %}active{% endif %}">
+      <span class="ico">?</span>Справка
+    </a>
+    <a href="{{ url_for('logout') }}">
+      <span class="ico">⎋</span>Выход
+    </a>
+  </nav>
+  {% endif %}
+</body>
+</html>

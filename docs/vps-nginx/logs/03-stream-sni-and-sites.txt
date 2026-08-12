@@ -1,0 +1,147 @@
+=== stream.d listing ===
+total 12
+drwxr-xr-x 2 root root 4096 Aug 11 09:04 .
+drwxr-xr-x 9 root root 4096 Aug 11 09:04 ..
+-rw-r--r-- 1 root root  294 Aug 11 09:05 tyoung-sni.conf
+
+=== FULL stream configs ===
+######## /etc/nginx/stream.d/tyoung-sni.conf ########
+map $ssl_preread_server_name $yp_backend {
+    tyoung.idivles.ru 127.0.0.1:8443;
+    default           127.0.0.1:10443;
+}
+server {
+    listen 443 reuseport;
+    listen [::]:443 reuseport;
+    proxy_pass $yp_backend;
+    ssl_preread on;
+    proxy_connect_timeout 5s;
+    proxy_timeout 86400s;
+}
+
+
+=== stream section in nginx.conf ===
+#	# imap_capabilities "IMAP4rev1" "UIDPLUS";
+#
+#	server {
+#		listen     localhost:110;
+#		protocol   pop3;
+#		proxy      on;
+#	}
+#
+#	server {
+#		listen     localhost:143;
+#		protocol   imap;
+#		proxy      on;
+#	}
+#}
+
+stream {
+	include /etc/nginx/stream.d/*.conf;
+}
+
+=== default server for 80 / catch-alls ===
+/etc/nginx/fastcgi.conf:24:fastcgi_param  SERVER_NAME        $server_name;
+/etc/nginx/nginx.conf:23:	# server_names_hash_bucket_size 64;
+/etc/nginx/nginx.conf:24:	# server_name_in_redirect off;
+/etc/nginx/nginx.conf:33:	ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3; # Dropping SSLv3, ref: POODLE
+/etc/nginx/stream.d/tyoung-sni.conf:1:map $ssl_preread_server_name $yp_backend {
+/etc/nginx/stream.d/tyoung-sni.conf:2:    tyoung.idivles.ru 127.0.0.1:8443;
+
+=== what is on 3000 (portal app?) ===
+LISTEN 0      65535      127.0.0.1:3000       0.0.0.0:*    users:(("docker-proxy",pid=796418,fd=8))                       
+LISTEN 0      65535              *:30001            *:*    users:(("xray-linux-amd6",pid=1414441,fd=9))                   
+HTTP/1.1 200 OK
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+content-security-policy: default-src 'self'; script-src 'self' 'nonce-ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0' 'strict-dynamic' https://mc.yandex.ru https://yandex.ru https://*.yandex.ru https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; font-src 'self' data:; connect-src 'self' https://mc.yandex.ru https://*.yandex.ru wss: https:; media-src 'self' blob: https://vk.com https://*.vk.com https://vk.ru https://*.vk.ru; frame-src 'self' https://yandex.ru https://*.yandex.ru https://vk.com https://*.vk.com https://vk.ru https://*.vk.ru https://gosuslugi.ru https://*.gosuslugi.ru https://pos.gosuslugi.ru; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+Vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+link: </_next/static/media/29b98dbfba401fa9-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0"; type="font/woff2", </_next/static/media/4c9affa5bc8f420e-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0"; type="font/woff2", </_next/static/media/875ae681bfde4580-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0"; type="font/woff2", </_next/static/media/d76fe899475ae4d7-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0"; type="font/woff2", </_next/static/css/5ba766da0731f6d5.css>; rel=preload; as="style"; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0", </_next/static/css/923b2e03cf327418.css>; rel=preload; as="style"; nonce="ZWM3YmQ5Y2EtZTY3OS00ZjE3LWEzMTgtNGU5ZjBlMDQ4NTg0"
+X-Powered-By: Next.js
+Cache-Control: private, no-cache, no-store, max-age=0, must-revalidate
+Content-Type: text/html; charset=utf-8
+Date: Wed, 12 Aug 2026 13:23:43 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+
+
+=== certs present ===
+total 20
+drwxr-xr-x 2 root root 4096 Aug 12 15:03 .
+drwxr-xr-x 4 root root 4096 Aug 12 15:03 ..
+-rw-r--r-- 1 root root 4808 Aug 12 15:03 fullchain.pem
+-rw------- 1 root root  227 Aug 12 15:03 privkey.pem
+total 20
+drwx------ 4 root root 4096 Aug 11 09:04 .
+drwxr-xr-x 9 root root 4096 Aug 12 00:39 ..
+-rw-r--r-- 1 root root  740 Apr  8 20:45 README
+drwxr-xr-x 2 root root 4096 Apr  8 20:45 shumko.tech
+drwxr-xr-x 2 root root 4096 Aug 11 09:04 tyoung.idivles.ru
+
+=== website roots / apps ===
+total 16
+drwxr-xr-x  4 root root 4096 Aug 11 09:04 .
+drwxr-xr-x 12 root root 4096 Apr  5 22:33 ..
+drwxr-xr-x  2 root root 4096 Aug 11 09:13 certbot
+drwxr-xr-x  2 root root 4096 Apr  5 22:33 html
+total 16
+drwxr-xr-x  4 root root 4096 Aug 11 08:49 .
+drwxr-xr-x 18 root root 4096 May 20 23:17 ..
+drwx--x--x  4 root root 4096 Aug 11 08:49 containerd
+drwxr-xr-x 15 root root 4096 Aug 11 21:22 sochi-portal
+
+=== firewall ===
+Chain INPUT (policy DROP)
+target     prot opt source               destination         
+f2b-sshd   6    --  0.0.0.0/0            0.0.0.0/0            multiport dports 0,22
+ufw-before-logging-input  0    --  0.0.0.0/0            0.0.0.0/0           
+ufw-before-input  0    --  0.0.0.0/0            0.0.0.0/0           
+ufw-after-input  0    --  0.0.0.0/0            0.0.0.0/0           
+ufw-after-logging-input  0    --  0.0.0.0/0            0.0.0.0/0           
+ufw-reject-input  0    --  0.0.0.0/0            0.0.0.0/0           
+ufw-track-input  0    --  0.0.0.0/0            0.0.0.0/0           
+Status: active
+
+To                         Action      From
+--                         ------      ----
+80/tcp                     ALLOW       Anywhere                  
+443                        ALLOW       Anywhere                  
+2053/tcp                   ALLOW       Anywhere                  
+2096/tcp                   ALLOW       Anywhere                  
+444                        ALLOW       Anywhere                  
+5205/tcp                   ALLOW       Anywhere                  
+4488                       ALLOW       Anywhere                  
+443/tcp                    ALLOW       Anywhere                  
+5201                       ALLOW       Anywhere                  
+445                        ALLOW       Anywhere                  
+442                        ALLOW       Anywhere                  
+441                        ALLOW       Anywhere                  
+440                        ALLOW       Anywhere                  
+51820                      ALLOW       Anywhere                  
+40874                      ALLOW       Anywhere                  
+33333                      ALLOW       Anywhere                  
+OpenSSH                    ALLOW       Anywhere                  
+80                         ALLOW       Anywhere                  
+10443                      ALLOW       Anywhere                  
+80/tcp (v6)                ALLOW       Anywhere (v6)             
+443 (v6)                   ALLOW       Anywhere (v6)             
+2053/tcp (v6)              ALLOW       Anywhere (v6)             
+2096/tcp (v6)              ALLOW       Anywhere (v6)             
+444 (v6)                   ALLOW       Anywhere (v6)             
+5205/tcp (v6)              ALLOW       Anywhere (v6)             
+4488 (v6)                  ALLOW       Anywhere (v6)             
+443/tcp (v6)               ALLOW       Anywhere (v6)             
+5201 (v6)                  ALLOW       Anywhere (v6)             
+445 (v6)                   ALLOW       Anywhere (v6)             
+442 (v6)                   ALLOW       Anywhere (v6)             
+441 (v6)                   ALLOW       Anywhere (v6)             
+440 (v6)                   ALLOW       Anywhere (v6)             
+51820 (v6)                 ALLOW       Anywhere (v6)             
+40874 (v6)                 ALLOW       Anywhere (v6)             
+33333 (v6)                 ALLOW       Anywhere (v6)             
+OpenSSH (v6)               ALLOW       Anywhere (v6)             
+80 (v6)                    ALLOW       Anywhere (v6)             
+10443 (v6)                 ALLOW       Anywhere (v6)             
+

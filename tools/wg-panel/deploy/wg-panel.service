@@ -1,0 +1,23 @@
+[Unit]
+Description=WireGuard Admin Panel
+After=network.target wg-quick@wg0.service
+Wants=wg-quick@wg0.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/wg-panel
+Environment=WG_PANEL_DIR=/opt/wg-panel
+Environment=PORT=8787
+Environment=WG_ADMIN_USER=admin
+Environment=WG_PUBLIC_BASE=https://v1.idivles.ru:8447
+Environment=WG_ENDPOINT=77.110.125.241:51820
+Environment=WG_BAN_AFTER=2
+Environment=WG_BAN_SECONDS=3600
+# Optional: set WG_ADMIN_PASSWORD before first start; otherwise password is written to admin.bootstrap
+ExecStart=/opt/wg-panel/venv/bin/python /opt/wg-panel/app.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

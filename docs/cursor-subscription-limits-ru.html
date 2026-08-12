@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Подписка Cursor: лимиты, тарифы и возможности</title>
+<style>
+@page { size: A4; margin: 16mm 14mm; }
+:root {
+  --ink: #1a1c20;
+  --muted: #5b6270;
+  --rule: #dfe3ea;
+  --accent: #2f6feb;
+  --surface: #f6f8fb;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0 auto;
+  max-width: 900px;
+  padding: 36px 28px 64px;
+  font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+h1 {
+  font-size: 30px;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+h2 {
+  font-size: 21px;
+  margin: 34px 0 12px;
+  padding-bottom: 7px;
+  border-bottom: 2px solid var(--rule);
+  letter-spacing: -0.01em;
+  page-break-after: avoid;
+}
+h3 {
+  font-size: 17px;
+  margin: 24px 0 8px;
+  page-break-after: avoid;
+}
+h4 { font-size: 15px; margin: 18px 0 6px; }
+p, ul, ol { margin: 0 0 12px; }
+li { margin: 3px 0; }
+li > ul, li > ol { margin: 4px 0 4px; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+  font: 0.88em/1.5 ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1px 5px;
+}
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 28px 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 18px;
+  font-size: 13.5px;
+  page-break-inside: auto;
+}
+thead { background: var(--surface); }
+th, td {
+  border: 1px solid var(--rule);
+  padding: 6px 9px;
+  text-align: left;
+  vertical-align: top;
+}
+th { font-weight: 650; }
+tr { page-break-inside: avoid; }
+blockquote {
+  margin: 14px 0;
+  padding: 2px 0 2px 14px;
+  border-left: 3px solid var(--accent);
+  color: var(--muted);
+}
+em { color: var(--muted); }
+h1 + p strong { font-size: 15px; }
+</style>
+</head>
+<body>
+<h1 id="подписка-cursor-лимиты-тарифы-и-возможности">Подписка Cursor: лимиты, тарифы и возможности</h1>
+<p><strong>Справочник на русском языке. Данные актуальны на 11 августа 2026 года.</strong></p>
+<p>Все сведения ниже взяты из официальной документации Cursor (<code>cursor.com/docs</code>, <code>cursor.com/help</code>, <code>cursor.com/terms/pricing</code>). Там, где в официальных источниках нет точных цифр, это прямо помечено словами <strong>«не документировано»</strong> — я не подставляю догадки, потому что это денежный вопрос.</p>
+<hr />
+<h2 id="содержание">Содержание</h2>
+<ol>
+<li><a href="#1-сколько-у-меня-осталось-до-лимита--где-посмотреть">Сколько у меня осталось до лимита — где посмотреть</a></li>
+<li><a href="#2-как-устроена-тарификация-в-2026-году">Как устроена тарификация в 2026 году</a></li>
+<li><a href="#3-тарифы-и-цены">Тарифы и цены</a></li>
+<li><a href="#4-что-входит-в-каждый-тариф">Что входит в каждый тариф</a></li>
+<li><a href="#5-что-происходит-при-достижении-лимита">Что происходит при достижении лимита</a></li>
+<li><a href="#6-on-demand-оплата-сверх-лимита">On-demand: оплата сверх лимита</a></li>
+<li><a href="#7-лимиты-траты-и-уведомления">Лимиты траты и уведомления</a></li>
+<li><a href="#8-auto-и-cursor-router">Auto и Cursor Router</a></li>
+<li><a href="#9-цены-моделей-за-миллион-токенов">Цены моделей за миллион токенов</a></li>
+<li><a href="#10-cursor-token-rate">Cursor Token Rate</a></li>
+<li><a href="#11-отдельно-оплачиваемые-возможности">Отдельно оплачиваемые возможности</a></li>
+<li><a href="#12-контекстные-окна-моделей">Контекстные окна моделей</a></li>
+<li><a href="#13-возможности-по-тарифам">Возможности по тарифам</a></li>
+<li><a href="#14-teams-и-enterprise">Teams и Enterprise</a></li>
+<li><a href="#15-оплата-смена-тарифа-отмена-и-возвраты">Оплата, смена тарифа, отмена и возвраты</a></li>
+<li><a href="#16-как-не-выйти-за-лимит-практические-советы">Как не выйти за лимит: практические советы</a></li>
+<li><a href="#17-про-rate-limits-и-что-изменилось-с-2025-года">Про «rate limits» и что изменилось с 2025 года</a></li>
+<li><a href="#18-чего-нет-в-официальной-документации">Чего нет в официальной документации</a></li>
+<li><a href="#19-полезные-ссылки">Полезные ссылки</a></li>
+</ol>
+<hr />
+<h2 id="1-сколько-у-меня-осталось-до-лимита--где-посмотреть">1. Сколько у меня осталось до лимита — где посмотреть</h2>
+<p>Персональные данные о расходах и остатке лимита есть только в вашем аккаунте Cursor. Ни у агента, ни у кого-то со стороны доступа к ним нет, поэтому цифру остатка нужно посмотреть самостоятельно — она есть в четырёх местах:</p>
+<table>
+<thead>
+<tr>
+<th>Где</th>
+<th>Ссылка</th>
+<th>Что показывает</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Вкладка Spending</strong> (главное место)</td>
+<td><a href="https://cursor.com/dashboard/spending">cursor.com/dashboard/spending</a></td>
+<td>Расход по обоим пулам в реальном времени, <strong>остаток включённого лимита</strong>, начисления on-demand, <strong>дату сброса лимита</strong>, стоимость отдельных запросов; здесь же настраиваются лимиты траты и оповещения</td>
+</tr>
+<tr>
+<td><strong>Usage dashboard</strong></td>
+<td><a href="https://cursor.com/dashboard/usage">cursor.com/dashboard/usage</a></td>
+<td>Включённое использование отдельно по пулам Cursor Models и Other Models</td>
+</tr>
+<tr>
+<td><strong>Billing &amp; Invoices</strong></td>
+<td><a href="https://cursor.com/dashboard">cursor.com/dashboard</a> → Billing &amp; Invoices</td>
+<td>Два раздела: Included Usage (покрыто подпиской) и On-Demand Usage (сверх подписки), счета</td>
+</tr>
+<tr>
+<td><strong>Настройки редактора</strong></td>
+<td>Cursor → Settings</td>
+<td>Оба пула видны прямо в редакторе, без открытия браузера</td>
+</tr>
+</tbody>
+</table>
+<p>Что важно понимать про «остаток»:</p>
+<ul>
+<li>Лимит сбрасывается <strong>раз в месяц по дате оформления подписки</strong>, а не первого числа календарного месяца. Точная дата сброса написана на вкладке Spending.</li>
+<li><strong>Неиспользованный остаток не переносится</strong> на следующий месяц.</li>
+<li>У вас <strong>два независимых лимита</strong> (см. следующий раздел), и они расходуются отдельно. Может закончиться один, а второй ещё останется.</li>
+<li>Если вы участник командного тарифа (Teams), вы видите свой персональный остаток; лимит выделяется каждому участнику по типу места и <strong>между участниками не переносится</strong>.</li>
+</ul>
+<p>Судя по тому, что у вас работают Cloud Agents (фоновые агенты в облаке), у вас <strong>платный тариф</strong> — облачные агенты недоступны на бесплатном Hobby. Какой именно из платных, видно на странице <a href="https://cursor.com/dashboard/billing">cursor.com/dashboard/billing</a>.</p>
+<hr />
+<h2 id="2-как-устроена-тарификация-в-2026-году">2. Как устроена тарификация в 2026 году</h2>
+<p>Главное изменение по сравнению с 2024–2025 годами: <strong>счёт идёт не в «запросах», а в токенах и деньгах</strong>. Старая модель с «premium requests» и «быстрыми/медленными запросами» официально названа legacy (устаревшей). Пользователей старых тарифов переводят на новую схему при очередном продлении подписки.</p>
+<h3 id="два-пула-использования">Два пула использования</h3>
+<p>У каждого тарифа есть <strong>два отдельных месячных пула</strong>, каждый сбрасывается вместе с биллинговым циклом:</p>
+<p><strong>1. Cursor Models</strong> («пул первых моделей»)</p>
+<ul>
+<li>Модели: <strong>Cursor Grok 4.5</strong> и <strong>Composer 2.5</strong> (собственные модели Cursor).</li>
+<li>Включённого лимита здесь «значительно больше» — в документации формулировка «generous included usage». Точная сумма в долларах <strong>не документирована ни для одного тарифа</strong>.</li>
+<li>Освобождён от надбавки Cursor Token Rate.</li>
+</ul>
+<p><strong>2. Other Models</strong> («пул сторонних моделей»)</p>
+<ul>
+<li>Все сторонние модели: Anthropic Claude, OpenAI GPT, Google Gemini, Moonshot Kimi, Z.ai GLM.</li>
+<li>Тарифицируется <strong>по API-цене модели без наценки</strong> («no markup»).</li>
+<li>Тарифы Pro, Pro Plus и Ultra включают минимум $20 такого использования в месяц (больше на старших тарифах).</li>
+</ul>
+<p>Практический вывод: выбор модели напрямую определяет, как быстро тают деньги. Composer 2.5 ($0,5 за миллион входных токенов) и Claude Fable 5 ($10 за миллион входных и $50 за миллион выходных) отличаются по стоимости в десятки раз.</p>
+<h3 id="из-чего-складывается-счёт">Из чего складывается счёт</h3>
+<p>Согласно Pricing Policy (§2.4, §9), <strong>Total Tokens</strong> — это суммарное количество токенов по всем операциям: вход, выход и кэш (и чтение, и запись). Стоимость = Total Tokens × тариф модели. То есть кэш тоже считается, просто по своим (обычно сильно меньшим) ставкам.</p>
+<p>Дополнительные множители, которые могут увеличить счёт:</p>
+<ul>
+<li><strong>Cursor Token Rate</strong> — $0,25 за миллион токенов, только на Teams и Enterprise (подробнее в разделе 10).</li>
+<li><strong>Региональное размещение данных</strong> (data residency) — надбавка <strong>+10 %</strong> к цене моделей для подходящих моделей.</li>
+<li><strong>Fast-режимы моделей</strong> — как правило ×2 к цене (у Claude Opus 4.7 fast — в разы дороже).</li>
+<li><strong>Long context</strong> — у части моделей (GPT-5.4, GPT-5.5, GPT-5.6 Sol) контекст до 1M токенов стоит ×2 по входным токенам; у моделей Claude 4.5–5 и Kimi K3 надбавки за длинный контекст нет.</li>
+</ul>
+<hr />
+<h2 id="3-тарифы-и-цены">3. Тарифы и цены</h2>
+<h3 id="индивидуальные-тарифы">Индивидуальные тарифы</h3>
+<table>
+<thead>
+<tr>
+<th>Тариф</th>
+<th>Цена</th>
+<th>Включено Other Models</th>
+<th>Cursor Models</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hobby</strong></td>
+<td>Бесплатно</td>
+<td>Ограниченно</td>
+<td>Ограниченно</td>
+</tr>
+<tr>
+<td><strong>Start</strong> (только Индия)</td>
+<td>₹649/мес, налог включён</td>
+<td>$0 (пула нет)</td>
+<td>«Щедрый» включённый лимит</td>
+</tr>
+<tr>
+<td><strong>Pro</strong></td>
+<td><strong>$20/мес</strong></td>
+<td><strong>$20</strong></td>
+<td>«Щедрый» включённый лимит</td>
+</tr>
+<tr>
+<td><strong>Pro Plus</strong> (Pro+)</td>
+<td><strong>$60/мес</strong></td>
+<td><strong>$70</strong></td>
+<td>«Щедрый» включённый лимит</td>
+</tr>
+<tr>
+<td><strong>Ultra</strong></td>
+<td><strong>$200/мес</strong></td>
+<td><strong>$400</strong></td>
+<td>«Щедрый» включённый лимит</td>
+</tr>
+</tbody>
+</table>
+<h3 id="бизнес-тарифы">Бизнес-тарифы</h3>
+<table>
+<thead>
+<tr>
+<th>Тариф</th>
+<th>Цена</th>
+<th>Включённый лимит</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Teams Standard</strong></td>
+<td><strong>$40 за пользователя/мес</strong></td>
+<td>Стандартная командная квота</td>
+</tr>
+<tr>
+<td><strong>Teams Premium</strong></td>
+<td><strong>$120 за пользователя/мес</strong></td>
+<td><strong>×5</strong> от стандартной квоты</td>
+</tr>
+<tr>
+<td><strong>Unpaid Admin</strong> (Teams)</td>
+<td>$0</td>
+<td>Нет доступа к продукту, только админ-функции</td>
+</tr>
+<tr>
+<td><strong>Enterprise</strong></td>
+<td>Индивидуально (Contact Sales)</td>
+<td>Pooled usage по договору (Precommitted Usage)</td>
+</tr>
+</tbody>
+</table>
+<p>Важные оговорки по ценам:</p>
+<ul>
+<li><strong>Все цены указаны без налогов.</strong> Единственное исключение — индийский тариф Start, где цена с налогом.</li>
+<li><strong>Годовые цены в долларах официально не публикуются.</strong> Единственная документированная цифра: для Teams «экономия 20 % при переходе с месячной на годовую оплату». На странице цен есть переключатель Monthly/Yearly, но сами суммы в документации отсутствуют.</li>
+<li><strong>Минимального количества мест для Teams нет.</strong> Ограничения такие: в команде всегда должен быть хотя бы один админ и хотя бы один платный участник; бесплатный Unpaid Admin требует наличия хотя бы одного платного пользователя; один аккаунт не может состоять более чем в одной команде.</li>
+<li>Тип места (Standard/Premium) не связан с ролью (Member/Admin) — их назначают независимо. Переход Standard → Premium действует сразу с пересчётом на остаток цикла; Premium → Standard — только с конца цикла.</li>
+<li><strong>Подписки продаются только напрямую на cursor.com.</strong> Официально: «Мы не авторизуем никаких реселлеров и сторонних продавцов», аккаунты из других источников могут быть заблокированы.</li>
+<li><strong>Покупка через App Store (iOS):</strong> доступны только месячные Pro, Pro+ и Ultra; годовых, Teams и Enterprise там нет. У таких подписчиков <strong>нельзя включить on-demand</strong> (Cursor не хранит их платёжный метод), а возврат делает только Apple.</li>
+</ul>
+<h3 id="сколько-лимита-нужно-на-практике">Сколько лимита нужно на практике</h3>
+<p>Официальная оценка Cursor по профилю использования:</p>
+<table>
+<thead>
+<tr>
+<th>Профиль</th>
+<th>Ожидаемый расход</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ежедневное использование только Tab (автодополнение)</td>
+<td>Всегда укладывается в $20</td>
+</tr>
+<tr>
+<td>Умеренное использование агента</td>
+<td>Обычно укладывается во включённые $20</td>
+</tr>
+<tr>
+<td>Ежедневное использование агента</td>
+<td>Обычно $60–100/мес суммарно</td>
+</tr>
+<tr>
+<td>Тяжёлое использование (несколько агентов, автоматизации)</td>
+<td>Часто $200+/мес</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="4-что-входит-в-каждый-тариф">4. Что входит в каждый тариф</h2>
+<p><strong>Hobby (бесплатно)</strong></p>
+<ul>
+<li>Агент, чат и Tab-автодополнение на модели Auto.</li>
+<li>«Ограниченное число запросов к агенту», доступ к Composer.</li>
+<li>Доступен меньший набор моделей, чем на платных тарифах.</li>
+<li>Карта при регистрации не требуется.</li>
+<li>Точные числовые лимиты Hobby <strong>не документированы</strong>.</li>
+</ul>
+<p><strong>Pro / Pro Plus / Ultra</strong></p>
+<ul>
+<li><strong>Неограниченное Tab-автодополнение.</strong></li>
+<li>Расширенные лимиты агента на <strong>всех</strong> моделях, доступ к frontier-моделям.</li>
+<li><strong>Cloud Agents</strong> (облачные агенты) и <strong>Bugbot</strong> (ревью кода).</li>
+<li>MCP-серверы, плагины, hooks, skills, Cursor SDK, Automations.</li>
+<li>Возможность выбирать уровень reasoning-усилий и включать Fast-режимы.</li>
+<li>Различаются только объёмом включённого лимита: $20 / $70 / $400 в пуле Other Models.</li>
+</ul>
+<p><strong>Start (только Индия, ₹649/мес)</strong></p>
+<ul>
+<li>Включено: агент, режимы Plan и Ask, Cloud Agents, Cursor для iOS, плагины, MCP-серверы, hooks, skills. Модели — только Grok 4.5 и Composer 2.5.</li>
+<li>Ограничения: обе модели работают в non-fast режиме, Grok 4.5 зафиксирован на среднем (medium) уровне усилий, менять это нельзя.</li>
+<li><strong>Не включено:</strong> пул Other Models, on-demand, Bugbot, Auto, Automations, Cursor SDK.</li>
+<li>Grok 4.5 расходует пул примерно <strong>в 3 раза быстрее</strong>, чем Composer 2.5.</li>
+<li>При исчерпании лимита ИИ-функции <strong>приостанавливаются до следующего цикла</strong> — доплатить нельзя.</li>
+</ul>
+<p><strong>Teams</strong> — всё из Pro плюс: централизованный биллинг и администрирование, командный маркетплейс внутренних правил/скиллов/плагинов, агентное ревью кода Bugbot, облачные агенты и автоматизации с общим командным контекстом, аналитика использования, принудительный Privacy Mode на всю команду, SAML/OIDC SSO, Cursor Router.</p>
+<p><strong>Enterprise</strong> — всё из Teams плюс: pooled usage (общий пул на всю организацию), оплата по счёту/PO, SCIM-провижининг мест, ограничения доступа к репозиториям/моделям/MCP, контроль auto-run, браузера и сети, audit logs, сервисные аккаунты, AI Code Tracking API, приоритетная поддержка и аккаунт-менеджмент.</p>
+<hr />
+<h2 id="5-что-происходит-при-достижении-лимита">5. Что происходит при достижении лимита</h2>
+<ol>
+<li><strong>В редакторе появляется уведомление</strong> о том, что включённое использование закончилось.</li>
+<li>Дальше два пути: <strong>включить on-demand</strong> (оплата по факту) или <strong>перейти на старший тариф</strong>.</li>
+<li><strong>Качество и скорость запросов при этом не понижаются</strong> — официальная формулировка: «Requests are never downgraded in quality or speed». Никакой «медленной очереди», как в старых тарифах, нет.</li>
+<li>Если on-demand <strong>выключен</strong>, запросы просто перестают выполняться до сброса лимита.</li>
+</ol>
+<p><strong>Особая логика для Teams:</strong> когда участник израсходовал весь включённый лимит сторонних моделей, Cursor <strong>автоматически переключает его на пул Cursor Models</strong>. Если он продолжает пользоваться сторонними моделями или исчерпал и второй пул — он переходит на on-demand, если тот включён.</p>
+<p><strong>Особая логика для Start:</strong> on-demand отсутствует, функции приостанавливаются до сброса лимита.</p>
+<hr />
+<h2 id="6-on-demand-оплата-сверх-лимита">6. On-demand: оплата сверх лимита</h2>
+<ul>
+<li>Позволяет продолжать работу после исчерпания включённого лимита <strong>по тем же API-ценам</strong>, по факту потребления.</li>
+<li><strong>Выставляется постфактум, раз в месяц</strong>, отдельными позициями в счёте (не смешивается с подпиской).</li>
+<li>Для индивидуальных тарифов <strong>нужно включить вручную</strong>: <a href="https://cursor.com/dashboard/spending#on-demand-usage">cursor.com/dashboard/spending#on-demand-usage</a>.</li>
+<li>Для <strong>Teams включён по умолчанию</strong>.</li>
+<li><strong>Недоступен</strong> на тарифе Start и для подписок, купленных через App Store.</li>
+</ul>
+<h3 id="все-способы-получить-больше-лимита">Все способы получить больше лимита</h3>
+<ol>
+<li><strong>Переключиться на модели Cursor</strong> (Grok 4.5, Composer 2.5) — это отдельный пул, который, скорее всего, ещё не исчерпан.</li>
+<li><strong>Включить on-demand.</strong></li>
+<li><strong>Перейти на старший тариф</strong> — Pro+ ($60/мес, включено $70) или Ultra ($200/мес, включено $400).</li>
+<li><strong>BYOK</strong> — подключить свои API-ключи в Cursor Settings → Models. Внимание: на Teams и Enterprise <strong>Cursor Token Rate ($0,25/млн токенов) взимается и при BYOK</strong>, вдобавок к тому, что вы платите своему API-провайдеру напрямую.</li>
+<li><strong>Enterprise pooled usage</strong> — неиспользованные объёмы перераспределяются на тех, кому они нужны.</li>
+</ol>
+<hr />
+<h2 id="7-лимиты-траты-и-уведомления">7. Лимиты траты и уведомления</h2>
+<h3 id="spend-limits-жёсткий-предел-расходов">Spend limits (жёсткий предел расходов)</h3>
+<ul>
+<li>Настраиваются на <a href="https://cursor.com/dashboard/spending">cursor.com/dashboard/spending</a>. <strong>Чтобы увидеть и задать лимит, должен быть включён on-demand.</strong> Изменения применяются немедленно; значение «No Limit» снимает ограничение.</li>
+<li><strong>При достижении лимита:</strong> ИИ-функции отключаются у конкретного пользователя, остальные участники команды не затрагиваются, пользователь видит уведомление, работа автоматически возобновляется в начале следующего биллингового цикла.</li>
+<li><strong>Индивидуальные тарифы</strong> (Pro, Pro+, Ultra): месячный лимит на собственный on-demand.</li>
+<li><strong>Teams:</strong> лимит на всю команду; при достижении ИИ-функции отключаются у всех, кто расходует on-demand.</li>
+<li><strong>Enterprise:</strong> лимиты и на команду, и на отдельных участников — через переопределения на вкладке Members, групповые переопределения на вкладке Groups или общий командный лимит на вкладке Spending. Если лимиты приходят из нескольких источников, <strong>применяется наибольший из применимых</strong>. Доступно и через Admin API.</li>
+<li>Изменение командного лимита <strong>не обновляет уже существующие персональные и групповые переопределения</strong> — их нужно снимать вручную.</li>
+<li><strong>Dynamic Spend Limits</strong> — автоматическая подстройка командного лимита под размер команды, пропорционально числу мест. Включается на вкладке Spending.</li>
+<li>На Enterprise с pooled usage персональные лимиты применяются к <strong>общему</strong> расходу, а не только к on-demand.</li>
+<li>Согласно Pricing Policy §7.2, администраторы аккаунта вправе устанавливать <strong>жёсткие предельные лимиты (hard caps)</strong> на использование в организации.</li>
+</ul>
+<h3 id="spend-alerts-предупреждения-по-email">Spend alerts (предупреждения по email)</h3>
+<ul>
+<li>Письмо приходит, когда расход on-demand достигает заданного вами порога. <strong>Оповещения не останавливают работу</strong> — для остановки нужны spend limits.</li>
+<li>Настройка: <a href="https://cursor.com/dashboard/spending">cursor.com/dashboard/spending</a> → <strong>Add Alert</strong> → выбрать уровень (команда или участник) → задать порог.</li>
+<li>Порог считается <strong>только по on-demand</strong>; включённое использование в него не входит. Исключение — Enterprise с pooled usage, где можно настроить оповещения по общему расходу.</li>
+<li>Админ решает, кому отправлять персональные оповещения: администраторам, самому участнику или обоим.</li>
+<li>Это <strong>единственный документированный механизм предупреждения</strong> о приближении к лимиту. Предупреждений в процентах от включённого лимита (вроде «вы израсходовали 80 %») в документации нет.</li>
+</ul>
+<hr />
+<h2 id="8-auto-и-cursor-router">8. Auto и Cursor Router</h2>
+<p>Режим Auto теперь работает на <strong>Cursor Router</strong> и имеет <strong>три режима</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Режим</th>
+<th>Логика</th>
+<th>Тарификация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Auto Cost</strong></td>
+<td>Прежняя логика Auto; сохраняет функциональность и цены старого режима Auto. Пользователей прежнего Auto перевели именно сюда</td>
+<td>Фиксированная ставка независимо от выбранной моделью: <strong>$1,25/млн вход</strong>, $1,25/млн запись кэша, <strong>$0,25/млн чтение кэша</strong>, <strong>$6,00/млн выход</strong>. Освобождён от Cursor Token Rate</td>
+</tr>
+<tr>
+<td><strong>Auto Balance</strong></td>
+<td>Баланс интеллекта, скорости и стоимости</td>
+<td>По API-цене фактически использованной модели + Cursor Token Rate для сторонних моделей</td>
+</tr>
+<tr>
+<td><strong>Auto Intelligence</strong></td>
+<td>Направляет на самые сильные модели для сложных задач</td>
+<td>Так же, как Balance</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Важно про деньги:</strong> Balance и Intelligence в среднем стоят <strong>примерно в 2 раза дороже</strong> Cost, а в зависимости от режима — <strong>до 2–4 раз дороже</strong>. У Cursor есть отдельный пункт в FAQ «Почему выросли мои расходы после запуска Cursor Router» именно с этим объяснением. Если счёт неожиданно вырос — проверьте, не переключён ли Auto в Balance или Intelligence.</p>
+<p><strong>Auto нигде не является безлимитным или бесплатным.</strong> У Auto Cost есть явные ставки за токены, и он расходует пулы. Запросы через Router могут расходовать оба пула — в зависимости от того, какая модель обработала запрос.</p>
+<p><strong>Доступность:</strong> Cursor Router пока доступен <strong>только на Teams и Enterprise</strong>. Индивидуальные тарифы (Hobby, Pro, Pro+, Ultra) получат его позже — формулировка документации: «через несколько месяцев после запуска». На Enterprise Router по умолчанию выключен, включает администратор.</p>
+<p><strong>Модели, между которыми маршрутизирует Router:</strong> GPT-5.5, Claude Opus 5, Grok 4.5, Claude Fable 5. <strong>Grok 4.5 обязателен</strong> — если его заблокировать, Router отключается. GPT-5.5 и Claude Opus 5 рекомендованы: блокировка одной ухудшает качество маршрутизации, блокировка обеих отключает Router.</p>
+<p><strong>Админ-настройки:</strong> включение/отключение Router; выбор доступных участникам режимов (можно отключить до двух); видимость выбранной модели (Hidden по умолчанию или Displayed); «Impose Auto» — <strong>Soft</strong> (новый чат по умолчанию на Auto, можно переключить) или <strong>Hard</strong> (выбор модели заблокирован на Auto). Обе опции выключены по умолчанию.</p>
+<p>В Cursor SDK: идентификатор модели <code>auto-smart</code>, параметр <code>optimize_for</code> со значениями <code>cost</code>, <code>balanced</code>, <code>intelligence</code>.</p>
+<hr />
+<h2 id="9-цены-моделей-за-миллион-токенов">9. Цены моделей за миллион токенов</h2>
+<h3 id="модели-cursor-пул-cursor-models">Модели Cursor (пул Cursor Models)</h3>
+<table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>Вход</th>
+<th>Запись кэша</th>
+<th>Чтение кэша</th>
+<th>Выход</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Auto Cost</td>
+<td>$1,25</td>
+<td>$1,25</td>
+<td>$0,25</td>
+<td>$6</td>
+</tr>
+<tr>
+<td><strong>Composer 2.5</strong></td>
+<td><strong>$0,5</strong></td>
+<td>—</td>
+<td>$0,2</td>
+<td><strong>$2,5</strong></td>
+</tr>
+<tr>
+<td>Composer 2.5 (fast, по умолчанию в продукте)</td>
+<td>$3</td>
+<td>—</td>
+<td>—</td>
+<td>$15</td>
+</tr>
+<tr>
+<td>Composer 1</td>
+<td>$1,25</td>
+<td>—</td>
+<td>$0,125</td>
+<td>$10</td>
+</tr>
+<tr>
+<td><strong>Grok 4.5 (standard)</strong></td>
+<td><strong>$2</strong></td>
+<td>—</td>
+<td>$0,5</td>
+<td><strong>$6</strong></td>
+</tr>
+<tr>
+<td>Grok 4.5 (fast)</td>
+<td>$4</td>
+<td>—</td>
+<td>$1,00</td>
+<td>$18</td>
+</tr>
+</tbody>
+</table>
+<p>Composer 2.5 — самая дешёвая модель в системе. Grok 4.5 поддерживает уровни усилий high (по умолчанию), medium, low.</p>
+<h3 id="сторонние-модели-пул-other-models">Сторонние модели (пул Other Models)</h3>
+<table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>Провайдер</th>
+<th>Вход</th>
+<th>Запись кэша</th>
+<th>Чтение кэша</th>
+<th>Выход</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude 4 Sonnet</td>
+<td>Anthropic</td>
+<td>$3</td>
+<td>$3,75</td>
+<td>$0,3</td>
+<td>$15</td>
+</tr>
+<tr>
+<td>Claude 4 Sonnet 1M</td>
+<td>Anthropic</td>
+<td>$6</td>
+<td>$7,5</td>
+<td>$0,6</td>
+<td>$22,5</td>
+</tr>
+<tr>
+<td>Claude 4.5 Haiku</td>
+<td>Anthropic</td>
+<td>$1</td>
+<td>$1,25</td>
+<td>$0,1</td>
+<td>$5</td>
+</tr>
+<tr>
+<td>Claude 4.5 Opus</td>
+<td>Anthropic</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$25</td>
+</tr>
+<tr>
+<td>Claude 4.5 Sonnet</td>
+<td>Anthropic</td>
+<td>$3</td>
+<td>$3,75</td>
+<td>$0,3</td>
+<td>$15</td>
+</tr>
+<tr>
+<td>Claude 4.6 Opus</td>
+<td>Anthropic</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$25</td>
+</tr>
+<tr>
+<td>Claude 4.6 Sonnet</td>
+<td>Anthropic</td>
+<td>$3</td>
+<td>$3,75</td>
+<td>$0,3</td>
+<td>$15</td>
+</tr>
+<tr>
+<td>Claude 4.7 Opus</td>
+<td>Anthropic</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$25</td>
+</tr>
+<tr>
+<td><strong>Claude Opus 4.7 (fast mode)</strong></td>
+<td>Anthropic</td>
+<td><strong>$30</strong></td>
+<td>$37,5</td>
+<td>$3</td>
+<td><strong>$150</strong></td>
+</tr>
+<tr>
+<td>Claude Opus 4.8</td>
+<td>Anthropic</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$25</td>
+</tr>
+<tr>
+<td>Claude Opus 5</td>
+<td>Anthropic</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$25</td>
+</tr>
+<tr>
+<td>Claude Sonnet 5</td>
+<td>Anthropic</td>
+<td>$3</td>
+<td>$3,75</td>
+<td>$0,3</td>
+<td>$15</td>
+</tr>
+<tr>
+<td><strong>Claude Fable 5</strong></td>
+<td>Anthropic</td>
+<td><strong>$10</strong></td>
+<td>$12,5</td>
+<td>$1</td>
+<td><strong>$50</strong></td>
+</tr>
+<tr>
+<td>Gemini 2.5 Flash</td>
+<td>Google</td>
+<td>$0,3</td>
+<td>—</td>
+<td>$0,03</td>
+<td>$2,5</td>
+</tr>
+<tr>
+<td>Gemini 3 Flash</td>
+<td>Google</td>
+<td>$0,5</td>
+<td>—</td>
+<td>$0,05</td>
+<td>$3</td>
+</tr>
+<tr>
+<td>Gemini 3 Pro</td>
+<td>Google</td>
+<td>$2</td>
+<td>—</td>
+<td>$0,2</td>
+<td>$12</td>
+</tr>
+<tr>
+<td>Gemini 3 Pro Image Preview</td>
+<td>Google</td>
+<td>$2</td>
+<td>—</td>
+<td>$0,2</td>
+<td>$12</td>
+</tr>
+<tr>
+<td>Gemini 3.1 Pro</td>
+<td>Google</td>
+<td>$2</td>
+<td>—</td>
+<td>$0,2</td>
+<td>$12</td>
+</tr>
+<tr>
+<td>Gemini 3.5 Flash</td>
+<td>Google</td>
+<td>$1,5</td>
+<td>—</td>
+<td>$0,15</td>
+<td>$9</td>
+</tr>
+<tr>
+<td>Gemini 3.6 Flash</td>
+<td>Google</td>
+<td>$1,5</td>
+<td>—</td>
+<td>$0,15</td>
+<td>$7,5</td>
+</tr>
+<tr>
+<td>GLM 5.2</td>
+<td>Z.ai</td>
+<td>$1,4</td>
+<td>—</td>
+<td>$0,26</td>
+<td>$4,4</td>
+</tr>
+<tr>
+<td>GPT-5</td>
+<td>OpenAI</td>
+<td>$1,25</td>
+<td>—</td>
+<td>$0,125</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>GPT-5 Fast</td>
+<td>OpenAI</td>
+<td>$2,5</td>
+<td>—</td>
+<td>$0,25</td>
+<td>$20</td>
+</tr>
+<tr>
+<td>GPT-5 Mini</td>
+<td>OpenAI</td>
+<td>$0,25</td>
+<td>—</td>
+<td>$0,025</td>
+<td>$2</td>
+</tr>
+<tr>
+<td>GPT-5-Codex</td>
+<td>OpenAI</td>
+<td>$1,25</td>
+<td>—</td>
+<td>$0,125</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>GPT-5.1 Codex</td>
+<td>OpenAI</td>
+<td>$1,25</td>
+<td>—</td>
+<td>$0,125</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>GPT-5.1 Codex Max</td>
+<td>OpenAI</td>
+<td>$1,25</td>
+<td>—</td>
+<td>$0,125</td>
+<td>$10</td>
+</tr>
+<tr>
+<td>GPT-5.1 Codex Mini</td>
+<td>OpenAI</td>
+<td>$0,25</td>
+<td>—</td>
+<td>$0,025</td>
+<td>$2</td>
+</tr>
+<tr>
+<td>GPT-5.2</td>
+<td>OpenAI</td>
+<td>$1,75</td>
+<td>—</td>
+<td>$0,175</td>
+<td>$14</td>
+</tr>
+<tr>
+<td>GPT-5.2 Codex</td>
+<td>OpenAI</td>
+<td>$1,75</td>
+<td>—</td>
+<td>$0,175</td>
+<td>$14</td>
+</tr>
+<tr>
+<td>GPT-5.3 Codex</td>
+<td>OpenAI</td>
+<td>$1,75</td>
+<td>—</td>
+<td>$0,175</td>
+<td>$14</td>
+</tr>
+<tr>
+<td>GPT-5.4</td>
+<td>OpenAI</td>
+<td>$2,5</td>
+<td>—</td>
+<td>$0,25</td>
+<td>$15</td>
+</tr>
+<tr>
+<td>GPT-5.4 Mini</td>
+<td>OpenAI</td>
+<td>$0,75</td>
+<td>—</td>
+<td>$0,075</td>
+<td>$4,5</td>
+</tr>
+<tr>
+<td>GPT-5.4 Nano</td>
+<td>OpenAI</td>
+<td>$0,2</td>
+<td>—</td>
+<td>$0,02</td>
+<td>$1,25</td>
+</tr>
+<tr>
+<td>GPT-5.5</td>
+<td>OpenAI</td>
+<td>$5</td>
+<td>—</td>
+<td>$0,5</td>
+<td>$30</td>
+</tr>
+<tr>
+<td><strong>GPT-5.6 Luna</strong></td>
+<td>OpenAI</td>
+<td><strong>$0,2</strong></td>
+<td>$0,25</td>
+<td>$0,02</td>
+<td><strong>$1,2</strong></td>
+</tr>
+<tr>
+<td>GPT-5.6 Sol</td>
+<td>OpenAI</td>
+<td>$5</td>
+<td>$6,25</td>
+<td>$0,5</td>
+<td>$30</td>
+</tr>
+<tr>
+<td>GPT-5.6 Terra</td>
+<td>OpenAI</td>
+<td>$2</td>
+<td>$2,5</td>
+<td>$0,2</td>
+<td>$12</td>
+</tr>
+<tr>
+<td>Kimi K2.7 Code</td>
+<td>Moonshot</td>
+<td>$0,95</td>
+<td>—</td>
+<td>$0,19</td>
+<td>$4</td>
+</tr>
+<tr>
+<td>Kimi K3</td>
+<td>Moonshot</td>
+<td>$3</td>
+<td>—</td>
+<td>$0,3</td>
+<td>$15</td>
+</tr>
+</tbody>
+</table>
+<h3 id="важные-примечания-к-ценам">Важные примечания к ценам</h3>
+<ul>
+<li><strong>Claude Sonnet 5: акция при запуске — $2/млн вход и $10/млн выход до 31 августа 2026 года.</strong> Учтите, что у модели обновлённый токенизатор, поэтому один и тот же текст может дать больше токенов.</li>
+<li><strong>Claude Fable 5</strong> примерно в 2 раза дороже Claude Opus 5. Требует согласия на хранение данных для Enterprise, Teams и индивидуальных пользователей с включённым Privacy Mode: Anthropic хранит вход и выход агента для предотвращения злоупотреблений, но не использует эти данные для обучения моделей. Запросы, задевающие защитный фильтр, автоматически перенаправляются на Claude Opus.</li>
+<li><strong>Claude 4 Sonnet 1M</strong> — цена ×2, когда вход превышает 200k токенов; модель может оказаться очень дорогой из-за большого контекста.</li>
+<li><strong>Claude 4.5 Haiku</strong> — региональные эндпоинты Bedrock/Vertex дают надбавку +10 %; запись кэша ×1,25, чтение ×0,1.</li>
+<li><strong>Claude Opus 4.8 fast</strong> — в 3 раза дешевле по токенам, чем fast-режим Opus 4.7.</li>
+<li><strong>GPT-5.4 / 5.4 Mini / 5.4 Nano</strong> — скидка 90 % на кэшированные входные токены. GPT-5.4 fast на 15 % быстрее при цене ×2; long context до 1M токенов при цене входа ×2.</li>
+<li><strong>GPT-5.5 и GPT-5.6 Sol</strong> — long context до 1M токенов при цене входа ×2.</li>
+<li><strong>Семейство GPT-5.6</strong> — fast-режим по цене ×2; запись кэша считается как ×1,25 от некэшированного входа.</li>
+<li><strong>Claude 4.5 / 4.6 / 4.7 Sonnet и Opus, Opus 4.8, Opus 5, Sonnet 5, Kimi K3</strong> — контекст до 1M токенов по тем же ставкам, надбавки за длинный контекст нет.</li>
+<li><strong>Gemini 3 Pro Image Preview</strong> — генерация изображений: $120 за миллион токенов вывода (примерно $0,134 за изображение 1K/2K и $0,24 за 4K). У preview-моделей более строгие лимиты частоты запросов.</li>
+<li><strong>GPT-5.1 Codex Mini</strong> — лимиты частоты запросов в 4 раза выше, чем у GPT-5.1 Codex.</li>
+<li>Многие модели помечены «Hidden by default» — их нужно включать в выборе моделей вручную.</li>
+</ul>
+<hr />
+<h2 id="10-cursor-token-rate">10. Cursor Token Rate</h2>
+<p>Только для тарифов <strong>Teams и Enterprise</strong>: надбавка <strong>$0,25 за миллион токенов</strong> на запросы к сторонним моделям, сверх API-цены модели.</p>
+<ul>
+<li>Применяется к <strong>входным, выходным и кэшированным</strong> токенам.</li>
+<li>Применяется к включённому использованию, к on-demand <strong>и к BYOK</strong> (своим API-ключам).</li>
+<li>Покрывает инфраструктуру поиска, выполнение и маршрутизацию собственных моделей Cursor (Tab, Apply и прочее), а также затраты на обработку и инфраструктуру.</li>
+<li><strong>Освобождены:</strong> Auto Cost и все первые модели Cursor — Composer 2.5 и Grok 4.5.</li>
+<li>Взимается и когда вы выбираете стороннюю модель напрямую, и когда Auto Balance или Auto Intelligence направляет запрос на стороннюю модель.</li>
+</ul>
+<hr />
+<h2 id="11-отдельно-оплачиваемые-возможности">11. Отдельно оплачиваемые возможности</h2>
+<h3 id="cloud-agents-облачные-агенты-ранее-background-agents">Cloud Agents (облачные агенты, ранее Background Agents)</h3>
+<ul>
+<li>Тарифицируются <strong>по API-цене выбранной модели</strong>. Отдельной платы за виртуальную машину или машинное время <strong>в документации нет</strong>.</li>
+<li>Можно выбрать размер контекстного окна, и <strong>больший контекст увеличивает расход токенов и стоимость</strong>.</li>
+<li><strong>При первом использовании вас попросят задать лимит траты (spend limit).</strong></li>
+<li>Доступны на <strong>всех платных тарифах</strong>, включая Start. На бесплатном Hobby — недоступны.</li>
+<li>Запускать можно <strong>сколько угодно агентов параллельно</strong>; числового ограничения в документации нет.</li>
+<li>Панель управления: <a href="https://cursor.com/dashboard/cloud-agents">cursor.com/dashboard/cloud-agents</a> — статусы, логи, потребление ресурсов, окружения, секреты, настройки.</li>
+<li>Автоисправление упавшего CI на PR облачного агента доступно <strong>на тарифах Teams</strong>; отключается на конкретном PR командой <code>@cursor autofix off</code>.</li>
+<li>Админы команды могут включать/отключать «Long running agents», а на Enterprise — «Computer use».</li>
+</ul>
+<h3 id="bugbot-агентное-ревью-кода">Bugbot (агентное ревью кода)</h3>
+<ul>
+<li>Перешёл на <strong>тарификацию по использованию</strong>, а не по местам.</li>
+<li><strong>Средний прогон Bugbot стоит от $1,00 до $1,50</strong> в зависимости от размера и сложности PR.</li>
+<li><strong>Индивидуальные тарифы:</strong> списывается сначала из включённого лимита, затем из on-demand. Если on-demand выключен, Bugbot приостанавливается до следующего цикла.</li>
+<li><strong>Teams:</strong> ревью списываются <strong>из on-demand</strong>, а не из включённого лимита.</li>
+<li><strong>Уровни усилий</strong> (только на usage-based тарифах): <strong>Default</strong>, <strong>High</strong> (дороже, дольше, находит больше проблем), <strong>Custom</strong> (описание на естественном языке, когда какой уровень применять).</li>
+<li><strong>Bugbot Autofix</strong> запускает облачного агента и тарифицируется по ставкам вашего тарифа. Требует включённого on-demand и включённого хранения данных (не работает при Legacy Privacy Mode). Максимум <strong>3 попытки на PR</strong> при коммите в существующую ветку.</li>
+<li>MCP-поддержка Bugbot — только на Teams и Enterprise.</li>
+<li>Лимиты правил: одно правило обрезается на <strong>30 000 символов</strong>, суммарно правила — не более <strong>100 000 символов</strong> на ревью.</li>
+<li>Лимиты API: <code>POST /bugbot/review</code> — <strong>30 запросов в минуту на команду</strong> (dry-run дополнительно ограничен 10 в минуту); Admin Configuration API — <strong>60 запросов в минуту на команду</strong>.</li>
+<li><strong>Переход на новую тарификацию:</strong> новые клиенты — сразу; существующие — при первом продлении <strong>после 8 июня 2026 года</strong>. Пример из документации: цикл, начавшийся 1 мая 2026, переходит с цикла 1 июля (не 1 июня). Годовая подписка, купленная в мае 2026, — при продлении в мае 2027. Досрочно переключиться можно на <a href="https://cursor.com/dashboard/bugbot?modal=migrate-bugbot">cursor.com/dashboard/bugbot?modal=migrate-bugbot</a> с пропорциональным возвратом уже оплаченных за места сумм в виде кредитов.</li>
+<li><strong>Старая (legacy) схема Bugbot:</strong> для частных лиц $40/мес за до 200 PR в месяц по всем репозиториям; для команд $40 за пользователя в месяц, где «пользователь» — тот, чьи PR были отревьюены в этом месяце; общий предохранитель — 200 PR в месяц на лицензию (например, 100 пользователей → 20 000 PR/мес), по запросу увеличивается.</li>
+</ul>
+<h3 id="max-mode">Max Mode</h3>
+<ul>
+<li><strong>Max Mode доступен только на устаревших (legacy) request-based тарифах.</strong> На текущих usage-based тарифах его нет.</li>
+<li>На legacy-тарифах он расширяет контекстное окно модели сверх стандартного и тарифицируется <strong>по API-цене модели +20 %</strong>. Там же он давал субагентов, генерацию изображений и доступ к новейшим frontier-моделям.</li>
+<li>Многие модели помечены «Requires Max Mode on legacy request-based plans»: все Claude Opus/Sonnet 4.5 и новее, Fable 5, GPT-5.3 Codex, GPT-5.4, GPT-5.5, GPT-5.6 Sol, Kimi K3.</li>
+<li>На современных тарифах длинный контекст решается ценой моделей: у части моделей ×2 по входу за 1M-контекст, у части — без надбавки.</li>
+</ul>
+<h3 id="вызовы-инструментов-и-кэш">Вызовы инструментов и кэш</h3>
+<ul>
+<li><strong>Ограничения на количество вызовов инструментов нет:</strong> «There is no limit on the number of tool calls Agent can make during a task». Отдельной платы за вызов инструмента нет — они тарифицируются через токены.</li>
+<li>Кэш тарифицируется отдельными колонками: чтение кэша обычно составляет 10 % от цены входа (например, Claude Sonnet: $3 вход против $0,30 чтение кэша), запись кэша обычно ×1,25 от входа.</li>
+</ul>
+<h3 id="conversation-insights-enterprise">Conversation Insights (Enterprise)</h3>
+<p>Классифицирует работу по категории, типу, сложности и специфичности; работает на устройстве; включено по умолчанию. <strong>Было бесплатно в период превью; с 1 января 2026 года инференс тарифицируется.</strong></p>
+<hr />
+<h2 id="12-контекстные-окна-моделей">12. Контекстные окна моделей</h2>
+<table>
+<thead>
+<tr>
+<th>Модель</th>
+<th>Контекст по умолчанию</th>
+<th>Максимум</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Grok 4.5</td>
+<td>256k</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Composer 2.5 / Composer 1</td>
+<td>200k</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Claude 4 Sonnet, 4.5 Haiku, 4.5/4.6 Sonnet, Sonnet 5, Opus 4.7 fast</td>
+<td>200k</td>
+<td>1M (у Claude 4.5 Opus — 200k)</td>
+</tr>
+<tr>
+<td>Claude 4.7 Opus, Opus 4.8, Opus 5, Fable 5</td>
+<td>300k</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>Семейство GPT-5, GPT-5.x Codex, GPT-5.4 / 5.5 / 5.6</td>
+<td>272k</td>
+<td>1M (у 5.4, 5.5, 5.6 Sol)</td>
+</tr>
+<tr>
+<td>Gemini 2.5 Flash, 3 Flash, 3 Pro, 3.1 Pro, 3.5/3.6 Flash</td>
+<td>200k</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>Kimi K2.7 Code</td>
+<td>262k</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Kimi K3</td>
+<td>200k</td>
+<td>1M</td>
+</tr>
+<tr>
+<td>GLM 5.2</td>
+<td>200k</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Примечание: эта таблица опубликована на странице про legacy request-based тарифы — там же указаны «стоимости в запросах» (например, Claude 4 Sonnet = 1 запрос, thinking-вариант = 2, Composer 2.5 = 2, GPT-5 Fast = 2), но эти числа относятся <strong>только к устаревшим тарифам</strong> и на новых не применяются.</p>
+<hr />
+<h2 id="13-возможности-по-тарифам">13. Возможности по тарифам</h2>
+<h3 id="администрирование-и-биллинг">Администрирование и биллинг</h3>
+<table>
+<thead>
+<tr>
+<th>Возможность</th>
+<th>Индивидуальные</th>
+<th>Teams</th>
+<th>Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Централизованный биллинг</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Контроль расходов</td>
+<td>Персональные лимиты</td>
+<td>Командные лимиты</td>
+<td>Pooled usage + админ-контроль</td>
+</tr>
+<tr>
+<td>Billing Groups</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Аналитика по команде</td>
+<td>—</td>
+<td>Analytics Dashboard</td>
+<td>Analytics Dashboard + AI Code Tracking API + Conversation Insights</td>
+</tr>
+<tr>
+<td>Cursor Blame</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>SSO (SAML/OIDC)</td>
+<td>—</td>
+<td>✓</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>SCIM-провижининг</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Audit logs</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Сервисные аккаунты</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="маркетплейс">Маркетплейс</h3>
+<table>
+<thead>
+<tr>
+<th>Возможность</th>
+<th>Индивидуальные</th>
+<th>Teams</th>
+<th>Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Командные маркетплейсы</td>
+<td>—</td>
+<td>1 маркетплейс</td>
+<td>Без ограничений</td>
+</tr>
+<tr>
+<td>Импорт community-плагинов</td>
+<td>—</td>
+<td>Включён по умолчанию</td>
+<td>Выключен по умолчанию</td>
+</tr>
+<tr>
+<td>Кто может редактировать</td>
+<td>—</td>
+<td>Все команды</td>
+<td>Только админы</td>
+</tr>
+<tr>
+<td>Распространение и гейтинг через SCIM</td>
+<td>—</td>
+<td>Нет</td>
+<td>Есть</td>
+</tr>
+</tbody>
+</table>
+<h3 id="централизованное-управление-агентами">Централизованное управление агентами</h3>
+<table>
+<thead>
+<tr>
+<th>Возможность</th>
+<th>Индивидуальные</th>
+<th>Teams</th>
+<th>Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Privacy Mode</td>
+<td>Выбор пользователя</td>
+<td>Принудительно для всей организации</td>
+<td>Принудительно для всей организации</td>
+</tr>
+<tr>
+<td>Team Rules</td>
+<td>—</td>
+<td>Обязательные + опциональные</td>
+<td>Обязательные + опциональные</td>
+</tr>
+<tr>
+<td>Hooks (логирование/аудит)</td>
+<td>✓</td>
+<td>Распространение через MDM</td>
+<td>MDM + серверное распространение</td>
+</tr>
+<tr>
+<td>Agent Sandbox Mode</td>
+<td>✓</td>
+<td>✓</td>
+<td>Принудительно для организации</td>
+</tr>
+<tr>
+<td>Блоклист репозиториев</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Ограничение доступа к моделям</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Контроль auto-run, браузера, сети</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+</tbody>
+</table>
+<h3 id="управление-доступом-пользователей-только-enterprise">Управление доступом пользователей (только Enterprise)</h3>
+<p>Ограничение доступа к агентам через <strong>Cursor CLI</strong>; ограничение того, кто может <strong>создавать облачных агентов</strong>; ограничение доступа к аналитике только для админов; <strong>отключение BYOK</strong> (своих API-ключей).</p>
+<h3 id="поддержка-и-юридические-условия">Поддержка и юридические условия</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Индивидуальные</th>
+<th>Teams</th>
+<th>Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Техподдержка</td>
+<td>Сообщество и стандартная поддержка (форум)</td>
+<td>Сообщество и стандартная поддержка</td>
+<td><strong>Первый ответ человека: 8 часов (критично), 24 часа (обычно)</strong></td>
+</tr>
+<tr>
+<td>Условия</td>
+<td>Онлайн-условия</td>
+<td>MSA и DPA</td>
+<td>MSA и DPA</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="14-teams-и-enterprise">14. Teams и Enterprise</h2>
+<h3 id="роли-в-teams">Роли в Teams</h3>
+<ul>
+<li><strong>Member</strong> — возможности Pro, без доступа к биллингу и админке; видит свой расход и свой остаток включённого лимита.</li>
+<li><strong>Admin</strong> — плюс управление участниками, SSO, настройка on-demand и лимитов траты, аналитика.</li>
+<li><strong>Unpaid Admin</strong> — бесплатно, без доступа к продукту, те же админ-возможности.</li>
+</ul>
+<p>Приглашать участников могут все три роли. Удалять участников, менять роли, заходить в админ-панель, настраивать SSO и безопасность, управлять биллингом, смотреть аналитику и управлять доступом могут только Admin и Unpaid Admin.</p>
+<h3 id="аналитика-команды">Аналитика команды</h3>
+<p>Панель <a href="https://cursor.com/dashboard/analytics">cursor.com/dashboard/analytics</a> показывает: долю ИИ в закоммиченном коде, правки агента, Tab-автодополнения (количество подсказок, не строк), отправленные сообщения (с фильтром по режиму и модели), активных пользователей, ежедневное использование за 365 дней, лидерборд (чаты / принятые Tab-подсказки / строки кода от агента, плюс любимая модель), инсайты по репозиториям, использование облачных агентов (создано агентов, открыто и смёржено PR, строк кода), топ репозиториев и пользователей по облачным агентам, версии клиента.</p>
+<p>Ограничения: фильтрация — до <strong>10 пользователей</strong> и <strong>90 непрерывных дней</strong>. Выгрузка CSV по отдельному графику или по всем сразу. Данные собираются только с <strong>версии клиента 1.5 и выше</strong>. Analytics API — только Enterprise.</p>
+<h3 id="enterprise-договорные-механики">Enterprise: договорные механики</h3>
+<p>Из <a href="https://cursor.com/terms/pricing">Pricing Policy</a>:</p>
+<ul>
+<li><strong>Precommitted Usage</strong> учитывается кумулятивно за весь срок договора, а не по месяцам; <strong>не переносится</strong> на следующий срок, а неиспользованный остаток выставляется в счёт в конце срока (§5.2).</li>
+<li><strong>On-Demand Usage Fees</strong> выставляются <strong>ежемесячно постфактум</strong> (§5.1).</li>
+<li>Условия оплаты — <strong>Net 30</strong> (§5.5).</li>
+<li>Номера заказов (PO) должны попасть на <code>ar@cursor.com</code> минимум за <strong>5 рабочих дней</strong> до конца следующего расчётного периода.</li>
+<li>Отказ от автопродления — письменное уведомление за <strong>30 дней</strong>.</li>
+<li><strong>True Up</strong> считается по числу активных пользователей в <strong>последние 30 дней</strong> каждого периода True Up; места сверх базовой линии выставляются по цене Core License плюс Precommitted Usage за оставшиеся месяцы срока.</li>
+<li>Bugbot Usage Fees учитываются в Precommitted Usage (§2.6).</li>
+<li>Скидки за объём для больших команд — через <code>enterprise@cursor.com</code>.</li>
+</ul>
+<hr />
+<h2 id="15-оплата-смена-тарифа-отмена-и-возвраты">15. Оплата, смена тарифа, отмена и возвраты</h2>
+<h3 id="биллинговый-цикл">Биллинговый цикл</h3>
+<p>Начинается с даты оформления подписки. Индивидуальные тарифы продлеваются по дате регистрации, Teams — по дате регистрации команды. <strong>Даты продления не меняются при добавлении или удалении участников.</strong></p>
+<h3 id="смена-тарифа">Смена тарифа</h3>
+<ul>
+<li><strong>Апгрейд действует немедленно.</strong></li>
+<li><strong>Даунгрейд</strong> — это «Schedule Downgrade»: текущий тариф сохраняется до конца оплаченного периода.</li>
+<li>Переход с месячной на годовую оплату — через зелёный баннер «Upgrade Now».</li>
+<li><strong>С годовой на месячную посреди периода перейти нельзя</strong>: только запланировать на конец года; для Teams — «отменить, дождаться конца года, подписаться заново».</li>
+</ul>
+<h3 id="отмена">Отмена</h3>
+<p>Через <a href="https://cursor.com/dashboard/billing">cursor.com/dashboard/billing</a> → Manage Subscription (Stripe-портал) → Cancel Subscription. Платные функции сохраняются до конца оплаченного периода, затем аккаунт возвращается на бесплатный <strong>Hobby</strong>. Отмена не удаляет аккаунт и локальные файлы.</p>
+<p>Кнопка отмены скрыта, если: тариф уже истёк, есть неоплаченный счёт, вы участник команды без прав админа, либо подписка оформлена через iOS.</p>
+<h3 id="возвраты">Возвраты</h3>
+<p>Для Pro, Pro+ и Ultra правила одинаковы для месячной и годовой оплаты. Возврат <strong>последнего платежа</strong> возможен, если <strong>одновременно</strong>:</p>
+<ol>
+<li>платёж был сделан <strong>в течение последних 14 дней</strong>, и</li>
+<li><strong>вы не пользовались подпиской</strong> в этом расчётном периоде.</li>
+</ol>
+<p>Деньги возвращаются на исходный способ оплаты в течение <strong>5–10 рабочих дней</strong>. Вне 14-дневного окна или при наличии использования платёж, как правило, не возвращается, и вы считаетесь обязанным по текущему периоду. <strong>Начисления за on-demand и fast-requests за уже потреблённое не возвращаются.</strong> Для покупок через iOS возврат делает только Apple. Cursor просит связаться с поддержкой до оспаривания платежа в банке. Политика не ограничивает прав потребителя по применимому законодательству. Для Teams публично описана только возможность корректировки биллинга в виде кредита на будущий счёт.</p>
+<h3 id="студенческая-скидка">Студенческая скидка</h3>
+<p><strong>Набор новых участников по старой студенческой скидке прекращён 25 июня 2026 года</strong> (причина — мошенничество). Кто уже активировал, сохраняет тариф до истечения плана, дальше Pro продолжается по обычным $20/мес. Замена: бакалавры смогут получать кредиты и скидки на кампусных и онлайн-мероприятиях «начиная с этой осени»; магистранты, аспиранты, академические исследователи и преподаватели могут запросить кредиты через форму. Процент или сумма старой скидки на текущей странице не указаны.</p>
+<hr />
+<h2 id="16-как-не-выйти-за-лимит-практические-советы">16. Как не выйти за лимит: практические советы</h2>
+<ol>
+<li><strong>Проверьте, в каком режиме у вас Auto.</strong> Balance и Intelligence стоят в 2–4 раза дороже Cost. Это самая частая причина неожиданного роста счёта.</li>
+<li><strong>Пользуйтесь моделями Cursor для рутины.</strong> Composer 2.5 ($0,5 вход / $2,5 выход) расходует отдельный пул, которого «значительно больше», и не облагается Cursor Token Rate. Grok 4.5 в 3 раза «дороже» Composer по расходу пула.</li>
+<li><strong>Осторожнее с fast-режимами.</strong> Composer 2.5 fast стоит $3/$15 против $0,5/$2,5 у обычного — в 6 раз дороже. Fast у GPT-5.6 и GPT-5.4 — ×2. Claude Opus 4.7 fast — $30/$150, это самая дорогая позиция в прайсе.</li>
+<li><strong>Задайте spend limit сразу</strong>, а не после первого счёта: <a href="https://cursor.com/dashboard/spending">cursor.com/dashboard/spending</a>. И добавьте spend alert на комфортный порог.</li>
+<li><strong>Следите за длиной контекста.</strong> Токены входа считаются на каждом шаге агента, поэтому долгие сессии с огромным контекстом дороги. Для облачных агентов размер контекста выбирается явно и прямо влияет на счёт.</li>
+<li><strong>Используйте кэш в свою пользу.</strong> Продолжение той же беседы дешевле, чем начало новой с тем же контекстом: чтение кэша обычно составляет 10 % цены входа.</li>
+<li><strong>Не запускайте Bugbot на всё подряд</strong> — в среднем $1,00–1,50 за прогон, а уровень High дороже.</li>
+<li><strong>Считайте экономику тарифа.</strong> Если стабильно доплачиваете более $40 в месяц сверх Pro, дешевле Pro+ ($60 при включённых $70). Если более $200 сверх — считайте Ultra ($200 при включённых $400).</li>
+<li><strong>Claude Sonnet 5 до 31 августа 2026</strong> идёт по акции $2/$10 вместо $3/$15 — временно это одна из самых выгодных сильных моделей.</li>
+<li><strong>Помните про даты сброса.</strong> Лимит сбрасывается по дате подписки, остаток не переносится — в конце цикла остатком имеет смысл пользоваться, а не экономить его.</li>
+</ol>
+<hr />
+<h2 id="17-про-rate-limits-и-что-изменилось-с-2025-года">17. Про «rate limits» и что изменилось с 2025 года</h2>
+<p>Об этом стоит сказать отдельно, потому что в интернете очень много устаревших статей.</p>
+<p>Схема с <strong>«burst rate limit» и «local rate limit»</strong> (короткие всплески активности с медленным восстановлением и лимит, полностью восстанавливающийся раз в несколько часов) <strong>отсутствует в текущей официальной документации Cursor</strong>. Страница <code>cursor.com/docs/account/pricing/rate-limits</code> отдаёт 404. Эта модель относилась к периоду 2025 года с «безлимитом с ограничением частоты» и сегодня встречается только в сторонних блогах. Считайте её <strong>неактуальной</strong>.</p>
+<p>Что вместо неё сейчас: <strong>месячные пулы использования</strong> (Cursor Models + Other Models), сбрасывающиеся вместе с биллинговым циклом, плюс <strong>лимиты траты</strong>. Никакого документированного механизма почасового или поминутного восстановления лимитов для пользовательских запросов к моделям нет.</p>
+<p>Понятия <strong>«fast requests» и «slow requests»</strong> в текущей документации тоже отсутствуют. Сегодня «fast» — это лишь отдельные варианты моделей со своими ценами (Grok 4.5 Fast, Composer 2.5 fast, GPT-5 Fast, fast-режимы GPT-5.4/5.5/5.6, Claude Opus 4.7/4.8/5 fast). Старое понятие «fast requests» упоминается только на странице возвратов.</p>
+<p>Численные лимиты частоты запросов опубликованы <strong>только для API Bugbot</strong> (30 и 60 запросов в минуту на команду, см. раздел 11). Для моделей есть лишь два относительных утверждения: у GPT-5.1 Codex Mini лимиты в 4 раза выше, чем у GPT-5.1 Codex, а у Gemini 3 Pro Image Preview лимиты строже.</p>
+<hr />
+<h2 id="18-чего-нет-в-официальной-документации">18. Чего нет в официальной документации</h2>
+<p>Чтобы вы не искали зря и не верили случайным цифрам из интернета — вот что официально <strong>не документировано</strong>:</p>
+<ol>
+<li><strong>Burst и local rate limits</strong>, периоды их восстановления и числовые лимиты частоты запросов для пользователей по моделям.</li>
+<li>Точный текст сообщения «вы достигли лимита» и набор предлагаемых в нём вариантов.</li>
+<li><strong>Точный размер пула Cursor Models</strong> на любом тарифе — только «щедрый», «значительно больше» и для Start «Grok расходует примерно в 3 раза быстрее Composer».</li>
+<li><strong>Точная сумма включённой квоты Teams Standard</strong> — только «×5» для Premium относительно неё.</li>
+<li><strong>Точные числа для Hobby</strong> (запросы, токены, Tab-автодополнения).</li>
+<li><strong>Годовые цены в долларах</strong> для любого тарифа — только «экономия 20 %» для Teams.</li>
+<li><strong>Актуальный прайс Bugbot за ревью</strong> — только средние $1,00–1,50 за прогон.</li>
+<li><strong>Максимальный размер файла</strong> для контекста или чтения агентом.</li>
+<li><strong>Числовой предел параллельных облачных агентов</strong> и отдельная плата за машинное время облачного агента сверх токенов.</li>
+<li><strong>Минимальное число мест</strong> для Teams, кроме требования «хотя бы один админ и один платный участник».</li>
+<li><strong>Предупреждение в процентах</strong> от включённого лимита — есть только пороговые оповещения по on-demand.</li>
+<li><strong>Цена места Enterprise</strong> — только «Custom / свяжитесь с отделом продаж».</li>
+<li><strong>Процент старой студенческой скидки</strong> на текущей странице (программа закрыта для новых участников с 25 июня 2026).</li>
+</ol>
+<hr />
+<h2 id="19-полезные-ссылки">19. Полезные ссылки</h2>
+<h3 id="личный-кабинет">Личный кабинет</h3>
+<ul>
+<li><a href="https://cursor.com/dashboard/spending">Spending — расход, остаток, лимиты, дата сброса</a></li>
+<li><a href="https://cursor.com/dashboard/usage">Usage — использование по пулам</a></li>
+<li><a href="https://cursor.com/dashboard/billing">Billing — тариф, оплата, счета, отмена</a></li>
+<li><a href="https://cursor.com/dashboard/spending#on-demand-usage">Включение on-demand</a></li>
+<li><a href="https://cursor.com/dashboard/cloud-agents">Cloud Agents</a></li>
+<li><a href="https://cursor.com/dashboard/analytics">Analytics (Teams/Enterprise)</a></li>
+<li><a href="https://cursor.com/dashboard/api">API-ключи</a></li>
+</ul>
+<h3 id="документация">Документация</h3>
+<ul>
+<li><a href="https://cursor.com/docs/account/pricing">Модели и цены</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/pricing">Тарифы (help)</a></li>
+<li><a href="https://cursor.com/help/models-and-usage/usage-limits">Лимиты использования</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/overages">Перерасход (overages)</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/spend-limits">Лимиты траты</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/spend-alerts">Оповещения о расходах</a></li>
+<li><a href="https://cursor.com/docs/cursor-router">Cursor Router</a></li>
+<li><a href="https://cursor.com/help/models-and-usage/token-rate">Cursor Token Rate</a></li>
+<li><a href="https://cursor.com/help/models-and-usage/available-models">Доступные модели</a></li>
+<li><a href="https://cursor.com/docs/cloud-agent">Cloud Agents</a></li>
+<li><a href="https://cursor.com/docs/bugbot">Bugbot</a></li>
+<li><a href="https://cursor.com/docs/account/teams/pricing">Teams: цены</a></li>
+<li><a href="https://cursor.com/docs/enterprise">Enterprise</a></li>
+<li><a href="https://cursor.com/terms/pricing">Pricing Policy (юридические условия)</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/refunds">Возвраты</a></li>
+<li><a href="https://cursor.com/help/account-and-billing/cancel">Отмена подписки</a></li>
+<li><a href="https://cursor.com/help/ai-features/max-mode">Max Mode (legacy)</a></li>
+<li><a href="https://cursor.com/docs/account/pricing/request-based-legacy">Legacy request-based тарифы и контекстные окна</a></li>
+</ul>
+<hr />
+<p><em>Документ подготовлен 11 августа 2026 года на основе официальной документации Cursor. Цены и лимиты Cursor меняются часто — перед принятием решений о тарифе сверяйтесь с <a href="https://cursor.com/docs/account/pricing">cursor.com/docs/account/pricing</a> и своей вкладкой <a href="https://cursor.com/dashboard/spending">Spending</a>.</em></p>
+</body>
+</html>

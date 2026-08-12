@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Пиры · WG Panel{% endblock %}
+{% block body %}
+<div class="stats">
+  <div class="stat"><div class="muted tiny">Пиров</div><div class="v">{{ stats.peers }}</div><div class="tiny muted">вкл. {{ stats.enabled }}</div></div>
+  <div class="stat"><div class="muted tiny">Онлайн</div><div class="v">{{ stats.online }}</div><div class="tiny muted">&lt; 3 мин</div></div>
+  <div class="stat"><div class="muted tiny">↓ RX</div><div class="v">{{ human_bytes(stats.rx) }}</div></div>
+  <div class="stat"><div class="muted tiny">↑ TX</div><div class="v">{{ human_bytes(stats.tx) }}</div></div>
+</div>
+
+<div class="card">
+  <h1>Новый конфиг</h1>
+  <p class="muted tiny">{{ endpoint }}</p>
+  <form method="post" action="{{ url_for('peers_create') }}" class="stack" style="margin-top:10px">
+    <div>
+      <label class="muted">Имя</label>
+      <input name="name" pattern="[A-Za-z0-9_\-]{2,32}" required placeholder="phone1 / home-router" autocomplete="off">
+    </div>
+    <div>
+      <label class="muted">Заметка</label>
+      <input name="note" placeholder="Кто это">
+    </div>
+    <div>
+      <label class="muted">Срок доступа</label>
+      <div class="seg">
+        <label><input type="radio" name="duration_preset" value="1m" checked><span>1 мес</span></label>
+        <label><input type="radio" name="duration_preset" value="3m"><span>3 мес</span></label>
+        <label><input type="radio" name="duration_preset" value="6m"><span>6 мес</span></label>
+        <label><input type="radio" name="duration_preset" value="12m"><span>12 мес</span></label>
+        <label><input type="radio" name="duration_preset" value="24m"><span>24 мес</span></label>
+        <label><input type="radio" name="duration_preset" value="forever"><span>∞</span></label>
+        <label><input type="radio" name="duration_preset" value="custom"><span>Свой</span></label>
+      </div>
+      <div id="custom-days-wrap" hidden style="margin-top:8px">
+        <input name="expires_days" type="number" min="1" placeholder="Дней" inputmode="numeric">
+      </div>
+    </div>
+    <div>
+      <label class="muted">Лимит ГБ (пусто = без лимита)</label>
+      <input name="traffic_gb" type="number" min="0" step="0.1" placeholder="например 100" inputmode="decimal">
+    </div>
+    <button type="submit" class="block">Создать</button>
+  </form>
+  <form method="post" action="{{ url_for('peers_sync') }}" style="margin-top:8px">
+    <button class="secondary block" type="submit">Синхронизировать wg0</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Пиры</h2>
+  {% if not peers %}
+  <p class="muted">Пока пусто.</p>
+  {% else %}
+  <div class="mobile-list">
+    {% for p in peers %}
+    <div class="peer-card">
+      <div class="head">
+        <div>
+          <a class="title" href="{{ url_for('peer_detail', peer_id=p.id) }}">{{ p.name }}</a>
+          <div class="muted tiny">{{ p.vpn_ip }}{% if p.note %} · {{ p.note }}{% endif %}</div>
+        </div>
+        <div style="text-align:right;max-width:46%">
+          {% if p.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}
+          {% if p.online %}<span class="pill on">live</span>{% endif %}
+          {% if p.expired %}<span class="pill off">истёк</span>
+          {% elif p.expires_soon %}<span class="pill warn">скоро</span>{% endif %}
+        </div>
+      </div>
+      <div class="meta tiny">
+        <div>Срок: <strong>{{ p.expires_label }}</strong></div>
+        <div>{{ p.used_label }} / {{ p.limit_label }} · {{ human_ago(p.handshake_ago) }}</div>
+        {% if p.usage_pct is not none %}<div class="bar"><i style="width:{{ p.usage_pct }}%"></i></div>{% endif %}
+      </div>
+      <div class="grid2">
+        <form method="post" action="{{ url_for('peer_renew', peer_id=p.id) }}">
+          <input type="hidden" name="duration_preset" value="1m">
+          <input type="hidden" name="next" value="{{ url_for('dashboard') }}">
+          <button type="submit">+1 мес</button>
+        </form>
+        <form method="post" action="{{ url_for('peer_renew', peer_id=p.id) }}">
+          <input type="hidden" name="duration_preset" value="3m">
+          <input type="hidden" name="next" value="{{ url_for('dashboard') }}">
+          <button type="submit" class="secondary">+3 мес</button>
+        </form>
+        <form method="post" action="{{ url_for('peer_toggle', peer_id=p.id) }}">
+          <button class="secondary" type="submit">{% if p.enabled %}Выкл{% else %}Вкл{% endif %}</button>
+        </form>
+        <a class="btn secondary" href="{{ url_for('peer_detail', peer_id=p.id) }}">Открыть</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="desktop-table">
+    <table>
+      <thead><tr><th>Имя</th><th>Срок</th><th>Статус</th><th>Трафик</th><th></th></tr></thead>
+      <tbody>
+      {% for p in peers %}
+        <tr>
+          <td><a href="{{ url_for('peer_detail', peer_id=p.id) }}"><strong>{{ p.name }}</strong></a><div class="muted tiny">{{ p.vpn_ip }}</div></td>
+          <td class="tiny">{{ p.expires_label }}{% if p.expired %} <span class="pill off">истёк</span>{% endif %}</td>
+          <td>{% if p.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}{% if p.online %} <span class="pill on">live</span>{% endif %}</td>
+          <td class="tiny">{{ p.used_label }} / {{ p.limit_label }}</td>
+          <td>
+            <div class="grid2" style="min-width:220px;margin:0">
+              <form method="post" action="{{ url_for('peer_renew', peer_id=p.id) }}"><input type="hidden" name="duration_preset" value="1m"><input type="hidden" name="next" value="{{ url_for('dashboard') }}"><button type="submit">+1м</button></form>
+              <form method="post" action="{{ url_for('peer_toggle', peer_id=p.id) }}"><button class="secondary" type="submit">{% if p.enabled %}Выкл{% else %}Вкл{% endif %}</button></form>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>DNS-аудит</h2>
+  {% if not audit %}
+  <p class="muted">Нет данных. DNS клиентов: 10.0.8.1</p>
+  {% else %}
+  <div class="list">
+    {% for a in audit %}
+    <div class="list-row">
+      <div>
+        <div>{{ a.value }}</div>
+        <div class="muted tiny">id {{ a.rid }}</div>
+      </div>
+      <div><strong>{{ a.hits }}</strong></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Блокировки IP</h2>
+  {% if not bans %}
+  <p class="muted">Пусто</p>
+  {% else %}
+  <div class="list">
+    {% for b in bans %}
+    <div class="list-row">
+      <div>
+        <code>{{ b.ip }}</code>
+        <div class="muted tiny">до {{ human_ts(b.until_ts) }}</div>
+      </div>
+      <form method="post" action="{{ url_for('unban', ip=b.ip) }}"><button class="secondary" type="submit">Снять</button></form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  const wrap=document.getElementById('custom-days-wrap');
+  document.querySelectorAll('input[name=duration_preset]').forEach(r=>{
+    const sync=()=>{ if(wrap) wrap.hidden = !(document.querySelector('input[name=duration_preset][value=custom]:checked')); };
+    r.addEventListener('change', sync); sync();
+  });
+})();
+</script>
+{% endblock %}
