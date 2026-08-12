@@ -1,0 +1,67 @@
+=== local curl tyoung via 127.0.0.1:8443 ===
+code:200
+
+=== search leftover v1 site configs ===
+/root/cert/v1.idivles.ru
+/root/.acme.sh/v1.idivles.ru_ecc
+/root/.acme.sh/v1.idivles.ru_ecc/v1.idivles.ru.key
+/root/.acme.sh/v1.idivles.ru_ecc/v1.idivles.ru.conf
+/root/.acme.sh/v1.idivles.ru_ecc/v1.idivles.ru.csr
+/root/.acme.sh/v1.idivles.ru_ecc/v1.idivles.ru.cer
+/root/.acme.sh/v1.idivles.ru_ecc/v1.idivles.ru.csr.conf
+
+=== sochi-portal brief ===
+ADMIN.md
+AGENTS.md
+apply-hash.js
+ARCHITECTURE.md
+AUDIT_FINDINGS.md
+AUDIT.md
+backup.bat
+backup-deploy
+backups
+backup.sh
+certs
+check-errors.js
+check-https-final.js
+check-https.js
+check.js
+CHECKLIST.md
+check-logs.js
+check-nginx.js
+check-ports.js
+check-vps.js
+check-vps-user.js
+check-xui.js
+CLAUDE.md
+clean.js
+clean.ts
+data
+DATA_MODEL.md
+deploy
+deploy.bat
+DEPLOYMENT.md
+
+=== docker ps ===
+NAMES                  IMAGE                PORTS                      STATUS
+sochi-portal-web-1     sochi-portal-web     127.0.0.1:3000->3000/tcp   Up 19 hours (healthy)
+sochi-portal-db-1      postgres:16-alpine   5432/tcp                   Up 31 hours (healthy)
+sochi-portal-redis-1   redis:7-alpine       6379/tcp                   Up 31 hours (healthy)
+
+=== cert domains ===
+subject=CN = v1.idivles.ru
+notBefore=Aug 12 11:04:46 2026 GMT
+notAfter=Nov 10 11:04:45 2026 GMT
+X509v3 Subject Alternative Name: 
+    DNS:v1.idivles.ru
+subject=CN = tyoung.idivles.ru
+notBefore=Aug 11 05:05:44 2026 GMT
+notAfter=Nov  9 05:05:43 2026 GMT
+X509v3 Subject Alternative Name: 
+    DNS:tyoung.idivles.ru
+
+=== ufw: are 10000/20000/30001 open? ===
+2053/tcp                   ALLOW       Anywhere                  
+10443                      ALLOW       Anywhere                  
+2053/tcp (v6)              ALLOW       Anywhere (v6)             
+10443 (v6)                 ALLOW       Anywhere (v6)             

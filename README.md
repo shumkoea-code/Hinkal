@@ -10,3 +10,7 @@
 pip install markdown
 python3 docs/build_pdf.py
 ```
+
+## VPS idivles (сайт + VPN на 443)
+
+Полный журнал диагностики и настройки: [docs/vps-nginx/DIAGNOSTICS-AND-SETUP.md](docs/vps-nginx/DIAGNOSTICS-AND-SETUP.md).

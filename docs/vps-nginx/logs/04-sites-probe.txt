@@ -1,0 +1,23 @@
+=== external: tyoung HTTPS ===
+HTTP/2 200 
+server: nginx/1.22.1
+date: Wed, 12 Aug 2026 13:24:14 GMT
+content-type: text/html; charset=utf-8
+x-frame-options: DENY
+x-content-type-options: nosniff
+referrer-policy: strict-origin-when-cross-origin
+strict-transport-security: max-age=31536000; includeSubDomains
+content-security-policy: default-src 'self'; script-src 'self' 'nonce-OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl' 'strict-dynamic' https://mc.yandex.ru https://yandex.ru https://*.yandex.ru https:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https: http:; font-src 'self' data:; connect-src 'self' https://mc.yandex.ru https://*.yandex.ru wss: https:; media-src 'self' blob: https://vk.com https://*.vk.com https://vk.ru https://*.vk.ru; frame-src 'self' https://yandex.ru https://*.yandex.ru https://vk.com https://*.vk.com https://vk.ru https://*.vk.ru https://gosuslugi.ru https://*.gosuslugi.ru https://pos.gosuslugi.ru; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'
+vary: rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch, Accept-Encoding
+link: </_next/static/media/29b98dbfba401fa9-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl"; type="font/woff2", </_next/static/media/4c9affa5bc8f420e-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl"; type="font/woff2", </_next/static/media/875ae681bfde4580-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl"; type="font/woff2", </_next/static/media/d76fe899475ae4d7-s.p.woff2>; rel=preload; as="font"; crossorigin=""; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl"; type="font/woff2", </_next/static/css/5ba766da0731f6d5.css>; rel=preload; as="style"; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl", </_next/static/css/923b2e03cf327418.css>; rel=preload; as="style"; nonce="OGVmOGJhYzgtMWRiMS00ZDZkLTg4MTYtM2QyNjQ5NGMxNGFl"
+x-powered-by: Next.js
+cache-control: private, no-cache, no-store, max-age=0, must-revalidate
+
+code:200
+title: <title>Центр развития молодежи Сочи | Официальный портал</title>
+
+=== external: v1 HTTPS ===
+
+=== DNS ===
+77.110.125.241  v1.idivles.ru
+77.110.125.241  tyoung.idivles.ru
