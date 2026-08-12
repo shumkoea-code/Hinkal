@@ -2,25 +2,23 @@
 {% block title %}Инструкция · WG Panel{% endblock %}
 {% block body %}
 <div class="card">
-  <h1>Как пользоваться панелью</h1>
-  <ol>
-    <li>Открывайте только <strong>секретный URL</strong> (см. Настройки). Корень сайта даёт 404.</li>
-    <li>Создайте пир на главной: срок <strong>1 / 3 / 6 / 12 / 24 мес</strong> или свой.</li>
-    <li>После истечения срока пир автоматически выключается на сервере — у клиента тот же `.conf`.</li>
-    <li><strong>Продление (+N мес)</strong> снова включает тот же ключ: пользователю ничего менять не нужно.</li>
-    <li>Скачайте <code>.conf</code> / QR или сделайте ссылку для пользователя.</li>
-    <li>Вкл/выкл и удаление — на дашборде или карточке пира.</li>
-    <li>Keenetic / MikroTik: документ WIREGUARD-ROUTERS.md.</li>
-  </ol>
-  <p>Endpoint: <code>{{ endpoint }}</code></p>
-  <p class="muted tiny">Логин: <code>{{ admin_login_url }}</code></p>
+  <h1>Как пользоваться</h1>
+  <div class="list" style="margin-top:8px">
+    <div class="list-row"><div>1. Заходите только по секретному URL (Настройки).</div></div>
+    <div class="list-row"><div>2. Создайте пир: срок 1–24 мес или свой.</div></div>
+    <div class="list-row"><div>3. Срок вышел → на сервере выкл. Тот же .conf у клиента.</div></div>
+    <div class="list-row"><div>4. Кнопка +N мес → снова работает без смены файла.</div></div>
+    <div class="list-row"><div>5. Share-ссылка для пользователя без пароля админа.</div></div>
+  </div>
+  <p class="muted tiny" style="margin-top:12px">Endpoint: <code>{{ endpoint }}</code></p>
+</div>
+<div class="card">
   <h2>Безопасность</h2>
-  <ul>
-    <li>Длинный секретный путь админки</li>
-    <li>HTTPS + rate-limit nginx</li>
-    <li>2 ошибки входа → бан IP на 1 час</li>
-    <li>Опционально TOTP 2FA</li>
-    <li>Лимит трафика / срок действия конфига</li>
-  </ul>
+  <div class="list">
+    <div class="list-row"><div>Секретный путь + HTTPS :8447</div></div>
+    <div class="list-row"><div>2 ошибки входа → бан IP на час</div></div>
+    <div class="list-row"><div>Опционально TOTP 2FA</div></div>
+    <div class="list-row"><div>Лимит трафика и срок на сервере</div></div>
+  </div>
 </div>
 {% endblock %}

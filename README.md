@@ -1,5 +1,26 @@
 # Hinkal
 
+Репозиторий: документация VPS/VPN + **WG Panel** (веб-админка WireGuard).
+
+## Скачать проект
+
+| Что | Ссылка |
+| --- | --- |
+| **ZIP всей ветки (актуально)** | https://github.com/shumkoea-code/Hinkal/archive/refs/heads/cursor/cursor-subscription-limits-ru-docs-59b1.zip |
+| Репозиторий | https://github.com/shumkoea-code/Hinkal |
+| Ветка с панелью и доками | https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1 |
+| Только WG Panel | https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-ru-docs-59b1/tools/wg-panel |
+| PR | https://github.com/shumkoea-code/Hinkal/pull/12 |
+
+```bash
+# клон
+git clone -b cursor/cursor-subscription-limits-ru-docs-59b1 https://github.com/shumkoea-code/Hinkal.git
+cd Hinkal
+
+# установка панели на сервер
+bash tools/wg-panel/deploy/install.sh
+```
+
 ## Документация
 
 - [Подписка Cursor: лимиты, тарифы и возможности](docs/cursor-subscription-limits-ru.md) — справочник на русском (актуально на 11 августа 2026). Версии для скачивания: [PDF](docs/cursor-subscription-limits-ru.pdf), [HTML](docs/cursor-subscription-limits-ru.html).
