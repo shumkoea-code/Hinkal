@@ -2,14 +2,49 @@
 
 **Сервер:** `v1.idivles.ru` (`77.110.125.241`)  
 **Панель 3X-UI:** https://v1.idivles.ru:444/t0HAtL75Ph0mDWoZPq/  
-**Дата актуальности:** 12 августа 2026
+**Дата актуальности:** 12 августа 2026 (обновлено: имена профилей + hardening)
 
 Эта инструкция объясняет **как всё устроено**, **почему раньше что-то не работало**, и **что именно включать на телефоне и на компьютере**.
 
-Краткая шпаргалка: [USER-GUIDE.md](./USER-GUIDE.md)  
-Технический отчёт о работах: [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)
+| Документ | Зачем |
+| --- | --- |
+| [USER-GUIDE.md](./USER-GUIDE.md) | Краткая шпаргалка |
+| [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | Защита и оптимизация сервера |
+| [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах |
 
 > Пароли, UUID и приватные ключи в этот документ **не входят**. Их берут только из панели / своей подписки.
+
+---
+
+## 0. Как читать названия в подписке (важно)
+
+После **обновления подписки** профили подписаны так, чтобы было видно, **на каком устройстве их брать**:
+
+| Префикс в имени | Значит |
+| --- | --- |
+| **ТЕЛ+ПК** | Подходит и для **телефона**, и для **компьютера** |
+| **ПК·WiFi** | Лучше для **ПК / домашнего Wi‑Fi**. На мобильном LTE Reality часто режут |
+| **ЗАПАС** | Резервные порты не 443 (админ/тест) |
+| **★** | Рекомендуемый выбор для телефона |
+
+### Актуальный список в клиенте
+
+| Имя | Устройства | Тип | Когда включать |
+| --- | --- | --- | --- |
+| **ТЕЛ+ПК · TLS-WS ★** | Телефон + ПК | WS + TLS | **Телефон / LTE — первый выбор** |
+| **ТЕЛ+ПК · gRPC** (`security=tls`) | Телефон + ПК | gRPC + TLS | Запас на телефоне |
+| **ТЕЛ+ПК · gRPC** (`security=none`) | Телефон + ПК | gRPC без TLS | Старый вариант, который раньше работал |
+| **ПК·WiFi · Stealth Reality** | ПК / Wi‑Fi | Reality + XHTTP | Основной скрытный на ПК |
+| **ПК·WiFi · Speed Vision** | ПК / Wi‑Fi | Reality + TCP Vision | Если нужен быстрее |
+| **ПК·WiFi · Alt Samsung** | ПК / Wi‑Fi | Reality + XHTTP | Если CF/Apple SNI режут |
+
+Замечания по отображению:
+
+1. У **первого** профиля может быть хвост `-логин` (например `…★-shumkoea`) — это метка аккаунта 3X-UI, не ошибка.
+2. Два профиля **gRPC** называются одинаково — различайте по полю **security**: `tls` или `none` в карточке / URI.
+3. Текст объявления подписки (`subAnnounce`) в клиентах, которые его показывают, повторяет ту же подсказку.
+
+**Без обновления подписки старые имена не появятся.**
 
 ---
 
@@ -98,8 +133,8 @@ nginx смотрит, «к кому клиент пришёл», и пересы
 
 Добавлены профили, которые снаружи = **обычный заход на `https://v1.idivles.ru`**:
 
-1. **Mobile-TLS-WS** — WebSocket внутри настоящего TLS  
-2. **gRPC-443 + TLS** — gRPC через путь `/gun` после настоящего TLS  
+1. **ТЕЛ+ПК · TLS-WS ★** — WebSocket внутри настоящего TLS  
+2. **ТЕЛ+ПК · gRPC** (`tls`) — gRPC через путь `/gun` после настоящего TLS  
 
 Их нужно ставить **первыми на телефоне**. Reality оставить для Wi‑Fi/ПК или как запас.
 
@@ -107,35 +142,28 @@ nginx смотрит, «к кому клиент пришёл», и пересы
 
 ## 4. Все профили в подписке (что выбирать)
 
-После обновления подписки у пользователя обычно **6 линков** на `v1.idivles.ru:443`:
+См. таблицу в **§0** — это главный ориентир по именам.
 
-| # | Имя в клиенте | Тип | security | Когда использовать |
-| --- | --- | --- | --- | --- |
-| 1 | **Mobile-TLS-WS** | `ws` | `tls` | **Телефон, LTE/5G — основной выбор** |
-| 2 | **gRPC-443** | `grpc` | `tls` | Телефон, если WS не зашёл |
-| 3 | **gRPC-443** | `grpc` | `none` | Старый рабочий вариант (как раньше) |
-| 4 | **Stealth-Reality-XHTTP** | `xhttp` | `reality` | ПК / Wi‑Fi, максимальная «скрытность» |
-| 5 | **Speed-Reality-TCP-Vision** | `tcp` + Vision | `reality` | ПК, если нужен скоростьнее канал |
-| 6 | **Alt-Reality-XHTTP-Samsung** | `xhttp` | `reality` | Если Cloudflare/Apple SNI режут, а Samsung ещё нет |
+После обновления подписки обычно **6 линков** на `v1.idivles.ru:443`.
 
 ### Как отличить правильный линк глазами
 
-**Телефон (рекомендуется):**
+**Телефон (рекомендуется) — имя `ТЕЛ+ПК · TLS-WS ★`:**
 ```text
 vless://…@v1.idivles.ru:443?type=ws&security=tls&path=/c410aeaf855fdf46bb88…
 ```
 
-**Телефон (запас gRPC+TLS):**
+**Телефон (запас) — `ТЕЛ+ПК · gRPC` + `security=tls`:**
 ```text
 vless://…@v1.idivles.ru:443?type=grpc&security=tls&serviceName=gun…
 ```
 
-**Старый gRPC:**
+**Старый gRPC — тот же заголовок, но `security=none`:**
 ```text
 vless://…@v1.idivles.ru:443?type=grpc&security=none&serviceName=gun…
 ```
 
-**Stealth (ПК):**
+**ПК Stealth — имя `ПК·WiFi · Stealth Reality`:**
 ```text
 vless://…@v1.idivles.ru:443?type=xhttp&security=reality&sni=www.cloudflare.com&fp=chrome&pbk=…&sid=…
 ```
@@ -208,7 +236,7 @@ https://v1.idivles.ru:2096/sub/pepewtfa/<ваш_subId>
 1. Удалите **старую** подписку этого сервера (чтобы не остались битые `localhost` / старые Reality-only наборы).
 2. Добавьте подписку URL из раздела 5.
 3. Дождитесь обновления списка серверов.
-4. В списке найдите **Mobile-TLS-WS** (обычно первый).
+4. В списке найдите **ТЕЛ+ПК · TLS-WS ★** (обычно первый; может быть с хвостом `-вашлогин`).
 5. Подключитесь только к нему.
 6. Проверьте IP (любой «what is my ip»): должен быть `77.110.125.241` (или актуальный IP VPS).
 
@@ -216,8 +244,8 @@ https://v1.idivles.ru:2096/sub/pepewtfa/<ваш_subId>
 
 По порядку:
 
-1. Возьмите второй линк **gRPC-443** с **`security=tls`** (не `none`).
-2. Затем старый **gRPC-443** с `security=none` (тот, что раньше работал).
+1. Возьмите **ТЕЛ+ПК · gRPC** с **`security=tls`** (не `none`).
+2. Затем тот же **ТЕЛ+ПК · gRPC** с `security=none` (тот, что раньше работал).
 3. Проверьте, что в URI адрес `v1.idivles.ru:443`, не `localhost`.
 4. Отключите «чужой» DNS/фильтры в клиенте на тест.
 5. Попробуйте с Wi‑Fi и с LTE отдельно — так видно, режет ли оператор.
@@ -240,10 +268,10 @@ Reality (Stealth/Speed/Alt) на LTE можете не мучить: часто 
 1. Клиент: **v2rayN**, **Hiddify**, **Nekoray** и т.п. (свежий Xray).
 2. Импорт той же подписки.
 3. Предпочтительно:
-   - **Stealth-Reality-XHTTP** — основной скрытный;
-   - **Speed-Reality-TCP-Vision** — если Stealth тормозит;
-   - **Alt-Reality-XHTTP-Samsung** — если CF/Apple SNI режут;
-   - **Mobile-TLS-WS** — тоже можно, он универсальный.
+   - **ПК·WiFi · Stealth Reality** — основной скрытный;
+   - **ПК·WiFi · Speed Vision** — если Stealth тормозит;
+   - **ПК·WiFi · Alt Samsung** — если CF/Apple SNI режут;
+   - **ТЕЛ+ПК · TLS-WS ★** — тоже можно, он универсальный.
 4. Не указывайте вручную порты `10443+`.
 
 ---
@@ -280,7 +308,8 @@ Xray предупреждает: Reality не на 443 менее скрытны
 | Панель | https://v1.idivles.ru:444/t0HAtL75Ph0mDWoZPq/ |
 | SSH | порт `4488` (не 22) |
 | Подписка | порт `2096` |
-| Inbounds | Mobile-TLS-WS, gRPC-443, Stealth, Speed, Alt, Backup… |
+| Inbounds | `ТЕЛ+ПК · TLS-WS ★`, `ТЕЛ+ПК · gRPC`, `ПК·WiFi · …`, `ЗАПАС · …` |
+| Защита | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) |
 | SNI-карта nginx | `/etc/nginx/stream.d/tyoung-sni.conf` |
 | HTTPS маски v1 | `/etc/nginx/sites-available/v1-idivles-ssl` (listen `127.0.0.1:8445`) |
 | БД панели | `/etc/x-ui/x-ui.db` |
@@ -322,9 +351,9 @@ curl -sk "https://v1.idivles.ru:2096/sub/pepewtfa/<subId>" | base64 -d
 
 В выводе `base64 -d` должны быть строки `vless://…@v1.idivles.ru:443…`, среди них:
 
-- `type=ws` и `security=tls` — Mobile;
-- `type=grpc` (tls и/или none);
-- Reality с `sni=www.cloudflare.com` / `www.apple.com` / `www.samsung.com`.
+- имя с **ТЕЛ+ПК · TLS-WS ★** и `type=ws` + `security=tls`;
+- **ТЕЛ+ПК · gRPC** (`tls` и/или `none`);
+- **ПК·WiFi · …** с Reality и `sni=www.cloudflare.com` / `www.apple.com` / `www.samsung.com`.
 
 Не должно быть `@localhost` и портов `1044x` в пользовательских линках.
 
@@ -354,12 +383,12 @@ A: Обновите клиент. На телефоне пользуйтесь M
 
 ## 14. Краткая памятка «что включить»
 
-| Устройство / сеть | Включать |
+| Устройство / сеть | Включать (по имени в подписке) |
 | --- | --- |
-| Телефон, мобильный интернет | **Mobile-TLS-WS** → иначе gRPC TLS → иначе gRPC none |
-| Ноутбук дома (Wi‑Fi) | **Stealth** → Speed → Alt → Mobile-TLS |
-| Нужна максимальная скорость на чистой сети | **Speed** (Vision) |
-| Reality режут, свой домен ещё жив | **Mobile-TLS-WS** |
+| Телефон, LTE/5G | **ТЕЛ+ПК · TLS-WS ★** → gRPC `tls` → gRPC `none` |
+| Ноутбук дома (Wi‑Fi) | **ПК·WiFi · Stealth** → Speed → Alt → TLS-WS |
+| Нужна скорость на чистой сети | **ПК·WiFi · Speed Vision** |
+| Reality режут, свой домен жив | **ТЕЛ+ПК · TLS-WS ★** |
 
 ---
 
@@ -367,10 +396,11 @@ A: Обновите клиент. На телефоне пользуйтесь M
 
 | Файл | Содержание |
 | --- | --- |
-| [USER-GUIDE.md](./USER-GUIDE.md) | Короткая инструкция |
+| [USER-GUIDE.md](./USER-GUIDE.md) | Короткая шпаргалка |
+| [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) | UFW, BBR, SSH, nginx headers, рекомендации |
 | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) | Полный отчёт о работах и тестах |
 | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) | Первичная диагностика «почему 10443» |
-| [live/](./live/) | Снятые с сервера nginx-конфиги |
+| [live/](./live/) | Снятые с сервера nginx / sysctl / ufw |
 | [logs/](./logs/) | Журналы проверок |
 
 Публичная папка в GitHub (ветка PR):  

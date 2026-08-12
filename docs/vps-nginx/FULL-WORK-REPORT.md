@@ -222,6 +222,7 @@ map $ssl_preread_server_name $yp_backend {
 | --- | --- | --- |
 | **Подробная разъясняющая инструкция** | пользователи + админ | [DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md) |
 | **Краткая шпаргалка** | быстрый старт | [USER-GUIDE.md](./USER-GUIDE.md) |
+| **Защита и оптимизация** | админ | [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md) |
 | **Этот полный отчёт** | заказчик / админ | [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md) |
 | **Первичная диагностика** | техдетали этапа A | [DIAGNOSTICS-AND-SETUP.md](./DIAGNOSTICS-AND-SETUP.md) |
 | **Оглавление папки** | навигация | [README.md](./README.md) |
@@ -234,12 +235,25 @@ https://github.com/shumkoea-code/Hinkal/tree/cursor/cursor-subscription-limits-r
 Прямые ссылки:
 
 - Подробная инструкция: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/DETAILED-INSTRUCTION.md  
+- Защита/оптимизация: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/SECURITY-AND-HARDENING.md  
 - Шпаргалка: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/USER-GUIDE.md  
 - Полный отчёт: https://github.com/shumkoea-code/Hinkal/blob/cursor/cursor-subscription-limits-ru-docs-59b1/docs/vps-nginx/FULL-WORK-REPORT.md  
 
 ---
 
-## 6.1. Фикс для телефона (12.08.2026, вечер)
+## 6.2. Отображение имён + hardening (12.08.2026, вечер-2)
+
+**Сделано:**
+
+1. Имена inbound’ов в подписке с префиксами устройств: `ТЕЛ+ПК · …`, `ПК·WiFi · …`, `★` у мобильного WS.
+2. `subAnnounce` объясняет префиксы; `remarkModel=-i`.
+3. UFW: закрыты лишние порты (22, 440–445, iperf 5201, WireGuard-like, 30001…).
+4. sysctl: BBR + fq, syncookies, anti-redirect, буферы.
+5. SSH: MaxAuthTries/LoginGraceTime/ClientAlive; X11 off.
+6. unattended-upgrades; nginx headers на маске v1.
+7. Документы: [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md), обновлены DETAILED/USER-GUIDE.
+
+**Проверка:** 6 линков из sub dial OK; сайты 200.
 
 **Симптом:** на телефоне работает только gRPC, три Reality — нет.
 

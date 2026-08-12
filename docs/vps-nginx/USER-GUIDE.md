@@ -1,47 +1,55 @@
 # Краткая инструкция (шпаргалка)
 
-**Подробный разбор со схемами и FAQ:**  
-**[DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)** ← читайте её, если нужны пояснения «почему так».
+**Подробно:** [DETAILED-INSTRUCTION.md](./DETAILED-INSTRUCTION.md)  
+**Защита сервера:** [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md)
 
-**Сервер:** `v1.idivles.ru` · **Панель:** https://v1.idivles.ru:444/t0HAtL75Ph0mDWoZPq/  
-**Подписка:** `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`
-
----
-
-## Телефон (LTE)
-
-Оператор часто режет **Reality**. Нужен профиль с **настоящим TLS** на свой домен.
-
-1. Удалить старую подписку → добавить URL выше заново.
-2. Включить **Mobile-TLS-WS** (первый в списке).
-3. Не помогло → **gRPC-443** с `security=tls` → потом `security=none`.
-
-В URI должно быть `v1.idivles.ru:443`, не `localhost` и не порт `1044x`.
+**Подписка:** `https://v1.idivles.ru:2096/sub/pepewtfa/<subId>`  
+После правок на сервере — **обязательно обновить подписку** в клиенте.
 
 ---
 
-## Компьютер / Wi‑Fi
+## Как читать имена
 
-| Приоритет | Профиль |
+| Префикс | Куда |
 | --- | --- |
-| 1 | Stealth-Reality-XHTTP (SNI Cloudflare) |
-| 2 | Speed-Reality-TCP-Vision (SNI Apple) |
-| 3 | Alt-Reality-XHTTP-Samsung |
-| запас | Mobile-TLS-WS |
+| **ТЕЛ+ПК** | Телефон и ПК |
+| **ПК·WiFi** | Лучше ПК / домашний Wi‑Fi (на LTE Reality часто режут) |
+| **★** | Рекомендуется для телефона |
 
+| Имя | Когда |
+| --- | --- |
+| **ТЕЛ+ПК · TLS-WS ★** | Телефон / LTE — **первый** |
+| **ТЕЛ+ПК · gRPC** (`tls`) | Запас на телефоне |
+| **ТЕЛ+ПК · gRPC** (`none`) | Старый рабочий |
+| **ПК·WiFi · Stealth Reality** | ПК основной |
+| **ПК·WiFi · Speed Vision** | ПК скорость |
+| **ПК·WiFi · Alt Samsung** | ПК запасной SNI |
+
+У первого профиля может быть хвост `-логин` — это нормально.
+
+---
+
+## Телефон
+
+1. Удалить старую подписку → добавить URL заново.  
+2. Включить **ТЕЛ+ПК · TLS-WS ★**.  
+3. Иначе gRPC `tls` → gRPC `none`.  
+4. В URI: `v1.idivles.ru:443`, не `localhost` / `1044x`.
+
+---
+
+## ПК / Wi‑Fi
+
+**Stealth** → Speed → Alt → при необходимости TLS-WS.  
 Клиент с Xray ≥ 26.3.27.
 
 ---
 
 ## Сайты
 
-- https://tyoung.idivles.ru/ — портал  
-- https://v1.idivles.ru/ — маска  
-
-Оба на том же `:443`, что и VPN.
+- https://tyoung.idivles.ru/  
+- https://v1.idivles.ru/  
 
 ---
-
-## Полный отчёт
 
 [FULL-WORK-REPORT.md](./FULL-WORK-REPORT.md)
