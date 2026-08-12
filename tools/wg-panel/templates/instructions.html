@@ -4,17 +4,21 @@
 <div class="card">
   <h1>Как пользоваться панелью</h1>
   <ol>
-    <li>Создайте пир кнопкой на главной (имя латиницей).</li>
-    <li>Скачайте <code>.conf</code> или сделайте <strong>ссылку для раздачи</strong>.</li>
-    <li>Отправьте ссылку пользователю — пароль админа не нужен.</li>
-    <li>Keenetic / MikroTik: см. документ WIREGUARD-ROUTERS.md в репозитории.</li>
+    <li>Открывайте только <strong>секретный URL</strong> (см. Настройки). Корень сайта даёт 404.</li>
+    <li>Создайте пир на главной (имя латиницей), при желании задайте лимит ГБ и срок.</li>
+    <li>Скачайте <code>.conf</code> / QR или сделайте ссылку для пользователя.</li>
+    <li>Вкл/выкл и удаление — на дашборде или карточке пира; sync в <code>wg0</code> автоматический.</li>
+    <li>Keenetic / MikroTik: документ WIREGUARD-ROUTERS.md.</li>
   </ol>
-  <p>Endpoint сервера: <code>{{ endpoint }}</code></p>
+  <p>Endpoint: <code>{{ endpoint }}</code></p>
+  <p class="muted tiny">Логин: <code>{{ admin_login_url }}</code></p>
   <h2>Безопасность</h2>
   <ul>
-    <li>HTTPS + rate-limit на nginx</li>
+    <li>Длинный секретный путь админки</li>
+    <li>HTTPS + rate-limit nginx</li>
     <li>2 ошибки входа → бан IP на 1 час</li>
-    <li>Сессия HttpOnly / Secure</li>
+    <li>Опционально TOTP 2FA</li>
+    <li>Лимит трафика / срок действия конфига</li>
   </ul>
 </div>
 {% endblock %}

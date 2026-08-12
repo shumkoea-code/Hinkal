@@ -391,7 +391,7 @@ A: Обновите клиент. На телефоне пользуйтесь *
 | --- | --- |
 | Телефон, LTE/5G | **ТЕЛ+ПК · TLS-WS ★** → gRPC `tls` → gRPC `none` |
 | Ноутбук дома (Wi‑Fi) | **ПК·WiFi · Stealth** → Speed → Alt → TLS-WS |
-| **Роутер Keenetic / MikroTik** | **WireGuard** — панель [WG-PANEL.md](./WG-PANEL.md) (`https://v1.idivles.ru:8447/`); импорт — [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md); учёт — [WG-AUDIT.md](./WG-AUDIT.md) |
+| **Роутер Keenetic / MikroTik** | **WireGuard** — панель [WG-PANEL.md](./WG-PANEL.md) (секретный `admin_url` в `/opt/wg-panel/admin.bootstrap`); импорт — [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md); учёт — [WG-AUDIT.md](./WG-AUDIT.md) |
 | Нужна скорость на чистой сети | **ПК·WiFi · Speed Vision** |
 | Reality режут, свой домен жив | **ТЕЛ+ПК · TLS-WS ★** |
 

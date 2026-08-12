@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}2FA · WG Panel{% endblock %}
+{% block body %}
+<div class="login-box card">
+  <h1>Двухфакторный код</h1>
+  <p class="muted">Введите код из приложения-аутентификатора.</p>
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+  <form method="post">
+    <p><label class="muted">Код 2FA</label><input name="code" inputmode="numeric" autocomplete="one-time-code" required autofocus placeholder="123456"></p>
+    <button type="submit">Подтвердить</button>
+    <a class="btn secondary" href="{{ url_for('login') }}" style="margin-left:8px">Назад</a>
+  </form>
+</div>
+{% endblock %}

@@ -2,21 +2,67 @@
 {% block title %}{{ peer.name }} · WG Panel{% endblock %}
 {% block body %}
 <div class="card">
-  <h1>{{ peer.name }} <span class="pill">{{ peer.vpn_ip }}</span></h1>
-  <p class="muted">Скачайте конфиг, покажите QR или создайте ссылку для пользователя (без пароля админа).</p>
-  <p>
-    <a class="btn" href="{{ url_for('peer_download', peer_id=peer.id) }}">Скачать .conf</a>
-    <a class="btn secondary" href="{{ url_for('dashboard') }}">Назад</a>
+  <h1>{{ peer.name }}
+    {% if peer.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}
+    {% if peer.online %}<span class="pill on">live</span>{% endif %}
+    <span class="pill">{{ peer.vpn_ip }}</span>
+  </h1>
+  <p class="muted">
+    Endpoint клиента: <code>{{ peer.endpoint or '—' }}</code> ·
+    handshake {{ human_ago(peer.handshake_ago) }} ·
+    ↓{{ human_bytes(peer.rx) }} ↑{{ human_bytes(peer.tx) }}
+    {% if peer.disabled_reason %} · причина выкл: <code>{{ peer.disabled_reason }}</code>{% endif %}
   </p>
-  <p><img alt="QR" src="{{ url_for('peer_qr', peer_id=peer.id) }}" style="background:#fff;padding:8px;border-radius:8px;max-width:240px"/></p>
+  <div class="actions">
+    <a class="btn" href="{{ url_for('peer_download', peer_id=peer.id) }}">Скачать .conf</a>
+    <form method="post" action="{{ url_for('peer_toggle', peer_id=peer.id) }}">
+      <input type="hidden" name="next" value="{{ url_for('peer_detail', peer_id=peer.id) }}">
+      <button class="secondary" type="submit">{% if peer.enabled %}Выключить{% else %}Включить{% endif %}</button>
+    </form>
+    <form method="post" action="{{ url_for('peer_reset_traffic', peer_id=peer.id) }}">
+      <button class="secondary" type="submit">Сброс трафика</button>
+    </form>
+    <form method="post" action="{{ url_for('peer_delete', peer_id=peer.id) }}" onsubmit="return confirm('Удалить {{ peer.name }}?')">
+      <button class="danger" type="submit">Удалить</button>
+    </form>
+    <a class="btn secondary" href="{{ url_for('dashboard') }}">Назад</a>
+  </div>
+  <p style="margin-top:14px"><img alt="QR" src="{{ url_for('peer_qr', peer_id=peer.id) }}" style="background:#fff;padding:8px;border-radius:8px;max-width:220px"/></p>
   <pre>{{ conf }}</pre>
 </div>
+
+<div class="card">
+  <h2>Настройки конфига</h2>
+  <form method="post" action="{{ url_for('peer_update', peer_id=peer.id) }}">
+    <div class="row">
+      <div><label class="muted">Заметка</label><input name="note" value="{{ peer.note or '' }}"></div>
+      <div><label class="muted">DNS</label><input name="dns" value="{{ peer.dns or settings.client_dns }}"></div>
+    </div>
+    <div class="row3" style="margin-top:10px">
+      <div><label class="muted">MTU</label><input name="mtu" type="number" value="{{ peer.mtu or settings.client_mtu }}"></div>
+      <div><label class="muted">Keepalive</label><input name="keepalive" type="number" value="{{ peer.keepalive or settings.keepalive }}"></div>
+      <div><label class="muted">Лимит ГБ (пусто = не менять)</label><input name="traffic_gb" type="number" step="0.1" placeholder="{% if peer.traffic_limit_bytes %}{{ '%.2f'|format(peer.traffic_limit_bytes/1024/1024/1024) }}{% else %}без лимита{% endif %}"></div>
+    </div>
+    <p style="margin-top:10px"><label class="muted">AllowedIPs</label><input name="allowed_ips" value="{{ peer.allowed_ips or settings.allowed_ips }}"></p>
+    <div class="row" style="margin-top:10px">
+      <div><label class="muted">Продлить на N дней (пусто = не менять)</label><input name="expires_days" type="number" min="1" placeholder="{% if peer.expires_at %}до {{ peer.expires_at }}{% else %}бессрочно{% endif %}"></div>
+      <div style="align-self:end">
+        <label class="muted"><input type="checkbox" name="clear_limit" value="1"> Снять лимит трафика</label><br>
+        <label class="muted"><input type="checkbox" name="clear_expiry" value="1"> Сделать бессрочным</label>
+      </div>
+    </div>
+    <p style="margin-top:12px"><button type="submit">Сохранить настройки</button></p>
+  </form>
+</div>
+
 <div class="card">
   <h2>Ссылка для раздачи</h2>
-  <form method="post" action="{{ url_for('peer_share', peer_id=peer.id) }}" class="row">
-    <div><label class="muted">Часов жизни</label><input type="number" name="hours" value="24" min="1" max="168"></div>
-    <div><label class="muted">Макс. скачиваний</label><input type="number" name="uses" value="3" min="1" max="20"></div>
-    <div style="align-self:end"><button type="submit">Создать ссылку</button></div>
+  <form method="post" action="{{ url_for('peer_share', peer_id=peer.id) }}">
+    <div class="row">
+      <div><label class="muted">Часов жизни</label><input type="number" name="hours" value="24" min="1" max="168"></div>
+      <div><label class="muted">Макс. скачиваний</label><input type="number" name="uses" value="3" min="1" max="20"></div>
+    </div>
+    <p style="margin-top:10px"><button type="submit">Создать ссылку</button></p>
   </form>
   {% if share and share_url %}
   <p class="flash ok">Готово — отправьте пользователю:<br>

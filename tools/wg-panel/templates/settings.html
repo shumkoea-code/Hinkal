@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Настройки · WG Panel{% endblock %}
+{% block body %}
+<div class="card">
+  <h1>Секретный URL админки</h1>
+  <p class="muted">Корень сайта и короткий `/login` без секрета отвечают 404. Сохраните длинную ссылку.</p>
+  <pre>{{ admin_login_url }}</pre>
+  <p class="tiny muted">path: <code>{{ admin_path }}</code> · также в <code>/opt/wg-panel/admin.bootstrap</code> и <code>admin_path</code></p>
+  <form method="post" onsubmit="return confirm('Старая ссылка перестанет работать. Продолжить?')">
+    <input type="hidden" name="action" value="regen_path">
+    <div class="row">
+      <div><label class="muted">Текущий пароль</label><input type="password" name="current_password" required autocomplete="current-password"></div>
+      <div style="align-self:end"><button class="danger" type="submit">Сгенерировать новый URL</button></div>
+    </div>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Смена пароля</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="password">
+    <div class="row3">
+      <div><label class="muted">Текущий</label><input type="password" name="current_password" required autocomplete="current-password"></div>
+      <div><label class="muted">Новый (≥10)</label><input type="password" name="new_password" required minlength="10" autocomplete="new-password"></div>
+      <div><label class="muted">Повтор</label><input type="password" name="new_password2" required minlength="10" autocomplete="new-password"></div>
+    </div>
+    <p style="margin-top:12px"><button type="submit">Сменить пароль</button></p>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Двухфакторная аутентификация (TOTP)</h2>
+  {% if not pyotp_ok %}
+  <p class="flash error">Модуль pyotp не установлен на сервере.</p>
+  {% elif admin.totp_enabled %}
+  <p><span class="pill on">2FA включена</span></p>
+  <form method="post">
+    <input type="hidden" name="action" value="2fa_disable">
+    <div class="row">
+      <div><label class="muted">Пароль</label><input type="password" name="current_password" required></div>
+      <div><label class="muted">Код 2FA</label><input name="code" required inputmode="numeric"></div>
+    </div>
+    <p style="margin-top:12px"><button class="danger" type="submit">Отключить 2FA</button></p>
+  </form>
+  {% elif totp_pending %}
+  <p class="muted">Отсканируйте QR в Google Authenticator / Aegis / 1Password и введите код.</p>
+  {% if totp_qr_data %}<p><img src="{{ totp_qr_data }}" alt="2FA QR" style="background:#fff;padding:8px;border-radius:8px;max-width:220px"></p>{% endif %}
+  <p class="tiny muted">Секрет: <code>{{ totp_secret }}</code></p>
+  <form method="post">
+    <input type="hidden" name="action" value="2fa_confirm">
+    <div class="row">
+      <div><label class="muted">Код подтверждения</label><input name="code" required inputmode="numeric" autofocus></div>
+      <div style="align-self:end"><button type="submit">Подтвердить и включить</button></div>
+    </div>
+  </form>
+  {% else %}
+  <form method="post">
+    <input type="hidden" name="action" value="2fa_start">
+    <button type="submit">Включить 2FA</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  <h2>Параметры по умолчанию для новых пиров</h2>
+  <form method="post">
+    <input type="hidden" name="action" value="defaults">
+    <div class="row">
+      <div><label class="muted">Endpoint</label><input name="endpoint" value="{{ settings.endpoint }}"></div>
+      <div><label class="muted">DNS</label><input name="client_dns" value="{{ settings.client_dns }}"></div>
+    </div>
+    <div class="row3" style="margin-top:10px">
+      <div><label class="muted">MTU</label><input name="client_mtu" value="{{ settings.client_mtu }}"></div>
+      <div><label class="muted">Keepalive</label><input name="keepalive" value="{{ settings.keepalive }}"></div>
+      <div><label class="muted">AllowedIPs</label><input name="allowed_ips" value="{{ settings.allowed_ips }}"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div><label class="muted">Бан после N ошибок</label><input name="ban_after" value="{{ settings.ban_after }}"></div>
+      <div><label class="muted">Бан, секунд</label><input name="ban_seconds" value="{{ settings.ban_seconds }}"></div>
+    </div>
+    <p style="margin-top:12px"><button type="submit">Сохранить</button></p>
+  </form>
+</div>
+{% endblock %}

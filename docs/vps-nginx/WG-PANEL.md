@@ -4,40 +4,45 @@
 
 | | |
 | --- | --- |
-| **URL** | `https://v1.idivles.ru:8447/` |
+| **База** | `https://v1.idivles.ru:8447/` |
+| **Админка** | длинный секретный URL (см. `admin.bootstrap` → `admin_url=`) |
 | **Код** | `tools/wg-panel/` |
 | **На сервере** | `/opt/wg-panel/` |
 | **WG** | `wg0` · UDP `51820` · `10.0.8.0/24` |
-| **Пароль** | только на сервере: `/opt/wg-panel/admin.bootstrap` (после первого старта) |
+| **Пароль / URL** | `/opt/wg-panel/admin.bootstrap`, `/opt/wg-panel/admin_path` |
 
 Связано: [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md) · [WG-AUDIT.md](./WG-AUDIT.md) · [SECURITY-AND-HARDENING.md](./SECURITY-AND-HARDENING.md)
 
 ---
 
-## 1. Зачем
+## 1. Возможности
 
-Раньше конфиги Keenetic/MikroTik лежали в `/root/keenetic-wg/` и раздавались через `scp`. Панель даёт:
-
-1. **Один клик** — создать пир (ключ, IP, запись в `wg0`).
-2. **Скачать `.conf` / QR** в браузере.
-3. **Ссылка для пользователя** (`/s/<token>/page`) с лимитом скачиваний и TTL — без логина админа.
-4. **Бан IP**: 2 ошибки входа → блокировка на 1 час.
-5. **Nginx rate-limit** + TLS + security headers (анти-абьюз / смягчение DDoS на HTTP-слой).
-6. Топ DNS-аудита на дашборде (если включён `wg-audit`).
+1. **Секретный длинный путь** админки — корень и `/login` без секрета → **404**.
+2. **1 клик** — создать пир (ключи, IP, sync в `wg0`).
+3. **Вкл / выкл / удалить**, правка DNS/MTU/Keepalive/AllowedIPs.
+4. **Лимит трафика (ГБ)** и **срок действия** — автовыключение.
+5. **Статистика** RX/TX (накопительная), online, progress-бар лимита.
+6. **Скачать `.conf` / QR** и **share-ссылка** `/s/<token>/page` (без логина).
+7. **Настройки**: смена пароля, **TOTP 2FA**, регенерация URL, дефолты пиров, параметры бана.
+8. Nginx rate-limit + бан IP после ошибок входа.
 
 ---
 
-## 2. Быстрый старт для админа
+## 2. Быстрый старт
 
-1. Откройте `https://v1.idivles.ru:8447/login`.
-2. Логин/пароль: с сервера  
-   `cat /opt/wg-panel/admin.bootstrap`  
-   (формат `username=` / `password=`). Сохраните пароль и удалите файл.
-3. На главной введите имя (`router-home`, `phone1`…) → **Создать WireGuard-конфиг**.
-4. Скачайте `.conf`, покажите QR или нажмите **Создать ссылку** и отправьте URL пользователю.
-5. Пользователь открывает ссылку → «Скачать .conf» → импорт в Keenetic / MikroTik / приложение WireGuard.
+```bash
+cat /opt/wg-panel/admin.bootstrap
+# username=...
+# password=...   (если ещё не удалили)
+# admin_url=https://v1.idivles.ru:8447/<длинный_секрет>/login
+```
 
-Инструкция внутри UI: `/instructions`.
+1. Откройте **только** `admin_url` из файла.
+2. Войдите (при включённой 2FA — второй шаг с кодом).
+3. Создайте пир → скачайте конфиг или share-ссылку.
+4. В **Настройки** включите 2FA и при желании смените пароль / URL.
+
+Share-ссылки для пользователей остаются короткими: `https://v1.idivles.ru:8447/s/<token>/page` (секрет админки не нужен).
 
 ---
 
@@ -45,110 +50,70 @@
 
 | Мера | Как |
 | --- | --- |
-| HTTPS | nginx `:8447`, сертификат `v1.idivles.ru` |
-| Отдельный порт | не смешан с сайтом/VPN на `:443` |
-| Rate-limit login | `5r/m`, burst 3 |
-| Rate-limit общий | `30r/m`, burst 20 |
-| Conn limit | 15 соединений с IP |
-| Бан после ошибок | **2** неверных логина → бан IP на **3600 с** |
-| Сессия | HttpOnly, Secure, SameSite=Lax, ~8 ч |
-| Пароль | PBKDF2-HMAC-SHA256, 200k итераций |
-| App bind | только `127.0.0.1:8787` |
-| Секреты | не в git; `admin.bootstrap`, `secret_key`, `panel.db` только на диске |
+| Секретный URL | ~64 символа, хранится в БД + `admin_path` |
+| HTTPS | nginx `:8447` |
+| Rate-limit login | `5r/m` на `…/login` |
+| Rate-limit общий | `30r/m` |
+| Бан | N ошибок (по умолчанию 2) → 1 час |
+| 2FA | TOTP (Google Authenticator / Aegis) |
+| Пароль | PBKDF2-HMAC-SHA256, 200k |
+| App bind | `127.0.0.1:8787` |
 
-Снять бан: в панели «Блокировки IP» → **Снять**, либо:
+Снять бан:
 
 ```bash
 sqlite3 /opt/wg-panel/panel.db "DELETE FROM bans; DELETE FROM login_fails;"
 ```
 
-UFW: `8447/tcp` открыт. UDP `51820` — для самих туннелей WG (не панели).
-
 ---
 
-## 4. Установка / обновление на VPS
-
-Из репозитория (на сервере или через `scp` + `install.sh`):
+## 4. Установка / обновление
 
 ```bash
-# пример с рабочей станции
-rsync -avz -e 'ssh -p 4488' tools/wg-panel/ root@77.110.125.241:/tmp/wg-panel-src/
-ssh -p 4488 root@77.110.125.241 'bash /tmp/wg-panel-src/deploy/install.sh'
+# с рабочей станции
+scp -P 4488 -r tools/wg-panel root@77.110.125.241:/tmp/wg-panel-src-pack
+# или tar:
+tar czf /tmp/wg-panel.tgz tools/wg-panel
+scp -P 4488 /tmp/wg-panel.tgz root@77.110.125.241:/tmp/
+ssh -p 4488 root@77.110.125.241 'tar xzf /tmp/wg-panel.tgz -C /tmp && bash /tmp/tools/wg-panel/deploy/install.sh'
 ```
 
-Скрипт:
+Скрипт ставит venv, systemd, nginx, UFW `8447/tcp`.
 
-- копирует код в `/opt/wg-panel`
-- создаёт venv `/opt/wg-panel/venv` и ставит `flask`, `qrcode`, `Pillow`, `waitress`
-- включает `wg-panel.service` (ExecStart через venv)
-- кладёт nginx site + `limit_req` zones
-- `ufw allow 8447/tcp`
-
-Файлы деплоя: `tools/wg-panel/deploy/`.
-
-### Переменные окружения (systemd)
-
-| Переменная | По умолчанию | Смысл |
-| --- | --- | --- |
-| `WG_PUBLIC_BASE` | `https://v1.idivles.ru:8447` | абсолютные share-ссылки |
-| `WG_ENDPOINT` | `77.110.125.241:51820` | Endpoint в клиентском `.conf` |
-| `WG_BAN_AFTER` | `2` | ошибок до бана |
-| `WG_BAN_SECONDS` | `3600` | длительность бана |
-| `WG_CLIENT_DNS` | `10.0.8.1` | DNS в клиентах (аудит) |
-| `WG_ADMIN_PASSWORD` | (пусто) | задать до первого старта, иначе bootstrap-файл |
+После обновления секретный путь **сохраняется** (уже в БД). Новый путь — в Настройках → «Сгенерировать новый URL».
 
 ---
 
-## 5. Как устроено
+## 5. Архитектура
 
 ```
-Браузер ──TLS:8447──► nginx (rate-limit) ──► 127.0.0.1:8787 (waitress/Flask)
-                                                      │
-                                                      ├─ SQLite panel.db (пиры, баны, share-токены)
-                                                      ├─ /opt/wg-panel/peers/*.conf
-                                                      └─ wg syncconf → /etc/wireguard/wg0.conf + runtime wg0
+Браузер
+  ├─ /<secret>/…  → AdminPathMiddleware → Flask (логин, пиры, настройки)
+  └─ /s/<token>/… → Flask share (публично)
+nginx :8447 → 127.0.0.1:8787 (waitress)
+                  ├─ SQLite panel.db
+                  └─ wg syncconf → wg0
 ```
 
-- Создание пира: ключи `wg genkey` / `wg pubkey`, следующий свободный IP в `10.0.8.0/24` (начиная с `.2`).
-- `persist_wg_conf()` переписывает peer-секции `wg0.conf` из БД и делает `wg-quick strip` + `wg syncconf <iface> <file>` (без даунтайма интерфейса).
-- Кнопка **Синхронизировать wg0** — повторный sync, если что-то пошло не так.
-- При первом пустом DB импортируются `keenetic` / `mikrotik` из `/root/keenetic-wg/*.conf`, если файлы есть.
-
-Share-токен: TTL 1–168 ч, 1–20 скачиваний. Публичные маршруты: `/s/<token>/page`, `/s/<token>`, `/s/<token>/qr.png`.
+Трафик: счётчики `wg` + накопление `rx_total`/`tx_total` (переживают сброс counters). При превышении лимита или `expires_at` пир `enabled=0` и убирается из `wg0`.
 
 ---
 
-## 6. Раздача пользователю (инструкция)
-
-1. Админ создаёт пир и ссылку.
-2. Пользователь открывает ссылку (логин не нужен).
-3. Скачивает `.conf` или сканирует QR.
-4. **Keenetic:** Интернет → WireGuard → добавить → импорт файла → включить → маршрут `0.0.0.0/0` при необходимости.  
-5. **MikroTik:** WinBox Files → upload → `/import file-name=...` или ручной peer; либо приложение WireGuard.  
-6. **Телефон/ПК:** официальный клиент WireGuard → Add tunnel → файл / QR.
-
-Подробно по роутерам: [WIREGUARD-ROUTERS.md](./WIREGUARD-ROUTERS.md).
-
-DNS в конфиге уже `10.0.8.1` — нужен для учёта посещений ([WG-AUDIT.md](./WG-AUDIT.md)).
-
----
-
-## 7. Проверки
+## 6. Проверки
 
 ```bash
 systemctl status wg-panel --no-pager
-curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:8447/login   # 200
+PATH=$(cat /opt/wg-panel/admin_path)
+curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:8447/          # 404
+curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:8447/login     # 404
+curl -sk -o /dev/null -w '%{http_code}\n' https://127.0.0.1:8447/$PATH/login  # 200
 wg show wg0
-ufw status | grep 8447
 ```
-
-После создания пира в `wg show` должен появиться peer с `AllowedIPs = 10.0.8.X/32`.
 
 ---
 
-## 8. Ограничения
+## 7. Ограничения
 
-- Панель управляет **одним** интерфейсом `wg0` (не 3X-UI / не VLESS).
-- Запуск от `root` нужен для `wg`/`wg-quick` (можно позже вынести capabilities).
-- HTTP anti-DDoS = rate-limit + бан логина; объёмный L3/L4 DDoS на UDP 51820 — отдельная тема (провайдер / fail2ban / Cloudflare Spectrum и т.п.).
-- Не публикуйте `admin.bootstrap`, `panel.db`, приватные ключи в git и чаты.
+- Один интерфейс `wg0` (не 3X-UI).
+- HTTP anti-DDoS = rate-limit + бан; объёмный L3/L4 на UDP 51820 — отдельно.
+- Не публикуйте `admin.bootstrap`, `admin_path`, `panel.db` в git/чаты.

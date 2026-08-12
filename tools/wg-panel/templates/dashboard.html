@@ -1,19 +1,30 @@
 {% extends "base.html" %}
 {% block title %}Пиры · WG Panel{% endblock %}
 {% block body %}
+<div class="stats">
+  <div class="stat"><div class="muted tiny">Пиров</div><div class="v">{{ stats.peers }}</div><div class="muted tiny">вкл. {{ stats.enabled }}</div></div>
+  <div class="stat"><div class="muted tiny">Онлайн</div><div class="v">{{ stats.online }}</div><div class="muted tiny">handshake &lt; 3 мин</div></div>
+  <div class="stat"><div class="muted tiny">↓ RX</div><div class="v">{{ human_bytes(stats.rx) }}</div></div>
+  <div class="stat"><div class="muted tiny">↑ TX</div><div class="v">{{ human_bytes(stats.tx) }}</div></div>
+</div>
+
 <div class="card">
-  <h1>Создать пир (1 клик)</h1>
-  <p class="muted">Сервер: <code>{{ endpoint }}</code> · бан после {{ ban_after }} ошибок на {{ ban_seconds // 60 }} мин</p>
+  <h1>Создать конфиг</h1>
+  <p class="muted">Endpoint: <code>{{ endpoint }}</code> · бан после {{ ban_after }} ошибок / {{ ban_seconds // 60 }} мин</p>
   <form method="post" action="{{ url_for('peers_create') }}">
     <div class="row">
-      <div><label class="muted">Имя (keenetic-home, phone1…)</label><input name="name" pattern="[A-Za-z0-9_\-]{2,32}" required placeholder="router-home"></div>
+      <div><label class="muted">Имя</label><input name="name" pattern="[A-Za-z0-9_\-]{2,32}" required placeholder="router-home"></div>
       <div><label class="muted">Заметка</label><input name="note" placeholder="Keenetic гостиная"></div>
     </div>
-    <p style="margin-top:12px">
-      <button type="submit">Создать WireGuard-конфиг</button>
-    </p>
+    <div class="row" style="margin-top:10px">
+      <div><label class="muted">Лимит трафика, ГБ (пусто = без лимита)</label><input name="traffic_gb" type="number" min="0" step="0.1" placeholder="50"></div>
+      <div><label class="muted">Срок, дней (пусто = бессрочно)</label><input name="expires_days" type="number" min="1" step="1" placeholder="30"></div>
+    </div>
+    <div class="actions" style="margin-top:14px">
+      <button type="submit">Создать WireGuard</button>
+    </div>
   </form>
-  <form method="post" action="{{ url_for('peers_sync') }}" style="margin-top:8px">
+  <form method="post" action="{{ url_for('peers_sync') }}" style="margin-top:10px">
     <button class="secondary" type="submit">Синхронизировать wg0</button>
   </form>
 </div>
@@ -22,18 +33,36 @@
   <h2>Пиры</h2>
   {% if not peers %}<p class="muted">Пока пусто — создайте первый.</p>{% else %}
   <table>
-    <thead><tr><th>Имя</th><th>IP</th><th>Статус</th><th>Handshake</th><th>Трафик</th><th></th></tr></thead>
+    <thead>
+      <tr><th>Имя</th><th>IP</th><th>Статус</th><th>Трафик</th><th>Handshake</th><th></th></tr>
+    </thead>
     <tbody>
     {% for p in peers %}
       <tr>
-        <td><a href="{{ url_for('peer_detail', peer_id=p.id) }}"><strong>{{ p.name }}</strong></a><div class="muted">{{ p.note or '' }}</div></td>
+        <td>
+          <a href="{{ url_for('peer_detail', peer_id=p.id) }}"><strong>{{ p.name }}</strong></a>
+          <div class="muted tiny">{{ p.note or '' }}{% if p.disabled_reason %} · {{ p.disabled_reason }}{% endif %}</div>
+        </td>
         <td><code>{{ p.vpn_ip }}</code></td>
-        <td>{% if p.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}</td>
-        <td class="muted">{% if p.handshake_ago is not none %}{{ p.handshake_ago }}s ago{% else %}—{% endif %}</td>
-        <td class="muted">↓{{ p.rx }} ↑{{ p.tx }}</td>
+        <td>
+          {% if p.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}
+          {% if p.online %}<span class="pill on">live</span>{% endif %}
+        </td>
+        <td>
+          <div class="tiny">{{ p.used_label }} / {{ p.limit_label }}</div>
+          {% if p.usage_pct is not none %}
+          <div class="bar"><i style="width:{{ p.usage_pct }}%"></i></div>
+          {% endif %}
+          <div class="muted tiny">↓{{ human_bytes(p.rx) }} ↑{{ human_bytes(p.tx) }}</div>
+        </td>
+        <td class="muted">{{ human_ago(p.handshake_ago) }}</td>
         <td style="white-space:nowrap">
-          <form style="display:inline" method="post" action="{{ url_for('peer_toggle', peer_id=p.id) }}"><button class="secondary" type="submit">{% if p.enabled %}Выкл{% else %}Вкл{% endif %}</button></form>
-          <form style="display:inline" method="post" action="{{ url_for('peer_delete', peer_id=p.id) }}" onsubmit="return confirm('Удалить {{ p.name }}?')"><button class="danger" type="submit">Удал.</button></form>
+          <form style="display:inline" method="post" action="{{ url_for('peer_toggle', peer_id=p.id) }}">
+            <button class="secondary" type="submit">{% if p.enabled %}Выкл{% else %}Вкл{% endif %}</button>
+          </form>
+          <form style="display:inline" method="post" action="{{ url_for('peer_delete', peer_id=p.id) }}" onsubmit="return confirm('Удалить {{ p.name }}?')">
+            <button class="danger" type="submit">Удал.</button>
+          </form>
         </td>
       </tr>
     {% endfor %}
@@ -45,7 +74,7 @@
 <div class="row">
   <div class="card">
     <h2>DNS-аудит (топ)</h2>
-    {% if not audit %}<p class="muted">Пока нет данных. DNS клиентов должен быть 10.0.8.1</p>
+    {% if not audit %}<p class="muted">Нет данных. DNS клиентов: 10.0.8.1</p>
     {% else %}<table><thead><tr><th>ID</th><th>Домен</th><th>hits</th></tr></thead><tbody>
     {% for a in audit %}<tr><td>{{ a.rid }}</td><td>{{ a.value }}</td><td>{{ a.hits }}</td></tr>{% endfor %}
     </tbody></table>{% endif %}

@@ -3,7 +3,7 @@
 {% block body %}
 <div class="login-box card">
   <h1>Вход администратора</h1>
-  <p class="muted">После {{ 2 }} ошибок IP блокируется на 1 час.</p>
+  <p class="muted">После {{ ban_after }} ошибок IP блокируется на 1 час. URL панели секретный.</p>
   {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
   <form method="post">
     <p><label class="muted">Логин</label><input name="username" autocomplete="username" required autofocus></p>
