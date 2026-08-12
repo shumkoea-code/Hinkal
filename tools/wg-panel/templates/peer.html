@@ -5,14 +5,41 @@
   <h1>{{ peer.name }}
     {% if peer.enabled %}<span class="pill on">on</span>{% else %}<span class="pill off">off</span>{% endif %}
     {% if peer.online %}<span class="pill on">live</span>{% endif %}
-    <span class="pill">{{ peer.vpn_ip }}</span>
+    {% if peer.expired %}<span class="pill off">истёк</span>
+    {% elif peer.expires_soon %}<span class="pill warn">скоро</span>{% endif %}
   </h1>
-  <p class="muted">
-    Endpoint клиента: <code>{{ peer.endpoint or '—' }}</code> ·
-    handshake {{ human_ago(peer.handshake_ago) }} ·
-    ↓{{ human_bytes(peer.rx) }} ↑{{ human_bytes(peer.tx) }}
-    {% if peer.disabled_reason %} · причина выкл: <code>{{ peer.disabled_reason }}</code>{% endif %}
+  <p class="muted tiny">
+    IP <code>{{ peer.vpn_ip }}</code> ·
+    endpoint <code>{{ peer.endpoint or '—' }}</code> ·
+    handshake {{ human_ago(peer.handshake_ago) }}
   </p>
+  <p>
+    <strong>Срок:</strong> {{ peer.expires_label }}
+    {% if peer.expires_left is not none and peer.expires_left > 0 %}
+      <span class="muted tiny">(ещё {{ human_ago(peer.expires_left) }})</span>
+    {% endif %}
+  </p>
+  <p class="muted tiny">↓{{ human_bytes(peer.rx) }} ↑{{ human_bytes(peer.tx) }}
+    {% if peer.disabled_reason %} · выкл: <code>{{ peer.disabled_reason }}</code>{% endif %}
+  </p>
+
+  <div class="card" style="margin:12px 0;padding:12px;background:#0e1622">
+    <h2 style="margin-bottom:6px">Продлить доступ</h2>
+    <p class="muted tiny">Ключи не меняются — после оплаты/продления тот же `.conf` снова работает, пользователю ничего обновлять не нужно.</p>
+    <div class="chip-row">
+      {% for key, meta in duration_presets.items() %}
+      <form method="post" action="{{ url_for('peer_renew', peer_id=peer.id) }}">
+        <input type="hidden" name="duration_preset" value="{{ key }}">
+        <button type="submit">+{{ meta[1] }}</button>
+      </form>
+      {% endfor %}
+      <form method="post" action="{{ url_for('peer_renew', peer_id=peer.id) }}">
+        <input type="hidden" name="duration_preset" value="forever">
+        <button type="submit" class="secondary">Бессрочно</button>
+      </form>
+    </div>
+  </div>
+
   <div class="actions">
     <a class="btn" href="{{ url_for('peer_download', peer_id=peer.id) }}">Скачать .conf</a>
     <form method="post" action="{{ url_for('peer_toggle', peer_id=peer.id) }}">
@@ -27,7 +54,7 @@
     </form>
     <a class="btn secondary" href="{{ url_for('dashboard') }}">Назад</a>
   </div>
-  <p style="margin-top:14px"><img alt="QR" src="{{ url_for('peer_qr', peer_id=peer.id) }}" style="background:#fff;padding:8px;border-radius:8px;max-width:220px"/></p>
+  <div class="qr-wrap" style="margin-top:14px"><img alt="QR" src="{{ url_for('peer_qr', peer_id=peer.id) }}"/></div>
   <pre>{{ conf }}</pre>
 </div>
 
@@ -38,20 +65,32 @@
       <div><label class="muted">Заметка</label><input name="note" value="{{ peer.note or '' }}"></div>
       <div><label class="muted">DNS</label><input name="dns" value="{{ peer.dns or settings.client_dns }}"></div>
     </div>
-    <div class="row3" style="margin-top:10px">
+    <div class="row" style="margin-top:10px">
       <div><label class="muted">MTU</label><input name="mtu" type="number" value="{{ peer.mtu or settings.client_mtu }}"></div>
       <div><label class="muted">Keepalive</label><input name="keepalive" type="number" value="{{ peer.keepalive or settings.keepalive }}"></div>
-      <div><label class="muted">Лимит ГБ (пусто = не менять)</label><input name="traffic_gb" type="number" step="0.1" placeholder="{% if peer.traffic_limit_bytes %}{{ '%.2f'|format(peer.traffic_limit_bytes/1024/1024/1024) }}{% else %}без лимита{% endif %}"></div>
     </div>
     <p style="margin-top:10px"><label class="muted">AllowedIPs</label><input name="allowed_ips" value="{{ peer.allowed_ips or settings.allowed_ips }}"></p>
-    <div class="row" style="margin-top:10px">
-      <div><label class="muted">Продлить на N дней (пусто = не менять)</label><input name="expires_days" type="number" min="1" placeholder="{% if peer.expires_at %}до {{ peer.expires_at }}{% else %}бессрочно{% endif %}"></div>
-      <div style="align-self:end">
-        <label class="muted"><input type="checkbox" name="clear_limit" value="1"> Снять лимит трафика</label><br>
-        <label class="muted"><input type="checkbox" name="clear_expiry" value="1"> Сделать бессрочным</label>
-      </div>
+    <div style="margin-top:10px">
+      <label class="muted">Лимит ГБ (пусто = не менять)</label>
+      <input name="traffic_gb" type="number" step="0.1" inputmode="decimal" placeholder="{% if peer.traffic_limit_bytes %}{{ '%.2f'|format(peer.traffic_limit_bytes/1024/1024/1024) }}{% else %}без лимита{% endif %}">
     </div>
-    <p style="margin-top:12px"><button type="submit">Сохранить настройки</button></p>
+    <p style="margin-top:12px"><label class="muted">Перезаписать срок (не продление)</label></p>
+    <div class="seg">
+      <label><input type="radio" name="duration_preset" value="keep" checked> <span>Не менять</span></label>
+      <label><input type="radio" name="duration_preset" value="1m"> <span>1 мес</span></label>
+      <label><input type="radio" name="duration_preset" value="3m"> <span>3 мес</span></label>
+      <label><input type="radio" name="duration_preset" value="12m"> <span>12 мес</span></label>
+      <label><input type="radio" name="duration_preset" value="forever"> <span>∞</span></label>
+      <label><input type="radio" name="duration_preset" value="custom"> <span>Свой</span></label>
+    </div>
+    <div style="margin-top:8px" id="peer-custom-days" hidden>
+      <input name="expires_days" type="number" min="1" placeholder="дней от сейчас">
+    </div>
+    <p style="margin-top:10px">
+      <label class="muted"><input type="checkbox" name="clear_limit" value="1"> Снять лимит трафика</label><br>
+      <label class="muted"><input type="checkbox" name="clear_expiry" value="1"> Сделать бессрочным</label>
+    </p>
+    <p style="margin-top:12px"><button type="submit" class="block">Сохранить настройки</button></p>
   </form>
 </div>
 
@@ -62,23 +101,29 @@
       <div><label class="muted">Часов жизни</label><input type="number" name="hours" value="24" min="1" max="168"></div>
       <div><label class="muted">Макс. скачиваний</label><input type="number" name="uses" value="3" min="1" max="20"></div>
     </div>
-    <p style="margin-top:10px"><button type="submit">Создать ссылку</button></p>
+    <p style="margin-top:10px"><button type="submit" class="block">Создать ссылку</button></p>
   </form>
   {% if share and share_url %}
-  <p class="flash ok">Готово — отправьте пользователю:<br>
-    <a href="{{ share_url }}"><code>{{ share_url }}</code></a>
-  </p>
+  <p class="flash ok">Готово:<br><a class="url-box" href="{{ share_url }}"><code>{{ share_url }}</code></a></p>
   {% endif %}
   {% if tokens %}
-  <table><thead><tr><th>Токен</th><th>Истекает</th><th>Использовано</th></tr></thead><tbody>
+  <div class="table-wrap"><table><thead><tr><th>Токен</th><th>Истекает</th><th>Исп.</th></tr></thead><tbody>
   {% for t in tokens %}
     <tr>
-      <td><a href="{{ public_base }}/s/{{ t.token }}/page"><code>{{ t.token[:12] }}…</code></a></td>
-      <td class="muted">{{ t.expires_at }}</td>
-      <td>{{ t.uses }}/{{ t.max_uses }} {% if t.expires_at < now or t.uses >= t.max_uses %}<span class="pill off">expired</span>{% endif %}</td>
+      <td><a href="{{ public_base }}/s/{{ t.token }}/page"><code>{{ t.token[:10] }}…</code></a></td>
+      <td class="muted tiny">{{ human_ts(t.expires_at) }}</td>
+      <td>{{ t.uses }}/{{ t.max_uses }}{% if t.expires_at < now or t.uses >= t.max_uses %} <span class="pill off">exp</span>{% endif %}</td>
     </tr>
   {% endfor %}
-  </tbody></table>
+  </tbody></table></div>
   {% endif %}
 </div>
+<script>
+(function(){
+  const wrap=document.getElementById('peer-custom-days');
+  document.querySelectorAll('input[name=duration_preset]').forEach(r=>{
+    r.addEventListener('change',()=>{ if(wrap) wrap.hidden = !(r.value==='custom' && r.checked); });
+  });
+})();
+</script>
 {% endblock %}

@@ -12,7 +12,7 @@ import sqlite3
 import subprocess
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from io import BytesIO
 from pathlib import Path
@@ -457,6 +457,70 @@ def human_ago(seconds: int | None) -> str:
     return f"{seconds // 86400}д"
 
 
+def human_ts(ts: int | None) -> str:
+    if not ts:
+        return "бессрочно"
+    return datetime.fromtimestamp(int(ts), tz=timezone.utc).strftime("%d.%m.%Y %H:%M UTC")
+
+
+def add_calendar_months(ts: int, months: int) -> int:
+    """Add calendar months to unix timestamp (UTC)."""
+    dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+    month0 = dt.month - 1 + int(months)
+    year = dt.year + month0 // 12
+    month = month0 % 12 + 1
+    if month == 12:
+        next_month = datetime(year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        next_month = datetime(year, month + 1, 1, tzinfo=timezone.utc)
+    last_day = (next_month - timedelta(days=1)).day
+    day = min(dt.day, last_day)
+    return int(
+        datetime(year, month, day, dt.hour, dt.minute, dt.second, tzinfo=timezone.utc).timestamp()
+    )
+
+
+DURATION_PRESETS = {
+    "1m": (1, "1 месяц"),
+    "3m": (3, "3 месяца"),
+    "6m": (6, "6 месяцев"),
+    "12m": (12, "12 месяцев"),
+    "24m": (24, "24 месяца"),
+}
+
+
+def parse_expiry_from_form(form, *, base_ts: int | None = None, stack: bool = False) -> int | None:
+    """
+    duration_preset: forever | 1m | 3m | 6m | 12m | 24m | custom
+    expires_days: used when custom
+    Returns unix expires_at, or None for unlimited.
+    If stack=True, months/days add on top of max(now, base_ts).
+    """
+    preset = (form.get("duration_preset") or "").strip()
+    now = int(time.time())
+    if preset in ("", "forever"):
+        if stack:
+            # renew with forever → clear expiry
+            return None
+        return None
+    start = now
+    if stack and base_ts and int(base_ts) > now:
+        start = int(base_ts)
+    if preset in DURATION_PRESETS:
+        months, _ = DURATION_PRESETS[preset]
+        return add_calendar_months(start, months)
+    if preset == "custom":
+        days = (form.get("expires_days") or "").strip()
+        if not days:
+            raise ValueError("Укажите число дней для своего срока")
+        return start + int(days) * 86400
+    # legacy: expires_days alone
+    days = (form.get("expires_days") or "").strip()
+    if days:
+        return start + int(days) * 86400
+    return None
+
+
 def next_vpn_ip() -> str:
     net = ipaddress.ip_network(SUBNET)
     used = {SERVER_VPN_IP}
@@ -713,8 +777,10 @@ def _inject_globals():
     return {
         "human_bytes": human_bytes,
         "human_ago": human_ago,
+        "human_ts": human_ts,
         "admin_url": admin_public_url,
         "public_base": PUBLIC_BASE,
+        "duration_presets": DURATION_PRESETS,
     }
 
 
@@ -829,6 +895,17 @@ def dashboard():
         p["usage_pct"] = min(100, int(used * 100 / lim)) if lim else None
         p["limit_label"] = human_bytes(lim) if lim else "без лимита"
         p["used_label"] = human_bytes(used)
+        exp = p.get("expires_at")
+        p["expires_label"] = human_ts(exp)
+        if exp:
+            left = int(exp) - now
+            p["expires_left"] = left
+            p["expires_soon"] = 0 < left < 7 * 86400
+            p["expired"] = left <= 0
+        else:
+            p["expires_left"] = None
+            p["expires_soon"] = False
+            p["expired"] = False
     return render_template(
         "dashboard.html",
         peers=peers,
@@ -857,16 +934,13 @@ def peers_create():
         flash("Имя: 2–32 символа [a-zA-Z0-9_-]", "error")
         return redirect(url_for("dashboard"))
     traffic_gb = (request.form.get("traffic_gb") or "").strip()
-    expires_days = (request.form.get("expires_days") or "").strip()
     traffic_limit = None
-    expires_at = None
     try:
         if traffic_gb:
             traffic_limit = int(float(traffic_gb) * 1024 * 1024 * 1024)
-        if expires_days:
-            expires_at = int(time.time()) + int(expires_days) * 86400
-    except ValueError:
-        flash("Лимит/срок: неверное число", "error")
+        expires_at = parse_expiry_from_form(request.form, stack=False)
+    except ValueError as e:
+        flash(str(e), "error")
         return redirect(url_for("dashboard"))
     peer_id = None
     vpn_ip = None
@@ -950,6 +1024,17 @@ def peer_detail(peer_id: int):
     peer_d["online"] = bool(hs and (now - hs) < 180)
     peer_d["rx"] = int(peer_d.get("rx_total") or 0)
     peer_d["tx"] = int(peer_d.get("tx_total") or 0)
+    exp = peer_d.get("expires_at")
+    peer_d["expires_label"] = human_ts(exp)
+    if exp:
+        left = int(exp) - now
+        peer_d["expires_left"] = left
+        peer_d["expires_soon"] = 0 < left < 7 * 86400
+        peer_d["expired"] = left <= 0
+    else:
+        peer_d["expires_left"] = None
+        peer_d["expires_soon"] = False
+        peer_d["expired"] = False
     conf = client_conf_text(peer)
     share = request.args.get("share")
     return render_template(
@@ -986,26 +1071,27 @@ def peer_update(peer_id: int):
         keepalive = int(request.form.get("keepalive")) if request.form.get("keepalive") else None
         traffic_gb = (request.form.get("traffic_gb") or "").strip()
         traffic_limit = int(float(traffic_gb) * 1024**3) if traffic_gb else None
-        expires_days = (request.form.get("expires_days") or "").strip()
-        expires_at = int(time.time()) + int(expires_days) * 86400 if expires_days else None
         clear_limit = request.form.get("clear_limit") == "1"
         clear_expiry = request.form.get("clear_expiry") == "1"
         if clear_limit:
             traffic_limit = None
+        elif not traffic_gb:
+            traffic_limit = peer["traffic_limit_bytes"]
         if clear_expiry:
             expires_at = None
-        elif not expires_days and peer["expires_at"]:
+        elif (request.form.get("duration_preset") or "").strip() in ("", "keep"):
             expires_at = peer["expires_at"]
-        if not traffic_gb and not clear_limit:
-            traffic_limit = peer["traffic_limit_bytes"]
-    except ValueError:
+        else:
+            # set absolute new period from now (not stack) when editing "срок"
+            expires_at = parse_expiry_from_form(request.form, stack=False)
+    except ValueError as e:
         con.close()
-        flash("Неверные числовые поля", "error")
+        flash(str(e), "error")
         return redirect(url_for("peer_detail", peer_id=peer_id))
     con.execute(
         """
         UPDATE peers SET note=?, dns=?, mtu=?, keepalive=?, allowed_ips=?,
-          traffic_limit_bytes=?, expires_at=?, disabled_reason=NULL WHERE id=?
+          traffic_limit_bytes=?, expires_at=? WHERE id=?
         """,
         (note, dns, mtu, keepalive, allowed_ips, traffic_limit, expires_at, peer_id),
     )
@@ -1013,8 +1099,54 @@ def peer_update(peer_id: int):
     peer = con.execute("SELECT * FROM peers WHERE id=?", (peer_id,)).fetchone()
     con.close()
     save_peer_conf_file(peer)
-    flash("Настройки пира сохранены (перевыпустите .conf клиенту при смене DNS/MTU/AllowedIPs).", "ok")
+    flash("Настройки пира сохранены. Ключи не менялись — клиенту новый .conf не нужен (кроме DNS/MTU/AllowedIPs).", "ok")
     return redirect(url_for("peer_detail", peer_id=peer_id))
+
+
+@app.route("/peers/<int:peer_id>/renew", methods=["POST"])
+@login_required
+def peer_renew(peer_id: int):
+    """Extend subscription without changing keys/IP — same .conf keeps working."""
+    con = db()
+    peer = con.execute("SELECT * FROM peers WHERE id=?", (peer_id,)).fetchone()
+    if not peer:
+        con.close()
+        abort(404)
+    preset = (request.form.get("duration_preset") or "1m").strip()
+    if preset == "forever":
+        expires_at = None
+        label = "бессрочно"
+    else:
+        try:
+            # stack on remaining time if still active
+            form = {"duration_preset": preset, "expires_days": request.form.get("expires_days")}
+            expires_at = parse_expiry_from_form(form, base_ts=peer["expires_at"], stack=True)
+        except ValueError as e:
+            con.close()
+            flash(str(e), "error")
+            return redirect(url_for("peer_detail", peer_id=peer_id))
+        if preset in DURATION_PRESETS:
+            label = DURATION_PRESETS[preset][1]
+        else:
+            label = f"до {human_ts(expires_at)}"
+    # Re-enable: same keys → client config unchanged, tunnel works again after sync
+    con.execute(
+        "UPDATE peers SET expires_at=?, enabled=1, disabled_reason=NULL WHERE id=?",
+        (expires_at, peer_id),
+    )
+    con.commit()
+    con.close()
+    try:
+        persist_wg_conf()
+        flash(
+            f"Продлено (+{label}). Ключи те же — пользователю ничего менять не нужно. "
+            f"Новый срок: {human_ts(expires_at)}.",
+            "ok",
+        )
+    except Exception as e:
+        flash(f"Срок обновлён в БД, sync: {e}", "error")
+    nxt = request.form.get("next") or url_for("peer_detail", peer_id=peer_id)
+    return redirect(nxt)
 
 
 @app.route("/peers/<int:peer_id>/download")
